@@ -41,6 +41,4 @@ Data/AI
 <br/>
 <img src="https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white" width="auto" height="25">
 <img src="https://img.shields.io/badge/django-092E20?style=for-the-badge&logo=django&logoColor=white" width="auto" height="25">
-<img src="https://img.shields.io/badge/selenium-43B02A?style=for-the-badge&logo=selenium&logoColor=white" width="auto" height="25">
-<img src="https://img.shields.io/badge/fasttext-DC382D?style=for-the-badge&logo=fasttext&logoColor=white" width="auto" height="25">
 
