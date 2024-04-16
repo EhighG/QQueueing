@@ -1,1 +1,0 @@
-export { cats } from "./assets";
