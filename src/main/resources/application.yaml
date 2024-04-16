@@ -2,18 +2,21 @@ spring:
   application:
     name: kafka
 
-  kafka:
-    consumer:
-      bootstrap-servers: localhost:9092 #consumer server ip + port, list = ,
-      group-id: test01 # consumerGroupId
-      auto-offset-reset: earliest # When a new consumer is added to a topic that has already been produced, set the reading point from where
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+kafka:
+  topic:
+    name: test
+#  kafka:
+#    consumer:
+#      bootstrap-servers: localhost:9092 #consumer server ip + port, list = ,
+#      group-id: test01 # consumerGroupId
+#      auto-offset-reset: earliest # When a new consumer is added to a topic that has already been produced, set the reading point from where
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 #      properties:
 #        spring.json.trusted.packages: "*"
 #    listener:
 #      ack-mode: manual # Send ACK manually.
-    producer:
-      bootstrap-servers: localhost:9092 #producer server ip + port, list = ,
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#    producer:
+#      bootstrap-servers: localhost:9092 #producer server ip + port, list = ,
+#      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer

@@ -1,21 +1,24 @@
 package com.practice.kafka;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 //@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MsgProducer {
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<Long, String> kafkaTemplate;
 
-    private final String topicName = "tests";
-    private static Long id = 0L;
+    @Value("${kafka.topic.name}")
+    private String topicName;
+    private static AtomicLong id = new AtomicLong(1L);
 
     public void send(String message) {
-        kafkaTemplate.send(topicName, ++id + "", message);
-        System.out.println("sending finished");
+        kafkaTemplate.send(topicName, id.getAndIncrement(), message);
     }
 }
