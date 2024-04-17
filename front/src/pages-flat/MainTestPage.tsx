@@ -1,5 +1,5 @@
 "use client";
-import Card from "@/widgets/Card";
+import { Card } from "@/widgets";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
