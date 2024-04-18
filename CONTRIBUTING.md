@@ -25,7 +25,7 @@ starting the implementation. There are often a number of ways to fix a problem
 and it is important to find the right approach before spending time on a PR
 that cannot be merged.
 
-We add the `help wanted` label to existing GitHub issues for which community
+We add the `help wanted` label to existing GitLab issues for which community
 contributions are particularly welcome, and we use the `good first issue` label
 to mark issues that we think will be suitable for new contributors.
 
