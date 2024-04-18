@@ -1,27 +1,12 @@
-사진하나 박아넣기
-
-QQueing
-
-# What is QQueing
-
-# Get started
-
-사용 설명서
-
-## Contributing
-
-[CONTRIBUTING](./CONTRIBUTING.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
-See the [CONTRIBUTING](./CONTRIBUTING.md) for Code Contribution Guidelines.
-
 <br>
 
 (로고 이미지)
 
 <div align="left">
-    <h1>Queueing</h1>
+    <h1>QQueueing</h1>
 </div>
 
-Queueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열 서비스입니다. 서버 프로그램이 실행 중인 곳에 설치해서, 추가 비용 없이 대기열 기능을 사용할 수 있습니다.
+QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열 서비스입니다. 서버 프로그램이 실행 중인 곳에 설치해서, 추가 비용 없이 대기열 기능을 사용할 수 있습니다.
 
 ## Features
 
@@ -52,6 +37,12 @@ Queueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열 
 <b>대기열이 적용된 요청의 트래픽량, 서버의 메모리 사용량 등을 모니터링할 수 있습니다.</b>
 
 ![alt text](image.png)
+
+## Contributing
+
+[CONTRIBUTING](./CONTRIBUTING.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
+See the [CONTRIBUTING](./CONTRIBUTING.md) for Code Contribution Guidelines.
+
 
 
 ## License
