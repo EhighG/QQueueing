@@ -40,7 +40,7 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 
 ## Contributing
 
-[CONTRIBUTING](./CONTRIBUTING.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
+[CONTRIBUTING](./CONTRIBUTING_KOR.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
 See the [CONTRIBUTING](./CONTRIBUTING.md) for Code Contribution Guidelines.
 
 
