@@ -1,4 +1,17 @@
-#A401 자율프로젝트
+사진하나 박아넣기
+
+QQueing
+
+# What is QQueing
+
+# Get started
+
+사용 설명서
+
+## Contributing
+
+[CONTRIBUTING](./CONTRIBUTING.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
+See the [CONTRIBUTING](./CONTRIBUTING.md) for Code Contribution Guidelines.
 
 <br>
 
