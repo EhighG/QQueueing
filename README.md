@@ -1,6 +1,7 @@
 <br>
+![QQueueing](./.asset/queueing.png)  
 
-(로고 이미지)
+
 
 <div align="left">
     <h1>QQueueing</h1>
