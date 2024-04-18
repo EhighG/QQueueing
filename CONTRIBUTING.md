@@ -44,10 +44,9 @@ cycle.
 
 * Add appropriate unit tests 
 * Add integration tests, if applicable
-* Make sure the code you add follows the [formatting guidelines](#java-language-formatting-guidelines)
 * Lines that are not part of your change should not be edited (e.g. don't format
   unchanged lines, don't reorder existing imports)
-* Add the appropriate [license headers](#license-headers) to any new files
+* Add the appropriate [license headers](https://lab.ssafy.com/s10-final/S10P31A401/-/blob/dev/LICENSE?ref_type=heads) to any new files
 
 
 ### Submitting your changes
