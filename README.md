@@ -37,7 +37,7 @@ Back
 <img src="https://img.shields.io/badge/Spring Cloud Config-6DB33F?style=for-the-badge&logo=Spring Cloud Config&logoColor=white" width="auto" height="25">
 <img src="https://img.shields.io/badge/Spring Webflux-6DB33F?style=for-the-badge&logo=sSpring Webflux&logoColor=white" width="auto" height="25">
 
-Data/AI
+
 <br/>
 <img src="https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white" width="auto" height="25">
 
