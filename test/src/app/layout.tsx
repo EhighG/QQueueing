@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { cats } from "@/shared";
+import { RQProvider, cats } from "@/shared";
 import { Footer, Header } from "@/widgets";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,11 +22,13 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="flex flex-1 w-screen h-screen min-h-screen justify-center">
-        <main className="flex flex-col flex-1 w-full max-w-screen-xl h-full">
-          <Header />
-          {children}
-          <Footer />
-        </main>
+        <RQProvider>
+          <main className="flex flex-col flex-1 w-full max-w-screen-xl h-full">
+            <Header />
+            {children}
+            <Footer />
+          </main>
+        </RQProvider>
       </body>
     </html>
   );
