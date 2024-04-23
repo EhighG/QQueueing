@@ -27,7 +27,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         }
 
         JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
-        String token = (String) jwtAuthenticationToken.getToken();
+        String token = jwtAuthenticationToken.getToken();
         String memberId = jwtUtils.getId(token);
         UserDetails userDetails = jwtUserDetailService.loadUserByUsername(memberId);
 
