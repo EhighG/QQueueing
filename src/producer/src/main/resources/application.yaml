@@ -1,0 +1,11 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: producer-server
+
+kafka:
+  topic-names:
+    enter: enter
+    out: out
