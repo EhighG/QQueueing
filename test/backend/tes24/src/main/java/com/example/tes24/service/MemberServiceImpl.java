@@ -43,12 +43,13 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
+    public Member login(String memberId) {
+        return login(Long.valueOf(memberId));
+    }
+
+    @Override
     public Member login(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
     }
 
-    @Override
-    public Member login(String memberId) {
-        return memberRepository.findById(Long.valueOf(memberId)).orElseThrow(NoSuchElementException::new);
-    }
 }

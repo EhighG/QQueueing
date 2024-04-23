@@ -7,6 +7,6 @@ public interface MemberService {
     Member updateAccessToken(Long memberId, String token);
     Member updateRefreshToken(Long memberId, String token);
     Member signUp(Member member);
-    Member login(Long memberId);
     Member login(String memberId);
+    Member login(Long memberId);
 }
