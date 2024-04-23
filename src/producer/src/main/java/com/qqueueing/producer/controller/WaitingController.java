@@ -1,4 +1,4 @@
-package com.practice.producerserver.controller;
+package com.qqueueing.producer.controller;
 
 import com.practice.producerserver.producer.EnterProducer;
 import com.practice.producerserver.producer.OutProducer;

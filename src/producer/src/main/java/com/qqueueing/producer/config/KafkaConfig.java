@@ -1,4 +1,4 @@
-package com.practice.producerserver.config;
+package com.qqueueing.producer.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongSerializer;

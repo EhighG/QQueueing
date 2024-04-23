@@ -1,4 +1,4 @@
-package com.practice.producerserver.producer;
+package com.qqueueing.producer.producer;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;

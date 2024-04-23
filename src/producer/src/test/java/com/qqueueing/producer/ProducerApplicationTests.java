@@ -1,10 +1,10 @@
-package com.practice.producerserver;
+package com.qqueueing.producer;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ProducerServerApplicationTests {
+class ProducerApplicationTests {
 
     @Test
     void contextLoads() {
