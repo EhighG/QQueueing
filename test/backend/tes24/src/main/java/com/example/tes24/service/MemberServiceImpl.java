@@ -22,6 +22,14 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
+    public Member updateAllTokens(Long memberId, String accessToken, String refreshToken) {
+        Member member = memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
+        member.setAccessToken(accessToken);
+        member.setRefreshToken(refreshToken);
+        return memberRepository.save(member);
+    }
+
+    @Override
     public Member updateAccessToken(Long memberId, String token) {
         Member member = memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
         member.setAccessToken(token);
