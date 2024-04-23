@@ -3,6 +3,7 @@ package com.example.tes24.controller;
 import com.example.tes24.entity.Member;
 import com.example.tes24.security.userdetails.JwtUserDetails;
 import com.example.tes24.service.MemberService;
+import com.example.tes24.service.QueueService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Member API")
 public class MemberController {
     private final MemberService memberService;
+    private final QueueService queueService;
 
     @Operation(
             summary = "Sign up a new member",
@@ -60,12 +62,12 @@ public class MemberController {
     }
 
     @PostMapping("/enqueue")
-    public ResponseEntity<?> enqueue() {
-        return ResponseEntity.ok("enqueued");
+    public ResponseEntity<?> enqueue(@AuthenticationPrincipal(expression = JwtUserDetails.ID) Long memberId) {
+        return queueService.enqueue(memberId);
     }
 
     @PostMapping("/dequeue")
     public ResponseEntity<?> dequeue() {
-        return ResponseEntity.ok("dequeued");
+        return queueService.dequeue();
     }
 }

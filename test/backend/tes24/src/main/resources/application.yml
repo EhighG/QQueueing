@@ -2,6 +2,7 @@ jwt:
   key: 94fb6d2d7c74a2bd820a55ad5ef89c2ff6a6da2d4df01a4dff7e5ae0a74b2032
   access-expiration: 15
   refresh-expiration: 60
+
 allowed-url:
   urls:
     - /prototype
@@ -13,6 +14,9 @@ allowed-url:
   anonymous:
     - /member/login
     - /member/signup
+
+qqueue:
+  server-url: localhost
 
 spring:
   datasource:
