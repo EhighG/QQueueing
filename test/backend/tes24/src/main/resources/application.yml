@@ -10,6 +10,9 @@ allowed-url:
     - /api-docs/**
     - /swagger-ui/**
     - /websocket/**
+  anonymous:
+    - /member/login
+    - /member/signup
 
 spring:
   datasource:
@@ -23,6 +26,11 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+        hbm2ddl:
+          auto:
+    hibernate:
+      ddl-auto: create-drop
+
 
 springdoc:
   api-docs:
