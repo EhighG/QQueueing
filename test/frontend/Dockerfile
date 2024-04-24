@@ -1,8 +1,10 @@
-FROM nginx:1.25.3
-USER root
+from bitnami/node:20
 ENV TZ=Asia/Seoul
-COPY default.conf /etc/nginx/conf.d/
-COPY nginx.conf /etc/nginx/
-COPY .next /etc/nginx/.next
-RUN chmod 664 /etc/nginx/.next
-EXPOSE 80
+EXPOSE 3000
+WORKDIR /
+COPY .next /frontend/.next
+COPY package.json next.config.mjs /frontend
+COPY node_modules /frontend/node_modules
+WORKDIR /frontend
+
+CMD ["npm", "start"]

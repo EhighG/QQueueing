@@ -1,4 +1,3 @@
-
 services:
   nginx:
     build: ./nginx
@@ -19,9 +18,6 @@ services:
     container_name: test-frontend
     networks:
       - test-network
-    ports:
-      - 8000:80
-
 
 
   backend:
@@ -45,6 +41,8 @@ services:
       - mysqldb-backup:/backup
     networks:
       - test-network
+
+
 
 
  #  prometheus:
