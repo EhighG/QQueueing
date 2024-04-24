@@ -3,7 +3,8 @@ package com.qqueueing.main;
 
 import com.qqueueing.main.connect.ConsumerConnector;
 import com.qqueueing.main.connect.ProducerConnector;
-import com.qqueueing.main.model.BatchResDto;
+
+import com.qqueueing.main.model.GetMyOrderResDto;
 import com.qqueueing.main.model.TestDto;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -27,9 +29,9 @@ public class WaitingService {
     private final String TARGET_URL;
     private Set<String> doneSet = new HashSet<>();
     private List<Long> outList = new LinkedList<>();
-    private Long batchLastIdx = 2L;
+    private Integer batchLastIdx = 2;
     private Long target_capacity = 2000L;
-    private Long totalQueueSize = 5000L;
+    private Integer totalQueueSize = 5000;
     private Long tmpEnterCnt = 0L;
 
 
@@ -41,42 +43,52 @@ public class WaitingService {
     }
 
     public TestDto enter(String clientIp) {
-//        if (totalQueueSize < target_capacity)
+        tmpEnterCnt++;
+
         // 카프카에 요청자 Ip 저장
-        return new TestDto(producerConnector.enter(clientIp), clientIp);
+        return producerConnector.enter(clientIp);
     }
 
     public void out(Long order) {
         // outList는 '내 앞에 나간 사람 수' 를 알기 위해 쓰이므로, 정렬된 채로 유지
-        int insertIdx = - (Collections.binarySearch(outList, order) + 1);
-        outList.add(insertIdx, order);
+        try {
+
+            int insertIdx = - (Collections.binarySearch(outList, order) + 1);
+            outList.add(insertIdx, order);
+            LinkedList<Integer> tl = new LinkedList<>();
+            int a = 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public Long getMyOrder(HttpServletResponse response, Long oldOrder, String ip) {
+    public GetMyOrderResDto getMyOrder(Long oldOrder, String ip) {
         // 변경된 로직
         if (doneSet.contains(ip)) {
-            try {
-                doneSet.remove(ip);
-                response.sendRedirect(TARGET_URL);
-                return -1L;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            doneSet.remove(ip);
+//                response.sendRedirect(TARGET_URL);
+            return new GetMyOrderResDto(0L, -1, TARGET_URL);
+//            try {
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
         }
-        int outCntInFront = - (Collections.binarySearch(outList,oldOrder) + 1);
-        return oldOrder - outCntInFront - batchLastIdx; // newOrder
+        int outCntInFront = - (Collections.binarySearch(outList, oldOrder) + 1);
+        Long myOrder = oldOrder - outCntInFront - batchLastIdx; // newOrder
+        return new GetMyOrderResDto(myOrder, totalQueueSize);
     }
 
     @Async
-    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 3초마다
+    @Scheduled(cron = "0/5 * * * * *") // 매 분 0초부터, 3초마다
     public void getNext() {
-        BatchResDto batchRes = consumerConnector.getNext(); // 대기 완료된 ip 목록을 가져온다.
+        Map<String, Object> batchRes = consumerConnector.getNext(); // 대기 완료된 ip 목록을 가져온다.
 
-        doneSet.addAll(new HashSet<>(batchRes.getCurDoneSet()));
+        doneSet.addAll((List<String>)batchRes.get("curDoneSet"));
+//        System.out.println("doneSet = " + doneSet);
 
         // 변경된 로직
-        batchLastIdx = batchRes.getBatchLastIdx();
-        totalQueueSize = batchRes.getTotalQueueSize();
+        batchLastIdx = (Integer) batchRes.get("batchLastIdx");
+        totalQueueSize = (Integer) batchRes.get("totalQueueSize");
 
         cleanUpOutList(); // 대기 끝난 애들 빼기
     }
@@ -84,7 +96,7 @@ public class WaitingService {
     private void cleanUpOutList() {
         outList = outList.stream()
                 .filter(i -> i > batchLastIdx)
-                .toList();
+                .collect(Collectors.toList());
     }
 
 }

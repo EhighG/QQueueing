@@ -1,15 +1,14 @@
-package com.qqueueing.main.model;
+package com.qqueueing.producer.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TestDto {
-    private Integer order;
+    private Long order;
     private String idVal;
 }
