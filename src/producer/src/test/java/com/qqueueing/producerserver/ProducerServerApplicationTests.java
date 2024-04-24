@@ -1,4 +1,4 @@
-package com.practice.producerserver;
+package com.qqueueing.producerserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

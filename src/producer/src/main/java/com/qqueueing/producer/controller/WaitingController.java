@@ -1,7 +1,6 @@
-package com.practice.producerserver.controller;
+package com.qqueueing.producer.controller;
 
-import com.practice.producerserver.producer.EnterProducer;
-import com.practice.producerserver.producer.OutProducer;
+import com.qqueueing.producer.producer.EnterProducer;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -9,11 +8,10 @@ import org.springframework.web.bind.annotation.*;
 public class WaitingController {
 
     private final EnterProducer enterProducer;
-    private final OutProducer outProducer;
+//    private final OutProducer outProducer;
 
-    public WaitingController(EnterProducer enterProducer, OutProducer outProducer) {
+    public WaitingController(EnterProducer enterProducer) {
         this.enterProducer = enterProducer;
-        this.outProducer = outProducer;
     }
 
     @PostMapping
@@ -21,9 +19,8 @@ public class WaitingController {
         return enterProducer.send(clientIp);
     }
 
-    @GetMapping("/{enterTopicKey}/out")
-    public void out(@PathVariable Long enterTopicKey) {
-        outProducer.send(enterTopicKey);
-    }
+//    @GetMapping("/{enterTopicKey}/out")
+//    public void out(@PathVariable Long enterTopicKey) {
+//    }
 }
 
