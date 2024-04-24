@@ -8,7 +8,12 @@ const Product = () => {
     <div className="flex flex-1 w-full h-full items-center justify-center">
       <div className="flex flex-col items-center">
         <div className="mb-5">
-          <Image src={cats} alt="상품이미지" className="size-[340px]" />
+          <Image
+            src={cats}
+            alt="상품이미지"
+            className="size-[340px]"
+            priority
+          />
         </div>
         <h1 className="text-[1.5rem]">뮤지컬 캣츠</h1>
 
