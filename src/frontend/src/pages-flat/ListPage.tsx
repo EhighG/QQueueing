@@ -1,12 +1,6 @@
-import { Metadata } from "next";
+import Link from "next/link";
 import React from "react";
-
-export const metadata: Metadata = {
-  title: "대기열 리스트",
-  description: "대기열 리스트 페이지",
-};
-
-const Page = () => {
+const ListPage = () => {
   return (
     <div className="flex flex-1 border border-slate-300 rounded-md shadow-xl">
       <div className="flex flex-col flex-1 gap-2">
@@ -25,16 +19,16 @@ const Page = () => {
               </tr>
             </thead>
             <tbody>
-              <p className="flex w-full h-full items-center justify-center self-center">
+              {/* <p className="flex w-full h-full items-center justify-center self-center">
                 등록한 데이터가 없습니다
-              </p>
-              {/* <tr className="flex items-center w-full text-center border-b border-black h-[60px]">
+              </p> */}
+              <tr className="flex items-center w-full text-center border-b border-black h-[60px]">
                 <td className="w-[12.5%]">1</td>
                 <td className="w-[25%]">3333</td>
                 <td className="w-[25%]">321</td>
                 <td className="w-[25%]">321</td>
                 <td className="w-[12.5%]">3213</td>
-              </tr> */}
+              </tr>
             </tbody>
           </table>
           <div className="flex justify-end items-center gap-[10px] h-[60px]">
@@ -44,20 +38,19 @@ const Page = () => {
             >
               변경
             </button>
-            <button
-              type="button"
-              className="px-8 py-2 border rounded-md border-black bg-blue-300 font-bold"
-            >
-              등록
-            </button>
+            <Link href="/regist">
+              <button
+                type="button"
+                className="px-8 py-2 border rounded-md border-black bg-blue-300 font-bold"
+              >
+                등록
+              </button>
+            </Link>
           </div>
         </div>
       </div>
-      {/* 타이틀 */}
-      {/* 컨텐츠 */}
-      {/* 필요하면 버튼 */}
     </div>
   );
 };
 
-export default Page;
+export default ListPage;

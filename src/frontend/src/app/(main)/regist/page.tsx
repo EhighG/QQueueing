@@ -1,3 +1,4 @@
+import { RegistPage } from "@/pages-flat";
 import { Metadata } from "next";
 import React from "react";
 
@@ -7,11 +8,7 @@ export const metadata: Metadata = {
 };
 
 const Page = () => {
-  return (
-    <div className="flex flex-1 border border-slate-300 rounded-md shadow-xl">
-      등록 페이지
-    </div>
-  );
+  return <RegistPage />;
 };
 
 export default Page;

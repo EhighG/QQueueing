@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { RQProvider } from "@/shared";
+import { Loading, RQProvider } from "@/shared";
 import { Footer, Header, NavMenu } from "@/widgets";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,27 +20,24 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  waiting,
 }: Readonly<{
   children: React.ReactNode;
-  waiting: React.ReactNode;
 }>) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        {waiting}
+        <Header />
         <RQProvider>
-          <Header />
           <main>
             <NavMenu />
             <div className="flex flex-col flex-1">
               <div className="flex flex-col flex-1 max-2xl:m-5 m-10 gap-10">
-                {children}
+                <Suspense fallback={<Loading />}>{children}</Suspense>
               </div>
             </div>
           </main>
-          <Footer />
         </RQProvider>
+        <Footer />
       </body>
     </html>
   );

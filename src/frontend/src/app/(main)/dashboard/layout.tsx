@@ -1,3 +1,6 @@
+import { Loading } from "@/shared";
+import { Suspense } from "react";
+
 export default function Layout({
   monitoring,
   resource,
@@ -8,10 +11,10 @@ export default function Layout({
   return (
     <>
       <div className="flex flex-1 border border-slate-300 rounded-md shadow-xl">
-        {monitoring}
+        <Suspense fallback={<Loading />}>{monitoring}</Suspense>
       </div>
       <div className="flex flex-1 border border-slate-300 rounded-md shadow-xl">
-        {resource}
+        <Suspense fallback={<Loading />}>{resource}</Suspense>
       </div>
     </>
   );

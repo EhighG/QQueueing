@@ -2,7 +2,7 @@ import React from "react";
 import { LinkButton } from "@/shared";
 const NavMenu = () => {
   return (
-    <nav className="w-[240px] h-full rounded-r-md border-r-2 border-black shadow-sm">
+    <nav className="max-2xl:w-[240px] w-[300px] h-full rounded-r-md border-r border-black shadow-sm">
       <div className="flex flex-col h-full ml-[10px] gap-[100px]">
         <dl>
           <dt className="text-[2rem] font-bold">대기열 관리</dt>
@@ -21,12 +21,24 @@ const NavMenu = () => {
         </dl>
         <dl>
           <dt className="text-[2rem] font-bold">QQueueing</dt>
-          <dd>QQueueing</dd>
-          <dd>DOCS</dd>
-          <dd>Example</dd>
-          <dd>GitHub</dd>
-          <dd>License</dd>
-          <dd>Contributing</dd>
+          <dd>
+            <LinkButton href="/about" title="about"></LinkButton>
+          </dd>
+          <dd>
+            <LinkButton href="/docs" title="docs"></LinkButton>
+          </dd>
+          <dd>
+            <LinkButton href="/example" title="example"></LinkButton>
+          </dd>
+          <dd>
+            <LinkButton href="/github" title="github"></LinkButton>
+          </dd>
+          <dd>
+            <LinkButton href="/license" title="License"></LinkButton>
+          </dd>
+          <dd>
+            <LinkButton href="/contributing" title="Contributing"></LinkButton>
+          </dd>
         </dl>
       </div>
     </nav>

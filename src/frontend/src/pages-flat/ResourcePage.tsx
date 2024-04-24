@@ -1,6 +1,6 @@
 import React from "react";
 
-const Resource = () => {
+const ResourcePage = () => {
   return (
     <div className="flex flex-col flex-1 gap-2">
       <div className="flex w-full items-center border-b border-black h-[60px] p-3">
@@ -25,4 +25,4 @@ const Resource = () => {
   );
 };
 
-export default Resource;
+export default ResourcePage;

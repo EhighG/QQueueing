@@ -1,7 +1,6 @@
-"use client";
 import React from "react";
 
-const Monitoring = () => {
+const MonitoringPage = () => {
   return (
     <div className="flex flex-col flex-1 gap-2">
       <div className="flex w-full items-center border-b border-black h-[60px] p-3">
@@ -26,4 +25,4 @@ const Monitoring = () => {
   );
 };
 
-export default Monitoring;
+export default MonitoringPage;

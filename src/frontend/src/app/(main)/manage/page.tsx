@@ -1,3 +1,4 @@
+import { ManagePage } from "@/pages-flat";
 import { Metadata } from "next";
 import React from "react";
 
@@ -7,11 +8,7 @@ export const metadata: Metadata = {
 };
 
 const Page = () => {
-  return (
-    <div className="flex flex-1 border border-slate-300 rounded-md shadow-xl">
-      대기열 상태 관리 페이지
-    </div>
-  );
+  return <ManagePage />;
 };
 
 export default Page;
