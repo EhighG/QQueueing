@@ -1,4 +1,4 @@
-package com.practice.apiserver.sse;
+package com.qqueueing.main.sse;
 
 import lombok.*;
 

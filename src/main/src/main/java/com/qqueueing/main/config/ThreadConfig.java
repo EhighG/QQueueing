@@ -1,4 +1,4 @@
-package com.practice.apiserver.config;
+package com.qqueueing.main.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
