@@ -1,5 +1,6 @@
 package com.example.tes24.controller;
 
+import com.example.tes24.dto.EnqueueResponseRecord;
 import com.example.tes24.entity.Member;
 import com.example.tes24.security.userdetails.JwtUserDetails;
 import com.example.tes24.service.MemberService;
@@ -26,17 +27,16 @@ public class MemberController {
     @Operation(
             summary = "Sign up a new member",
             description = "Saving a member to the database.",
-            responses ={
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Sign up successes.",
-                            content = @Content(schema = @Schema(name = "response", implementation = Member.class))),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Sign up failed.",
-                            content = @Content(schema = @Schema(name = "Can't sign up.", implementation = String.class)))
+            responses = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Sign up successes.",
+                    content = @Content(schema = @Schema(name = "response", implementation = Member.class))),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Sign up failed.",
+                    content = @Content(schema = @Schema(name = "Can't sign up.", implementation = String.class)))
             })
-
     @PostMapping("/signup")
     public ResponseEntity<?> signUp() {
         var response = memberService.signUp(new Member());
@@ -58,14 +58,29 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@AuthenticationPrincipal(expression = JwtUserDetails.ID) Long memberId) {
         Member member = memberService.login(memberId);
-        return null;
+        return ResponseEntity.ok(member);
     }
 
-    @PostMapping("/enqueue")
-    public ResponseEntity<?> enqueue(@AuthenticationPrincipal(expression = JwtUserDetails.ID) Long memberId) {
+    @Operation(
+            summary = "Enqueue a user",
+            description = "Request for entering waiting room to api server.",
+            responses =
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Enqueueing successes.",
+                    content = @Content(schema = @Schema(name = "response", implementation = EnqueueResponseRecord.class))))
+    @PostMapping("/enqueue/{memberId}")
+    public ResponseEntity<?> enqueue(@PathVariable Long memberId) {
         return queueService.enqueue(memberId);
     }
 
+    @Operation(
+            summary = "Dequeue a user",
+            description = "Request for exiting waiting room to api server.",
+            responses =
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Dequeueing successes."))
     @PostMapping("/dequeue")
     public ResponseEntity<?> dequeue() {
         return queueService.dequeue();

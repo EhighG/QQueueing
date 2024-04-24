@@ -45,8 +45,9 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     public Member signUp(Member member) {
-        member.setAccessToken(jwtUtils.createAccessToken(member.getMemberId()));
-        member.setRefreshToken(jwtUtils.createRefreshToken(member.getMemberId()));
+        Member savedMember = memberRepository.save(member);
+        savedMember.setAccessToken(jwtUtils.createAccessToken(member.getMemberId()));
+        savedMember.setRefreshToken(jwtUtils.createRefreshToken(member.getMemberId()));
         return memberRepository.save(member);
     }
 
