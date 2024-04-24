@@ -1,4 +1,4 @@
-package com.practice.apiserver;
+package com.qqueueing.main;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
