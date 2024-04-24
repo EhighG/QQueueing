@@ -5,18 +5,19 @@ jwt:
 
 allowed-url:
   urls:
-    - /prototype
+    - /member/dequeue
   patterns:
-    - /prototype/**
     - /api-docs/**
     - /swagger-ui/**
     - /websocket/**
+    - /member/enqueue/**
+    - /tes24/**
   anonymous:
-    - /member/login
     - /member/signup
 
 qqueue:
-  server-url: localhost
+  server-url: 70.12.247.128
+  server-port: 8080
 
 spring:
   datasource:
@@ -28,13 +29,8 @@ spring:
   jpa:
     properties:
       hibernate:
-        show_sql: true
-        format_sql: true
-        hbm2ddl:
-          auto:
-    hibernate:
-      ddl-auto: create-drop
-
+        show_sql: false
+        format_sql: false
 
 springdoc:
   api-docs:
@@ -49,3 +45,7 @@ springdoc:
   cache:
     disabled: true
   package-to-scan: com.example.tes24
+
+logging:
+  level:
+    org.springframework.security: off
