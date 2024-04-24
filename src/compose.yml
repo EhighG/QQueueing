@@ -1,0 +1,24 @@
+services:
+  qqueueing-main:
+    container_name: qqueueing-main
+
+  qqueueing-consumer:
+    container_name: qqueueing-consumer
+
+  qqueueing-frontend:
+    container_name: qqueueing-frontend
+
+  qqueueing-producer:
+    container_name: qqueueing-producer
+
+  qqueueing-mysql:
+    container_name: qqueueing-mysql
+
+  qqueueing-kafka:
+    container_name: qqueueing-kafka
+
+
+volumes:
+
+networks:
+
