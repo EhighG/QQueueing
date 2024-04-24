@@ -1,8 +1,7 @@
 package com.example.tes24.security.config;
 
 import com.example.tes24.properties.AllowedUrlProperties;
-import com.example.tes24.security.LoginEntryPoint;
-import com.example.tes24.security.filter.ExclusiveFilter;
+import com.example.tes24.security.filter.AnonymousFilter;
 import com.example.tes24.security.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,14 +28,17 @@ import java.util.List;
 public class SecurityConfig {
     private final String[] allowedUrls;
     private final String[] allowedPatterns;
+    private final String[] anonymous;
 
     public SecurityConfig(AllowedUrlProperties allowedUrlProperties) {
         Assert.notNull(allowedUrlProperties, "allowedUrlProperties must not be null");
         Assert.notNull(allowedUrlProperties.getUrls(), "urls must not be null");
         Assert.notNull(allowedUrlProperties.getPatterns(), "patterns must not be null");
+        Assert.notNull(allowedUrlProperties.getAnonymous(), "anonymous must not be null");
 
         this.allowedUrls = allowedUrlProperties.getUrls().toArray(new String[0]);
         this.allowedPatterns = allowedUrlProperties.getPatterns().toArray(new String[0]);
+        this.anonymous = allowedUrlProperties.getAnonymous().toArray(new String[0]);
     }
 
 
@@ -66,21 +68,21 @@ public class SecurityConfig {
             HttpSecurity httpSecurity,
             CorsConfigurationSource corsConfigurationSource,
             AuthenticationEntryPoint loginEntryPoint,
-            ExclusiveFilter exclusiveFilter,
+            AnonymousFilter anonymousFilter,
             JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
 
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(exclusiveFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(anonymousFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(allowedUrls).permitAll()
                         .requestMatchers(allowedPatterns).permitAll()
-                        .requestMatchers("/member/signup", "/member/login").anonymous()
+                        .requestMatchers(anonymous).anonymous()
                         .anyRequest().authenticated())
-                .exceptionHandling(customizer -> customizer.authenticationEntryPoint(loginEntryPoint))
+//                .exceptionHandling(customizer -> customizer.authenticationEntryPoint(loginEntryPoint))
                 .build();
     }
 }
