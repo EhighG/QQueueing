@@ -1,14 +1,11 @@
-package com.practice.apiserver;
+package com.qqueueing.main;
 
-import com.practice.apiserver.sse.WaitingInfo;
+import com.qqueueing.main.model.TestDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 //@Slf4j
@@ -18,29 +15,30 @@ import org.springframework.web.bind.annotation.RestController;
 public class WaitingController {
 
     private final WaitingService waitingService;
+    private static Long ipVal = 1L;
 
     @GetMapping
-    public ResponseEntity<Long> enter(HttpServletRequest request) {
+    public ResponseEntity<TestDto> enter(HttpServletRequest request) {
         // 요청이 프록시 등을 거쳐 넘어왔을 때, 원래 클라이언트의 ip주소를 담는 헤더
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null) {
-            ip = request.getRemoteAddr(); // 프록시 안 거쳤을 때
-        }
-
+//        String ip = request.getHeader("X-Forwarded-For");
+//        if (ip == null) {
+//            ip = request.getRemoteAddr(); // 프록시 안 거쳤을 때
+//        }
         return ResponseEntity
-                .ok(waitingService.enter(ip));
+                .ok(waitingService.enter("tmpUserId" + ipVal++));
     }
 
-    @GetMapping("/{userIdx}")
-    public ResponseEntity<WaitingInfo> getMyOrder(HttpServletResponse response,
-                                                  @PathVariable Long userIdx) {
+    @PostMapping("/{waitingIdx}")
+    public ResponseEntity<Long> getMyOrder(HttpServletResponse response,
+                                           @PathVariable Long waitingIdx,
+                                           @RequestBody String idVal) {
         return ResponseEntity
-                .ok(waitingService.getMyOrder(response, userIdx));
+                .ok(waitingService.getMyOrder(response, waitingIdx, idVal));
     }
 
-    @GetMapping("/{userIdx}/out")
-    public ResponseEntity<Void> out(@PathVariable Long userIdx) {
-        waitingService.out(userIdx);
+    @GetMapping("/{waitingIdx}/out")
+    public ResponseEntity<Void> out(@PathVariable Long waitingIdx) {
+        waitingService.out(waitingIdx);
         return ResponseEntity
                 .ok()
                 .build();

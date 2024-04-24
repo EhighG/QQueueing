@@ -3,9 +3,9 @@ package com.qqueueing.consumer.kafka.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@Data
 @AllArgsConstructor
-public class MessageDto {
+@Data
+public class ChangeConsumerPropertiesReqDto {
 
-    private String ip;
+    private int maxPollRecordsConfig;
 }
