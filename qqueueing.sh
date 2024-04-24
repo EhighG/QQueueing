@@ -30,8 +30,9 @@ usage() {
 case $1 in
   build)
 	if [[ -z $2 ]];then
-	  printf "\t no extra input"
-	  printf "\t build all application"
+	  printf "\tno extra input\n"
+	  printf "\tbuild all application\n"
+	  bash $PWD/src/build/main/build.sh
 	fi
 	echo "build images to run containers"
 	echo $PWD

@@ -1,4 +1,4 @@
 #!/bin/bash
-cd ../../main
+cd ../../consumer
 sh gradlew clean bootJar
-cp build/libs/*.jar ../build/main
+cp build/libs/*.jar ../build/consumer
