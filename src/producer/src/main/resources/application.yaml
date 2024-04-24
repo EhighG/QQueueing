@@ -7,5 +7,4 @@ spring:
 
 kafka:
   topic-names:
-    enter: enter
-    out: out
+    enter: test
