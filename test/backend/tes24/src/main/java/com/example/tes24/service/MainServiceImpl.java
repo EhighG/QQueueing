@@ -1,6 +1,6 @@
 package com.example.tes24.service;
 
-import com.example.tes24.dto.WaitingStatusResponseRecord;
+import com.example.tes24.dto.WaitingStatusResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -16,7 +16,7 @@ public class MainServiceImpl implements MainService {
     private String port;
 
     @Override
-    public ResponseEntity<WaitingStatusResponseRecord> getWaitingStatus(Long waitingIdx, String idVal) {
+    public WaitingStatusResponse getWaitingStatus(Long waitingIdx, String idVal) {
         RestClient restClient = RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
                 .baseUrl("http://" + remoteUrl + ":" + port + "/waiting/" + waitingIdx)
@@ -24,6 +24,6 @@ public class MainServiceImpl implements MainService {
 //                .defaultHeader("Authorization", "Bearer " + token)
                 .build();
 
-        return restClient.post().body(idVal).retrieve().toEntity(WaitingStatusResponseRecord.class);
+        return restClient.post().body(idVal).retrieve().body(WaitingStatusResponse.class);
     }
 }
