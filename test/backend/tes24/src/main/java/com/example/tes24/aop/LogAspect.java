@@ -10,12 +10,14 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Slf4j
 @Aspect
+//@Component
 @RequiredArgsConstructor
 public class LogAspect {
     private final EnqueueLogRepository enqueueLogRepository;
@@ -45,7 +47,7 @@ public class LogAspect {
 
         EnqueueLog enqueueLog = new EnqueueLog();
         enqueueLog.setMemberId(memberId);
-        enqueueLog.setEnqueueTime(LocalDateTime.from(Instant.now()));
+        enqueueLog.setEnqueueTime(LocalDateTime.now());
         if (sequence != null) enqueueLog.setSequenceNumber(sequence);
 
         enqueueLogRepository.save(enqueueLog);
