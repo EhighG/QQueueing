@@ -1,6 +1,6 @@
 package com.qqueueing.producer.producer;
 
-import com.qqueueing.producer.model.WaitingDto;
+import com.qqueueing.producer.model.TestDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -23,11 +23,10 @@ public class EnterProducer {
         this.enterTopic = enterTopic;
     }
 
-    public Long send(String message) {
+    public TestDto send(String message) {
         Long curIdx = id.getAndIncrement();
-//        WaitingDto waitingDto = new WaitingDto(id.getAndIncrement(), message);
-        kafkaTemplate.send(enterTopic, message);
-        return curIdx;
+        kafkaTemplate.send(enterTopic, message + curIdx);
+        return new TestDto(curIdx, message + curIdx);
     }
 }
 

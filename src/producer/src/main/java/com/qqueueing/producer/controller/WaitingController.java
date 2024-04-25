@@ -1,5 +1,6 @@
 package com.qqueueing.producer.controller;
 
+import com.qqueueing.producer.model.TestDto;
 import com.qqueueing.producer.producer.EnterProducer;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +16,9 @@ public class WaitingController {
     }
 
     @PostMapping
-    public Long enter(@RequestBody String clientIp) {
+    public TestDto enter(@RequestBody String clientIp) {
         return enterProducer.send(clientIp);
+
     }
 
 //    @GetMapping("/{enterTopicKey}/out")
