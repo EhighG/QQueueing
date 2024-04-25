@@ -1,24 +1,25 @@
+name: qqueueing
 services:
   qqueueing-main:
-    container_name: qqueueing-main
-
+    build:
+      context: .
+      dockerfile: build/main/Dockerfile
+    image: qqueueing-backend
+    networks:
+      - qqueueing-network
   qqueueing-consumer:
-    container_name: qqueueing-consumer
-
+    build: ./build/main
   qqueueing-frontend:
-    container_name: qqueueing-frontend
-
+    build: ./build/main
   qqueueing-producer:
-    container_name: qqueueing-producer
-
+    build: ./build/main
   qqueueing-mysql:
-    container_name: qqueueing-mysql
-
+    build: ./build/main
   qqueueing-kafka:
-    container_name: qqueueing-kafka
+    build: ./build/main
 
 
-volumes:
+volumes: { }
 
 networks:
   qqueueing-network: {}
