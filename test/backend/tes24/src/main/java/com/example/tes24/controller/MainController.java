@@ -1,5 +1,6 @@
 package com.example.tes24.controller;
 
+import com.example.tes24.dto.WaitingRequest;
 import com.example.tes24.dto.WaitingStatusResponse;
 import com.example.tes24.service.MainService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,15 +43,16 @@ public class MainController {
             summary = "Request waiting status",
             description = "Calling this api will response with current waiting status include current queue size and order.",
             parameters = @Parameter(name = "waitingIdx", schema = @Schema(implementation = Long.class)),
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(schema = @Schema(name = "idVal", implementation = String.class)), required = true),
+            requestBody = @io.swagger.v3.oas.annotations.parameters.
+                    RequestBody(content = @Content(schema = @Schema(name = "waitingRequest", implementation = WaitingRequest.class)), required = true),
             responses =
             @ApiResponse(
                     responseCode = "200",
                     description = "Request success.",
                     content = @Content(schema = @Schema(name = "response", implementation = WaitingStatusResponse.class))))
     @PostMapping("/waiting/{waitingIdx}")
-    public ResponseEntity<WaitingStatusResponse> waiting(@PathVariable Long waitingIdx, @RequestBody String idVal) {
-        WaitingStatusResponse response = mainService.getWaitingStatus(waitingIdx, idVal);
+    public ResponseEntity<WaitingStatusResponse> waiting(@PathVariable Long waitingIdx, @RequestBody WaitingRequest waitingRequest) {
+        WaitingStatusResponse response = mainService.getWaitingStatus(waitingIdx, waitingRequest.idVal());
 
         if (response.hasCurrentTurn()) {
             log.info(response.myOrder() + " " + response.redirectUrl());
