@@ -1,8 +1,16 @@
+"use client";
+import { fetchingWaiting } from "@/features";
 import { cats, logo } from "@/shared";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import React from "react";
 
 const WaitingModal = () => {
+  const { data } = useQuery({
+    queryKey: ["waiting"],
+    queryFn: fetchingWaiting,
+  });
+
   return (
     <div className="absolute z-0 flex inset-0 w-full h-full min-w-[800px] bg-slate-400 bg-opacity-50 items-center justify-center">
       <div className="w-[800px] h-[400px] bg-white">
