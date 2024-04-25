@@ -1,15 +1,17 @@
 package com.example.tes24.service;
 
-import com.example.tes24.dto.EnqueueResponseRecord;
+import com.example.tes24.dto.EnqueueResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.util.Map;
+import java.util.concurrent.*;
 
 @Service
+@RequiredArgsConstructor
 public class QueueServiceImpl implements QueueService {
     @Value("${qqueue.server-url}")
     private String remoteUrl;
@@ -17,8 +19,10 @@ public class QueueServiceImpl implements QueueService {
     @Value("${qqueue.server-port}")
     private String port;
 
+    private final ExecutorService executorService;
+
     @Override
-    public ResponseEntity<EnqueueResponseRecord> enqueue(Long memberId) {
+    public Future<EnqueueResponse> enqueue() {
         RestClient restClient = RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
                 .baseUrl("http://" + remoteUrl + ":" + port + "/waiting")
@@ -26,7 +30,7 @@ public class QueueServiceImpl implements QueueService {
 //                .defaultHeader("Authorization", "Bearer " + token)
                 .build();
 
-        return restClient.post().retrieve().toEntity(EnqueueResponseRecord.class);
+        return executorService.submit(() -> restClient.post().retrieve().body(EnqueueResponse.class));
     }
 
     @Override
