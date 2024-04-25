@@ -8,9 +8,9 @@ fi
 docker compose down $SER$1
 docker compose build $SER$1
 
-if [[ $2 == "-d" ]];then
+if [[ -z $2 ]];then
 	echo "no second"
 	docker compose up $SER$1
 else
-	docker compose up $SER$1 $2
+	docker compose up $2 $SER$1
 fi
