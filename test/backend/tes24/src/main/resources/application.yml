@@ -19,6 +19,16 @@ qqueue:
   server-url: 70.12.247.128
   server-port: 8080
 
+server:
+  tomcat:
+    accept-count: 30000
+    max-keep-alive-requests: -1
+    max-connections: 30000 # default 8192
+    #    connection-timeout: # default 60000 ms
+    threads:
+      max: 400 # default 200 / thread 경합..? 주의
+      min-spare: 200
+
 spring:
   datasource:
     hikari:
@@ -31,6 +41,9 @@ spring:
       hibernate:
         show_sql: false
         format_sql: false
+  threads:
+    virtual:
+      enabled: true
 
 springdoc:
   api-docs:
