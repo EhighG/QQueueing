@@ -1,17 +1,39 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { faker } from "@faker-js/faker";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { enterApi } from "@/features";
 
 type CardProps = {
   waiting?: boolean;
 };
 const Card = ({ waiting }: CardProps) => {
+  const [trigger, setTrigger] = React.useState(false);
   const router = useRouter();
+  const { data, error } = useQuery({
+    queryKey: ["waiting"],
+    queryFn: enterApi,
+    enabled: trigger,
+  });
+
+  useEffect(() => {
+    console.log(data);
+    if (!!data) {
+      console.log("data" + data);
+
+      router.push(`/waiting?id=${data.order}`);
+    }
+    return;
+  }, [data]);
+
   const handleRouting = () => {
-    if (waiting) router.push(`/waiting?src=${url}`);
-    else router.push(`/waiting/1`);
+    if (waiting) {
+      setTrigger(true);
+    } else {
+      router.push(`/waiting/1`);
+    }
   };
   const [hydrated, setHydrated] = React.useState(false);
   React.useEffect(() => {
