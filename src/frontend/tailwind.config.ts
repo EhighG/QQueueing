@@ -8,10 +8,7 @@ const config: Config = {
     "./src/pages-flat/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/widgets/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/entities/**/*.{js,ts,jsx,tsx,mdx}",
-<<<<<<< HEAD
     "./src/shared/**/*.{js,ts,jsx,tsx,mdx}",
-=======
->>>>>>> dev
   ],
   theme: {
     extend: {
