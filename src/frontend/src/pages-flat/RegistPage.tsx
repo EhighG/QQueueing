@@ -1,3 +1,5 @@
+import { cats } from "@/shared";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -58,7 +60,50 @@ const RegistPage = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-1 bg-green-300">대기열, 예상 치</div>
+        <div className="flex flex-1">
+          <div className="flex flex-1  flex-col max-2xl:m-5 m-10 gap-10">
+            <div className="flex flex-[2] overflow-auto flex-col border rounded-md border-black">
+              <div className="flex w-full items-center border-b border-black h-[60px] p-3">
+                <p className="text-[1.5rem] font-bold">대기열 이미지</p>
+              </div>
+              <div className="flex flex-1">
+                <div className="flex flex-[1] justify-center">
+                  <Image src={cats} alt="sample" className="" />
+                </div>
+                <div className="flex flex-[2] overflow-auto flex-col gap-5 p-2">
+                  <p className="text-[1.5rem] font-bold">
+                    대기열 이미지는 대기열 우측 상단에 표시 됩니다
+                  </p>
+                  <button
+                    type="button"
+                    className="p-2 border rounded-md border-black"
+                  >
+                    등록
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col flex-[1] border rounded-md border-black">
+              <div className="flex w-full items-center border-b border-black h-[60px] p-3">
+                <p className="text-[1.5rem] font-bold">
+                  시스템 성능 대비 예상치
+                </p>
+              </div>
+              <div className="flex flex-1">
+                <div className="flex flex-1 flex-col items-center justify-center gap-5 border-r border-black">
+                  <p className="text-[1.5rem] font-bold">최대 수용 가능 인원</p>
+                  <p className="text-[1.5rem] font-bold">200 명</p>
+                </div>
+                <div className="flex flex-1 flex-col items-center justify-center gap-5">
+                  <p className="text-[1.5rem] font-bold">
+                    1분 당 처리 가능 인원
+                  </p>
+                  <p className="text-[1.5rem] font-bold">200 명</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ interface AdaptAxiosRequestConfig extends AxiosRequestConfig {
 
 const axiosInstance = () => {
   const instance = axios.create({
-    baseURL: process.env.baseUrl,
+    baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   });
 
   // 모든 요청에 대해 기본 헤더 속성 설정
