@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Loading, RQProvider } from "@/shared";
-import { Footer, Header, NavMenu } from "@/widgets";
+import { Header, NavMenu } from "@/widgets";
 import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -37,7 +37,6 @@ export default function RootLayout({
             </div>
           </main>
         </RQProvider>
-        <Footer />
       </body>
     </html>
   );
