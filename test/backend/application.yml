@@ -1,0 +1,41 @@
+jwt:
+  key: 94fb6d2d7c74a2bd820a55ad5ef89c2ff6a6da2d4df01a4dff7e5ae0a74b2032
+  access-expiration: 15
+  refresh-expiration: 60
+allowed-url:
+  urls:
+    - /prototype
+  patterns:
+    - /prototype/**
+    - /api-docs/**
+    - /swagger-ui/**
+    - /websocket/**
+
+spring:
+  datasource:
+    hikari:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://mysqldb:3306/test?serverTimezone=UTC&useUniCode=yes&characterEncoding=UTF-8
+      username: SMY
+      password: 1049139
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs/json
+  swagger-ui:
+    enabled: true
+    path: /api-docs
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+  cache:
+    disabled: true
+  package-to-scan: com.example.tes24
