@@ -27,10 +27,6 @@ services:
     build: ./build/main
     networks:
       - qqueueing-network
-  qqueueing-mysql:
-    build: ./build/main
-    networks:
-      - qqueueing-network
 
   qqueueing-zookeeper:
     image: bitnami/zookeeper:3.9
