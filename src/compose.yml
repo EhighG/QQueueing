@@ -23,8 +23,15 @@ services:
     build: ./build/main
     networks:
       - qqueueing-network
+
   qqueueing-producer:
-    build: ./build/main
+    build:
+      context: .
+      dockerfile: build/consumer/Dockerfile
+    image: qqueueing-producer
+    depends_on:
+      - qqueueing-kafka
+      - qqueueing-rdbms
     networks:
       - qqueueing-network
 
