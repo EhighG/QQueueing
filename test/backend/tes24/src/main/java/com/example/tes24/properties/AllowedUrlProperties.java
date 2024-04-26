@@ -14,5 +14,5 @@ import java.util.List;
 public class AllowedUrlProperties {
     private List<String> urls;
     private List<String> patterns;
-
+    private List<String> anonymous;
 }
