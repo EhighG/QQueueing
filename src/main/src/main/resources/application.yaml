@@ -22,8 +22,7 @@ spring:
 servers: # 타 서버들의 정보 기록
   consumer: localhost:8082
   target: # 테스트용 사용자 서버(tes 24)
-    url: 70.12.247.125:8080/tes24
-    traffic-capacity: 200
+    url: http://localhost:8082/consume/test # 대기열 적용 대상 api url
 
 kafka:
   broker: localhost:9092
