@@ -58,7 +58,7 @@ public class KafkaConsumerService {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
         props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 10000);
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 3);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 2000);
 
 //        consumer = new KafkaConsumer<>(props);
 //        consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
@@ -88,7 +88,7 @@ public class KafkaConsumerService {
         consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
     }
 
-    public ConsumeMessageResDto consumeMessages() {
+    public synchronized ConsumeMessageResDto consumeMessages() {
 
         // Kafka partition number (zero-based index)
         int partitionNumber = 0;

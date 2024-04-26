@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class DequeueLog {
     private Long memberId;
 
     @Column(name = "dequeue_time")
-    private Timestamp dequeueTime;
+    private LocalDateTime dequeueTime;
 
     @Column(name = "sequence_number")
     private Long sequenceNumber;
