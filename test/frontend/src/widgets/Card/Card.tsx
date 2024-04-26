@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { faker } from "@faker-js/faker";
 import { useRouter } from "next/navigation";
@@ -9,23 +9,21 @@ import { enterApi } from "@/features";
 type CardProps = {
   waiting?: boolean;
 };
+
 const Card = ({ waiting }: CardProps) => {
-  const [trigger, setTrigger] = React.useState(false);
+  const [trigger, setTrigger] = useState<boolean>(false);
   const router = useRouter();
-  const { data, error } = useQuery({
+
+  const { data } = useQuery({
     queryKey: ["waiting"],
     queryFn: enterApi,
     enabled: trigger,
   });
 
   useEffect(() => {
-    console.log(data);
-    if (!!data) {
-      console.log("data" + data);
-
-      router.push(`/waiting?id=${data.order}`);
-    }
-    return;
+    // early return
+    if (!data) return;
+    router.push(`/waiting?id=${data.order}`);
   }, [data]);
 
   const handleRouting = () => {
