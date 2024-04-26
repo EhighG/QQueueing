@@ -74,7 +74,7 @@ services:
   qqueueing-prometheus:
     build: ./prometheus
     depends_on:
-      - qqueuueing-node-exporter
+      - qqueueing-node-exporter
     ports:
       - 3001:9090
     volumes:
@@ -84,12 +84,12 @@ services:
     user: root
 
   qqueueing-node-exporter:
-    build: bitnami/node-exporter:1.7.0
+    image: bitnami/node-exporter:1.7.0
 
   qqueueing-grafana:
-    build: ./grafana
+    image: grafana/grafana:main
     depends_on:
-      - prometheus
+      - qqueueing-prometheus
     ports:
       - 3002:3000
 
