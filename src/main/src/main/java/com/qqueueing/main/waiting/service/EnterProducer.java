@@ -1,6 +1,6 @@
-package com.qqueueing.producer.producer;
+package com.qqueueing.main.waiting.service;
 
-import com.qqueueing.producer.model.TestDto;
+import com.qqueueing.main.waiting.model.TestDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

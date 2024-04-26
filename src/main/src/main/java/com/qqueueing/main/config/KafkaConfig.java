@@ -1,21 +1,15 @@
-package com.qqueueing.producer.config;
+package com.qqueueing.main.config;
 
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.qqueueing.producer.model.WaitingDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.KafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.core.ProducerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +19,11 @@ import java.util.Map;
 public class KafkaConfig {
 
     private final String GROUP_ID = "Producer";
+    private final String KAFKA_BROKER;
+
+    public KafkaConfig(@Value("${kafka.broker}") String kafkaBrokerAddr) {
+        KAFKA_BROKER = kafkaBrokerAddr;
+    }
 
 //    // Consumer
 //    @Bean
@@ -68,7 +67,7 @@ public class KafkaConfig {
     @Bean
     public Map<String, Object> longObjectProducerConfig() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return props;
@@ -77,7 +76,7 @@ public class KafkaConfig {
     @Bean
     public Map<String, Object> longLongProducerConfig() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
         return props;

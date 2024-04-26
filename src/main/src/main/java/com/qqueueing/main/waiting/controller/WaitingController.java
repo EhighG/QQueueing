@@ -1,29 +1,16 @@
-package com.qqueueing.main;
+package com.qqueueing.main.waiting.controller;
 
-import com.qqueueing.main.connect.ConsumerConnector;
-import com.qqueueing.main.connect.ProducerConnector;
-import com.qqueueing.main.model.GetMyOrderResDto;
-import com.qqueueing.main.model.TestDto;
+
+import com.qqueueing.main.waiting.model.GetMyOrderResDto;
+import com.qqueueing.main.waiting.service.WaitingService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 
 //@Slf4j
 @RequestMapping("/waiting")
 @RestController
-//@RequiredArgsConstructor
 public class WaitingController {
 
     private final WaitingService waitingService;
@@ -41,7 +28,6 @@ public class WaitingController {
 //            ip = request.getRemoteAddr(); // 프록시 안 거쳤을 때
 //        }
         try {
-
             return ResponseEntity
                     .ok(waitingService.enter("tmpUserId"));
         } catch (Exception e) {
@@ -51,12 +37,19 @@ public class WaitingController {
     }
 
     @PostMapping("/{waitingIdx}")
-    public ResponseEntity<GetMyOrderResDto> getMyOrder(@PathVariable Long waitingIdx,
-                                                       @RequestBody String idVal) {
+    public ResponseEntity<?> getMyOrder(@PathVariable Long waitingIdx,
+                                                       @RequestBody String idVal,
+                                                       HttpServletRequest request) {
         System.out.println("idVal = " + idVal);
-//        GetMyOrderResDto myOrder = waitingService.getMyOrder(waitingIdx, idVal);
-        return ResponseEntity
-                .ok(waitingService.getMyOrder(waitingIdx, idVal));
+        Object myOrderRes = waitingService.getMyOrder(waitingIdx, idVal, request);
+        if (myOrderRes instanceof GetMyOrderResDto) {
+            return ResponseEntity
+                    .ok(myOrderRes);
+        } else {
+            return (ResponseEntity<?>) myOrderRes;
+        }
+//        return ResponseEntity
+//                .ok(waitingService.getMyOrder(waitingIdx, idVal, request));
 //        if (myOrder.getTotalQueueSize() == -1) {
 //        }
     }
@@ -68,4 +61,10 @@ public class WaitingController {
                 .ok()
                 .build();
     }
+
+//    @GetMapping("/test")
+//    public ResponseEntity<?> test(HttpServletRequest request) {
+//        Object obj = waitingService.test(request);
+//        return (ResponseEntity<?>) obj;
+//    }
 }

@@ -1,4 +1,4 @@
-package com.qqueueing.main.connect;
+package com.qqueueing.main.waiting.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
