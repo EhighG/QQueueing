@@ -2,14 +2,22 @@ jwt:
   key: 94fb6d2d7c74a2bd820a55ad5ef89c2ff6a6da2d4df01a4dff7e5ae0a74b2032
   access-expiration: 15
   refresh-expiration: 60
+
 allowed-url:
   urls:
-    - /prototype
+    - /member/dequeue
   patterns:
-    - /prototype/**
     - /api-docs/**
     - /swagger-ui/**
     - /websocket/**
+    - /member/enqueue/**
+    - /tes24/**
+  anonymous:
+    - /member/signup
+
+qqueue:
+  server-url: 70.12.247.128
+  server-port: 8080
 
 spring:
   datasource:
@@ -21,8 +29,11 @@ spring:
   jpa:
     properties:
       hibernate:
-        show_sql: true
-        format_sql: true
+        show_sql: false
+        format_sql: false
+  threads:
+    virtual:
+      enabled: true
 
 springdoc:
   api-docs:
@@ -37,3 +48,7 @@ springdoc:
   cache:
     disabled: true
   package-to-scan: com.example.tes24
+
+logging:
+  level:
+    org.springframework.security: off

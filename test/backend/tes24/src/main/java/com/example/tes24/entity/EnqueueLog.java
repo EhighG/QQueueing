@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class EnqueueLog {
     private Long memberId;
 
     @Column(name = "enqueue_time")
-    private Timestamp enqueueTime;
+    private LocalDateTime enqueueTime;
 
     @Column(name = "sequence_number")
     private Long sequenceNumber;
