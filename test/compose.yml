@@ -1,0 +1,85 @@
+services:
+  nginx:
+    build: ./nginx
+    image: test-nginx
+    depends_on:
+      - frontend
+      - backend
+    ports: 
+      - 80:80
+      - 443:443
+    container_name: test-nginx
+    networks:
+      - test-network
+
+  frontend:
+    build: ./frontend
+    image: test-frontend
+    container_name: test-frontend
+    networks:
+      - test-network
+
+
+  backend:
+    build: ./backend
+    image: test-backend
+    container_name: test-backend
+    depends_on:
+      - mysqldb
+    networks:
+      - test-network
+
+  mysqldb:
+    image: mysql:8.0.36
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_USER: SMY
+      MYSQL_PASSWORD: 1049139
+      MYSQL_ROOT_PASSWORD: root
+    container_name: test-mysqldb
+    volumes:
+      - mysqldb-backup:/backup
+      - ./test_dump.sql:/test_dump.sql
+    networks:
+      - test-network
+
+
+
+
+ #  prometheus:
+ #    build: ./prometheus
+ #    image: prometheus
+ #    container_name: prometheus
+ #    ports:
+ #      - 3001:9090
+ #    volumes:
+ #      - /opt/bitnami/prometheus/data:/opt/bitnami/prometheus/data
+ #    command:
+ #      - "--web.enable-lifecycle"
+ #    user: root
+ #    networks:
+ #      - test-network
+ #
+ #  node-exporter:
+ #    build: ./node-exporter
+ #    image: node-exporter
+ #    container_name: node-exporter
+ #    ports:
+ #      - 3003:9100
+ #
+ #  grafana:
+ #    build: ./grafana
+ #    image: grafana
+ #    depends_on:
+ #      - prometheus
+ #    container_name: grafana
+ #    ports:
+ #      - 3002:3000
+ #    networks:
+ #      - test-network
+
+volumes:
+  mysqldb-backup: {}
+
+networks:
+  test-network: {}

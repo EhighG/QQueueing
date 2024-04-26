@@ -1,0 +1,30 @@
+###batch-dev
+server.port: 8082
+
+spring:
+  datasource:
+    url: jdbc:mysql://qqueueing-rdbms:3306/queing?serverTimezone=UTC&characterEncoding=UTF-8
+    username: hak
+    password: hak
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+
+  kafka:
+    consumer:
+      bootstrap-servers: qqueueing-kafka:9092 # Kafka ???? ?? ?? ??? ??? ??? : ?? ??
+      group-id: consumer_group01 # Group Id
+      auto-offset-reset: latest # offset ? ??? ? ?? ?? ?? ??? ???? ?? ??
+      #      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      topic: test
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+
