@@ -1,8 +1,8 @@
 package com.qqueueing.main.waiting.controller;
 
 
-import com.qqueueing.main.waiting.service.WaitingService;
 import com.qqueueing.main.waiting.model.GetMyOrderResDto;
+import com.qqueueing.main.waiting.service.WaitingService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +28,6 @@ public class WaitingController {
 //            ip = request.getRemoteAddr(); // 프록시 안 거쳤을 때
 //        }
         try {
-
             return ResponseEntity
                     .ok(waitingService.enter("tmpUserId"));
         } catch (Exception e) {
@@ -38,12 +37,19 @@ public class WaitingController {
     }
 
     @PostMapping("/{waitingIdx}")
-    public ResponseEntity<GetMyOrderResDto> getMyOrder(@PathVariable Long waitingIdx,
-                                                       @RequestBody String idVal) {
+    public ResponseEntity<?> getMyOrder(@PathVariable Long waitingIdx,
+                                                       @RequestBody String idVal,
+                                                       HttpServletRequest request) {
         System.out.println("idVal = " + idVal);
-//        GetMyOrderResDto myOrder = waitingService.getMyOrder(waitingIdx, idVal);
-        return ResponseEntity
-                .ok(waitingService.getMyOrder(waitingIdx, idVal));
+        Object myOrderRes = waitingService.getMyOrder(waitingIdx, idVal, request);
+        if (myOrderRes instanceof GetMyOrderResDto) {
+            return ResponseEntity
+                    .ok(myOrderRes);
+        } else {
+            return (ResponseEntity<?>) myOrderRes;
+        }
+//        return ResponseEntity
+//                .ok(waitingService.getMyOrder(waitingIdx, idVal, request));
 //        if (myOrder.getTotalQueueSize() == -1) {
 //        }
     }
@@ -55,4 +61,10 @@ public class WaitingController {
                 .ok()
                 .build();
     }
+
+//    @GetMapping("/test")
+//    public ResponseEntity<?> test(HttpServletRequest request) {
+//        Object obj = waitingService.test(request);
+//        return (ResponseEntity<?>) obj;
+//    }
 }
