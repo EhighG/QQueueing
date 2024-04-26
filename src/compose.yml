@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: build/main/Dockerfile
     image: qqueueing-main
+    ports:
+      - 8080:8080
     networks:
       - qqueueing-network
 
