@@ -1,5 +1,5 @@
 export { cats } from "./assets";
-export { AxiosInstance } from "./axios";
+export { axiosInstance } from "./axios";
 export { sseConnect } from "./sse";
 export { cls } from "./cls";
 export { RQProvider } from "./RQProvider";
