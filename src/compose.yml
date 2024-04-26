@@ -71,6 +71,28 @@ services:
     networks:
       - qqueueing-network
 
+  qqueueing-prometheus:
+    build: ./prometheus
+    depends_on:
+      - qqueuueing-node-exporter
+    ports:
+      - 3001:9090
+    volumes:
+      - /opt/bitnami/prometheus/data:/opt/bitnami/prometheus/data
+    command:
+      - "--web.enable-lifecycle"
+    user: root
+
+  qqueueing-node-exporter:
+    build: bitnami/node-exporter:1.7.0
+
+  qqueueing-grafana:
+    build: ./grafana
+    depends_on:
+      - prometheus
+    ports:
+      - 3002:3000
+
 volumes:
   zookeeper_data:
     driver: local
