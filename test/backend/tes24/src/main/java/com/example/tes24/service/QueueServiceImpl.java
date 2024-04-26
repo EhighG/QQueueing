@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -19,9 +20,8 @@ public class QueueServiceImpl implements QueueService {
     @Value("${qqueue.server-port}")
     private String port;
 
-    private final ExecutorService executorService;
-
     @Override
+    @Async
     public Future<EnqueueResponse> enqueue() {
         RestClient restClient = RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
@@ -30,7 +30,12 @@ public class QueueServiceImpl implements QueueService {
 //                .defaultHeader("Authorization", "Bearer " + token)
                 .build();
 
-        return executorService.submit(() -> restClient.post().retrieve().body(EnqueueResponse.class));
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {}
+//        return CompletableFuture.completedFuture(new EnqueueResponse(0L, "id"));
+
+        return CompletableFuture.completedFuture(restClient.post().retrieve().body(EnqueueResponse.class));
     }
 
     @Override
