@@ -1,6 +1,6 @@
 FROM ubuntu:focal AS builder
 USER root
-RUN apt-get update && apt-get install -y openjdk-17-jdk
+RUN apt-get update && apt-get install -y openjdk-21-jdk
 COPY tes24 /tes24
 WORKdir tes24
 RUN sh gradlew clean bootJar
@@ -8,8 +8,8 @@ RUN sh gradlew clean bootJar
 FROM alpine:latest
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
-    apk --no-cache add openjdk17-jre-headless tzdata
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+    apk --no-cache add openjdk21-jre-headless tzdata
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 ENV TZ=Asia/Seoul
 EXPOSE 8080
 COPY --from=builder /tes24/build/libs/*.jar .

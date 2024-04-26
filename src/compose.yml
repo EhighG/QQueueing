@@ -22,7 +22,12 @@ services:
       - qqueueing-rdbms
 
   qqueueing-frontend:
-    build: ./build/main
+    build:
+      context: .
+      dockerfile: build/frontend/Dockerfile
+    image: qqueueing-frontend
+    ports:
+      - 3001:3000
     networks:
       - qqueueing-network
 
