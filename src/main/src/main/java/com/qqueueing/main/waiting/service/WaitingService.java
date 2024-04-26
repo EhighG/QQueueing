@@ -1,12 +1,8 @@
-package com.qqueueing.main;
+package com.qqueueing.main.waiting.service;
 
 
-import com.qqueueing.main.connect.ConsumerConnector;
-import com.qqueueing.main.connect.ProducerConnector;
-
-import com.qqueueing.main.model.GetMyOrderResDto;
-import com.qqueueing.main.model.TestDto;
-import jakarta.servlet.http.HttpServletResponse;
+import com.qqueueing.main.waiting.model.GetMyOrderResDto;
+import com.qqueueing.main.waiting.model.TestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -14,7 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,7 +20,8 @@ import java.util.stream.Collectors;
 public class WaitingService {
 
     private final ConsumerConnector consumerConnector;
-    private final ProducerConnector producerConnector;
+//    private final ProducerConnector producerConnector;
+    private final EnterProducer enterProducer;
     private final String TARGET_URL;
     private Set<String> doneSet = new HashSet<>();
     private List<Long> outList = new LinkedList<>();
@@ -35,10 +31,11 @@ public class WaitingService {
     private Long tmpEnterCnt = 0L;
 
 
-    public WaitingService(ConsumerConnector consumerConnector, ProducerConnector producerConnector,
+    public WaitingService(ConsumerConnector consumerConnector, EnterProducer enterProducer,
                           @Value("${servers.target.url}") String targetApiUrl) {
         this.consumerConnector = consumerConnector;
-        this.producerConnector = producerConnector;
+        this.enterProducer = enterProducer;
+//        this.producerConnector = producerConnector;
         this.TARGET_URL = targetApiUrl;
     }
 
@@ -46,7 +43,7 @@ public class WaitingService {
         tmpEnterCnt++;
 
         // 카프카에 요청자 Ip 저장
-        return producerConnector.enter(clientIp);
+        return enterProducer.send(clientIp);
     }
 
     public void out(Long order) {
@@ -67,6 +64,7 @@ public class WaitingService {
         if (doneSet.contains(ip)) {
             doneSet.remove(ip);
 //                response.sendRedirect(TARGET_URL);
+
             return new GetMyOrderResDto(0L, -1, TARGET_URL);
 //            try {
 //            } catch (IOException e) {

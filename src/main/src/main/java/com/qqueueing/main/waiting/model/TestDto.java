@@ -1,4 +1,4 @@
-package com.qqueueing.main.model;
+package com.qqueueing.main.waiting.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TestDto {
-    private Integer order;
+    private Long order;
     private String idVal;
 }
