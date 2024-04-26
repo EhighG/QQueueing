@@ -3,7 +3,7 @@ import styles from "./Header.module.css";
 const Header = () => {
   return (
     <header className={styles.header}>
-      <p className={styles.title}>Admin Dashboard</p>
+      <p className={styles.title}>QQueueing Admin Dashboard</p>
     </header>
   );
 };
