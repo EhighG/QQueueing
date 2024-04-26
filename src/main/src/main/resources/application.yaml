@@ -26,5 +26,6 @@ servers: # 타 서버들의 정보 기록
     traffic-capacity: 200
 
 kafka:
+  broker: localhost:9092
   topic-names:
     enter: test
