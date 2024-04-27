@@ -10,5 +10,6 @@ scrape_configs:
 
   - job_name: 'main-server'
     metrics_path: "/monitoring/prometheus"
+    scrape_interval: 1s
     static_configs:
       - targets: ['qqueueing-main:8080']

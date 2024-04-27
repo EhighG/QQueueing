@@ -99,8 +99,6 @@ services:
 
   qqueueing-grafana:
     image: grafana/grafana:main
-    depends_on:
-      - qqueueing-prometheus
     ports:
       - 3002:3000
     networks:
