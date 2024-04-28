@@ -1,61 +1,73 @@
-import { cats } from "@/shared";
+"use client";
+import { postWaiting } from "@/features";
+import { Button, Input, SectionTitle, cats } from "@/shared";
+import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 
 const RegistPage = () => {
+  const [url, setUrl] = useState<string>("");
+  const [maxQueue, setMaxQueue] = useState<number>(0);
+  const [buffer, setBuffer] = useState<number>(0);
+  const [name, setName] = useState("");
+
+  // 대기열 등록
+  const mutation = useMutation({
+    mutationFn: postWaiting,
+    onSuccess: () => {
+      alert("success");
+
+      // Invalidate and refetch
+      // queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+    onError: () => {
+      alert("error occur");
+    },
+  });
+
   return (
-    <div className="flex flex-1 flex-col border border-slate-300 rounded-md shadow-xl">
-      <div className="flex w-full items-center border-b border-black h-[60px] p-3">
-        <p className="text-[1.5rem] font-bold">등록 페이지</p>{" "}
-      </div>
+    <div className="flex flex-col flex-1 gap-2 bg-white rounded-md border">
+      <SectionTitle title="등록 페이지" />
       <div className="flex flex-1 max-2xl:m-5 m-10 ">
         <div className="flex flex-1 flex-col  items-center">
           <div className="flex flex-1 flex-col w-full p-10">
             <div className="flex flex-col flex-1  gap-5">
-              <label className="text-[1.5rem] font-bold">
-                대기열 등록 대상 URL
-              </label>
-              <input
-                type="text"
+              <Input
+                label="대기열 등록 대상 URL"
                 title="대기열 등록 대상 URL"
-                className="w-full h-[50px] rounded-lg border border-black text-[1.5rem] p-1"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
               />
-              <label className="text-[1.5rem] font-bold">최대 수용 인원</label>
-              <input
-                type="number"
+              <Input
+                label="최대 수용 인원"
                 title="최대 수용 인원"
-                className="w-full h-[50px] rounded-lg border border-black"
-              />
-              <label className="text-[1.5rem] font-bold">
-                1분 당 처리 인원
-              </label>
-              <input
                 type="number"
-                title="1분 당 처리 인원"
-                className="w-full h-[50px] rounded-lg border border-black"
+                value={maxQueue}
+                onChange={(e) => setMaxQueue(parseInt(e.target.value))}
               />
-              <label className="text-[1.5rem] font-bold">서비스 명</label>
-              <input
-                type="text"
+              <Input
+                label="1분 당 처리 인원"
+                title=" 1분 당 처리 인원"
+                type="number"
+                min={0}
+                value={buffer}
+                onChange={(e) => setBuffer(parseInt(e.target.value))}
+              />
+              <Input
+                label="서비스 명"
                 title="서비스 명"
-                className="w-full h-[50px] rounded-lg border border-black"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
               <div className="flex w-full justify-around">
                 <Link href="/waiting/1">
-                  <button
-                    type="button"
-                    className="w-[146px] h-[50px] text-[1.5rem] font-bold bg-gray-400 border border-black rounded-md"
-                  >
+                  <Button type="button" style="square">
                     미리 보기
-                  </button>
+                  </Button>
                 </Link>
-                <button
-                  type="button"
-                  className="w-[146px] h-[50px] text-[1.5rem] font-bold bg-gray-400 border border-black rounded-md"
-                >
-                  등록
-                </button>
+                <Button style="square">등록</Button>
               </div>
             </div>
           </div>
@@ -63,9 +75,7 @@ const RegistPage = () => {
         <div className="flex flex-1">
           <div className="flex flex-1  flex-col max-2xl:m-5 m-10 gap-10">
             <div className="flex flex-[2] overflow-auto flex-col border rounded-md border-black">
-              <div className="flex w-full items-center border-b border-black h-[60px] p-3">
-                <p className="text-[1.5rem] font-bold">대기열 이미지</p>
-              </div>
+              <SectionTitle title="대기열 이미지" />
               <div className="flex flex-1">
                 <div className="flex flex-[1] justify-center">
                   <Image src={cats} alt="sample" className="" />
@@ -74,21 +84,26 @@ const RegistPage = () => {
                   <p className="text-[1.5rem] font-bold">
                     대기열 이미지는 대기열 우측 상단에 표시 됩니다
                   </p>
-                  <button
+                  <Button
                     type="button"
                     className="p-2 border rounded-md border-black"
+                    onClick={() => {
+                      mutation.mutate({
+                        url,
+                        maxQueue,
+                        buffer,
+                        name,
+                      });
+                    }}
                   >
                     등록
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
             <div className="flex flex-col flex-[1] border rounded-md border-black">
-              <div className="flex w-full items-center border-b border-black h-[60px] p-3">
-                <p className="text-[1.5rem] font-bold">
-                  시스템 성능 대비 예상치
-                </p>
-              </div>
+              <SectionTitle title="시스템 성능 대비 예상치" />
+
               <div className="flex flex-1">
                 <div className="flex flex-1 flex-col items-center justify-center gap-5 border-r border-black">
                   <p className="text-[1.5rem] font-bold">최대 수용 가능 인원</p>
