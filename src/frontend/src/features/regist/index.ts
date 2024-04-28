@@ -1,0 +1,1 @@
+export { registWaiting } from "./api";
