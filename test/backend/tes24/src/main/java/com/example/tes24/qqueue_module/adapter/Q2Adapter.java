@@ -9,45 +9,16 @@ import java.net.*;
 import java.util.Optional;
 
 public class Q2Adapter {
-    private static final String DEFAULT_METHOD = "POST";
-    private static final int DEFAULT_TIMEOUT = 15000;
-    private static final Mode MODE = Mode.JSON;
-    private final String qqServerUrl;
+    private final HttpURLConnection urlConnection;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    static Q2AdapterBuilder q2AdapterBuilder;
+    Q2Adapter(HttpURLConnection urlConnection) {
+        assert urlConnection != null;
 
-    public Q2Adapter(String qqServerUrl) {
-        assert qqServerUrl != null && !qqServerUrl.isEmpty();
-
-        this.qqServerUrl = qqServerUrl;
-    }
-
-    static Q2AdapterBuilder builder() {
-        if (q2AdapterBuilder == null) {
-            q2AdapterBuilder = new Q2AdapterBuilder();
-        }
-
-        return q2AdapterBuilder;
-    }
-
-    private URL getURL() throws MalformedURLException {
-        return URI.create(this.qqServerUrl).toURL();
-    }
-
-    private HttpURLConnection getHttpConnection() throws IOException {
-        URL url = getURL();
-        return (HttpURLConnection) url.openConnection();
+        this.urlConnection = urlConnection;
     }
 
     public Q2ServerResponse enqueue(Q2ClientRequest q2ClientRequest) throws IOException {
-        HttpURLConnection urlConnection = getHttpConnection();
-        urlConnection.setConnectTimeout(DEFAULT_TIMEOUT);
-        urlConnection.setRequestMethod(DEFAULT_METHOD);
-        urlConnection.setDoInput(true);
-        urlConnection.setDoOutput(true);
-        urlConnection.setRequestProperty("Content-Type", "application/json");
-
         urlConnection.connect();
 
         Optional<Object> response = enqueue(q2ClientRequest, urlConnection);
@@ -62,7 +33,8 @@ public class Q2Adapter {
     }
 
     private Optional<Object> enqueue(Q2ClientRequest q2ClientRequest, URLConnection urlConnection) {
-        return MODE.equals(Mode.JSON) ?
+        String modeName = urlConnection.getRequestProperty("Content-Type");
+        return modeName != null && Mode.valueOf(modeName).equals(Mode.JSON) ?
                 enqueueWithJson(q2ClientRequest, urlConnection) :
                 enqueueWithSerialization(q2ClientRequest, urlConnection);
     }
@@ -82,8 +54,6 @@ public class Q2Adapter {
     }
 
     private Optional<Object> enqueueWithJson(Q2ClientRequest q2ClientRequest, URLConnection urlConnection) {
-        assert objectMapper != null;
-
         try {
             String json = this.objectMapper.writeValueAsString(q2ClientRequest);
 
@@ -100,32 +70,6 @@ public class Q2Adapter {
         } catch (IOException e) {
             return Optional.empty();
         }
-    }
-
-    static class Q2AdapterBuilder {
-        private String url;
-
-        static Q2AdapterBuilder builder() {
-            return new Q2AdapterBuilder();
-        }
-
-        public Q2AdapterBuilder url(String url) {
-            this.url = url;
-            return this;
-        }
-
-        public Q2Adapter build() {
-
-            Q2Adapter q2Adapter = new Q2Adapter(this.url);
-
-            return q2Adapter;
-        }
-    }
-
-//    static class Q2
-
-    private enum Mode {
-        SERIALIZE, JSON
     }
 
 }

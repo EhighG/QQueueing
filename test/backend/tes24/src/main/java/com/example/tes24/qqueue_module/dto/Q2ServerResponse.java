@@ -12,6 +12,6 @@ public class Q2ServerResponse implements Serializable {
     Long capacity;
 
     public boolean isFull() {
-        return currentQueueSize == capacity;
+        return currentQueueSize.equals(capacity);
     }
 }
