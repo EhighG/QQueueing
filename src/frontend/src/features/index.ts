@@ -1,1 +1,1 @@
-export { fetchingWaiting } from "./waiting";
+export { getWaiting, postWaiting } from "./waiting";
