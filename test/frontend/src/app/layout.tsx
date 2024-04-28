@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { RQProvider, cats } from "@/shared";
+import { RQProvider } from "@/shared";
 import { Footer, Header } from "@/widgets";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
     template: "%s | 큐잉",
     default: "큐잉",
   },
-  description: "누구나 쉽게 사용 가능한 대기열 시스템, 큐잉[Queueing]",
+  description: "누구나 쉽게 사용 가능한 대기열 시스템, 큐잉[QQueueing]",
 };
 
 export default function RootLayout({
