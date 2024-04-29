@@ -1,7 +1,7 @@
 FROM ubuntu:focal AS builder
 ARG APP=main
 USER root
-RUN apt-get update && apt-get install -y openjdk-17-jdk
+RUN apt-get update && apt-get install -y openjdk-21-jdk
 COPY $APP /$APP
 WORKDIR $APP
 RUN sh gradlew clean bootJar
@@ -10,8 +10,8 @@ FROM alpine:latest
 ARG APP=main
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
-    apk --no-cache add openjdk17-jre-headless tzdata
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+    apk --no-cache add openjdk21-jre-headless tzdata
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 ENV TZ=Asia/Seoul
 EXPOSE 8080
 COPY build/$APP/application.yml .

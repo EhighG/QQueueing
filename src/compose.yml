@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: build/main/Dockerfile
     image: qqueueing-main
+    ports:
+      - 8080:8080
     networks:
       - qqueueing-network
 
@@ -20,11 +22,23 @@ services:
       - qqueueing-rdbms
 
   qqueueing-frontend:
-    build: ./build/main
+    build:
+      context: .
+      dockerfile: build/frontend/Dockerfile
+    image: qqueueing-frontend
+    ports:
+      - 3001:3000
     networks:
       - qqueueing-network
+
   qqueueing-producer:
-    build: ./build/main
+    build:
+      context: .
+      dockerfile: build/consumer/Dockerfile
+    image: qqueueing-producer
+    depends_on:
+      - qqueueing-kafka
+      - qqueueing-rdbms
     networks:
       - qqueueing-network
 
@@ -61,6 +75,32 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - mysqldb-backup:/backup
+    networks:
+      - qqueueing-network
+
+  qqueueing-prometheus:
+    build: ./build/prometheus
+    depends_on:
+      - qqueueing-node-exporter
+    ports:
+      - 3003:9090
+    volumes:
+      - /opt/bitnami/prometheus/data:/opt/bitnami/prometheus/data
+    command:
+      - "--web.enable-lifecycle"
+    user: root
+    networks:
+      - qqueueing-network
+
+  qqueueing-node-exporter:
+    image: bitnami/node-exporter:1.7.0
+    networks:
+      - qqueueing-network
+
+  qqueueing-grafana:
+    image: grafana/grafana:main
+    ports:
+      - 3002:3000
     networks:
       - qqueueing-network
 
