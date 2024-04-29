@@ -29,6 +29,15 @@ public class KafkaConsumerController {
         return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "메시지를 consume하였습니다.", result));
     }
 
+    @PostMapping("/start")
+    public ResponseEntity<?> startQueueing() {
+
+        System.out.println("start");
+        kafkaConsumerService.deleteDatasOfPartition();
+
+        return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "대기열을 시작하였습니다. 새로운 partition이 할당되었습니다.", null));
+    }
+
     @PostMapping("/change")
     public ResponseEntity<?> changeConsumerProperties(@RequestBody ChangeConsumerPropertiesReqDto changeConsumerPropertiesReqDto) {
 

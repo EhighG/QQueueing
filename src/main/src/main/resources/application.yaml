@@ -1,12 +1,12 @@
 server:
-#  tomcat:
-#    accept-count: 500
-##    max-keep-alive-requests: -1
-##    max-connections: 30000 # default 8192
-##    connection-timeout: # default 60000 ms
-#    threads:
-#      max: 200 # default 200 / thread 경합..? 주의
-#      min-spare: 200
+  #  tomcat:
+  #    accept-count: 500
+  ##    max-keep-alive-requests: -1
+  ##    max-connections: 30000 # default 8192
+  ##    connection-timeout: # default 60000 ms
+  #    threads:
+  #      max: 200 # default 200 / thread 경합..? 주의
+  #      min-spare: 200
 
   port: 8081
 
@@ -20,11 +20,36 @@ spring:
 #      enabled: false
 
 servers: # 타 서버들의 정보 기록
-  consumer: localhost:8082
+  consumer: k10a401.p.ssafy.io:8082
   target: # 테스트용 사용자 서버(tes 24)
-    url: http://localhost:8082/consume/test # 대기열 적용 대상 api url
+    url: http://k401a10.p.ssafy.io:8082/consume/test # 대기열 적용 대상 api url
 
 kafka:
-  broker: localhost:9092
+  broker: k10a401.p.ssafy.io:9092
   topic-names:
     enter: test
+
+# actuator
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: "/monitoring"
+
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+
+info:
+  app:
+    name: qqueueing
+    company: 4EVERY1
+
