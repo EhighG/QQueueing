@@ -31,3 +31,28 @@ kafka:
   broker: qqueueing-kafka:9092
   topic-names:
     enter: test
+
+# actuator
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: "/monitoring"
+
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+
+info:
+  app:
+    name: qqueueing
+    company: 4EVERY1
+
