@@ -50,7 +50,7 @@ public class KafkaConsumerService {
 
     private KafkaConsumer<String, String> consumer;
 
-//    @PostConstruct
+    @PostConstruct
     public Properties init() {
 
         System.out.println("init!");
