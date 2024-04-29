@@ -18,7 +18,7 @@ import java.util.Enumeration;
 public class TargetApiConnector {
 
     private final RestTemplate restTemplate;
-    private final String TARGET_URL;
+    private String TARGET_URL;
 
     public TargetApiConnector(RestTemplate restTemplate,
                               @Value("${servers.target.url}") String targetUrl) {
