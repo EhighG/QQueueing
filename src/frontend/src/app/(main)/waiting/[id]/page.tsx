@@ -1,5 +1,5 @@
 "use client";
-import { fetchingWaiting } from "@/features";
+import { getWaiting } from "@/features";
 import { cats, logo } from "@/shared";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -8,7 +8,7 @@ import React from "react";
 const WaitingModal = () => {
   const { data } = useQuery({
     queryKey: ["waiting"],
-    queryFn: fetchingWaiting,
+    queryFn: getWaiting,
   });
 
   return (

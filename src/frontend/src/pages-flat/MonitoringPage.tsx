@@ -1,26 +1,20 @@
+import { Button, PerformanceCard, SectionTitle } from "@/shared";
 import React from "react";
 
 const MonitoringPage = () => {
   return (
-    <div className="flex flex-col flex-1 gap-2">
-      <div className="flex w-full items-center border-b border-black h-[60px] p-3">
-        <p className="text-[1.5rem] font-bold">모니터링</p>{" "}
-      </div>
+    <div className="flex flex-col flex-1 gap-2 bg-white rounded-md">
+      <SectionTitle title="모니터링" />
       <div className="flex items-center flex-1 justify-around">
-        <div className="flex flex-col items-center justify-center gap-5 size-[240px] bg-slate-200">
-          <h1 className="text-[2rem] font-bold">활성 중</h1>
-          <p className="text-[2rem] font-bold">1</p>
-        </div>
-        <div className="flex flex-col items-center justify-center gap-5 size-[240px] bg-slate-200">
-          <h1 className="text-[2rem] font-bold">활성 중</h1>
-          <p className="text-[2rem] font-bold">2</p>
-        </div>
-        <div className="flex flex-col items-center justify-center gap-5 size-[240px] bg-slate-200">
-          <h1 className="text-[2rem] font-bold">활성 중</h1>
-          <p className="text-[2rem] font-bold">3</p>
-        </div>
+        <PerformanceCard title="활성 중" perform={1} />
+        <PerformanceCard title="활성 중" perform={2} />
+        <PerformanceCard title="활성 중" perform={3} />
       </div>
-      <div className="flex w-full h-[60px] border-t border-t-black"></div>
+      <div className="flex w-full justify-center items-center h-[60px] hover:opacity-80">
+        <Button className="text-[1.5rem] border rounded-full px-10 py-2 bg-blue-500 text-white font-bold">
+          자세히 보기
+        </Button>
+      </div>
     </div>
   );
 };
