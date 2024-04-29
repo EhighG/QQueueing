@@ -1,2 +1,1 @@
-export { fetchingWaiting } from "./waiting";
-export { registWaiting } from "./regist";
+export { getWaiting, postWaiting } from "./waiting";
