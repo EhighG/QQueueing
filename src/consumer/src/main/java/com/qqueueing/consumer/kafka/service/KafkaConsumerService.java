@@ -6,10 +6,12 @@ import com.qqueueing.consumer.kafka.dto.MessageDto;
 import com.qqueueing.consumer.kafka.listener.RebalanceListener;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 
 @Slf4j
@@ -48,7 +51,9 @@ public class KafkaConsumerService {
     private KafkaConsumer<String, String> consumer;
 
     @PostConstruct
-    public void init() {
+    public Properties init() {
+
+        System.out.println("init!");
 
 //        Runtime.getRuntime().addShutdownHook(new ShutdownThread());
         Properties props = new Properties();
@@ -69,6 +74,35 @@ public class KafkaConsumerService {
         partitions.add(new TopicPartition(topic, partitionNumber));
 
         consumer.assign(partitions);
+
+        return props;
+    }
+
+
+    public void deleteDatasOfPartition() {
+
+        try {
+
+            AdminClient adminClient = AdminClient.create(init());
+
+            TopicPartition topicPartition = new TopicPartition(topic, 0); // 삭제하려는 토픽과 파티션 지정
+
+            // 삭제할 레코드의 오프셋을 파티션의 시작 오프셋으로 지정하여 모든 레코드 삭제
+            long offset = 0;
+
+            // 레코드 삭제 실행
+            DeleteRecordsResult deleteRecordsResult = adminClient.deleteRecords(
+                    Collections.singletonMap(topicPartition, RecordsToDelete.beforeOffset(offset)));
+
+            // 결과 확인
+            KafkaFuture<Void> future = deleteRecordsResult.all();
+            future.get(); // 삭제 작업 완료를 기다림
+            System.out.println("All records before offset " + offset + " deleted successfully.");
+
+        } catch (InterruptedException | ExecutionException e) {
+
+            System.out.println(e.getMessage());
+        }
     }
 
     public void changeConsumerProperties(ChangeConsumerPropertiesReqDto changeConsumerPropertiesReqDto) {
@@ -123,7 +157,7 @@ public class KafkaConsumerService {
         ConsumeMessageResDto consumeMessageResDto = new ConsumeMessageResDto();
         consumeMessageResDto.setCurDoneSet(new ArrayList<>());
         consumeMessageResDto.setBatchLastIdx(currentOffset);
-        consumeMessageResDto.setTotalQueueSize(lastOffset);
+        consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
 
         try {
 
@@ -131,8 +165,8 @@ public class KafkaConsumerService {
 
             for (ConsumerRecord<String, String> record : records) {
                 log.info("record:{}", record);
-                MessageDto messageDto = new MessageDto(record.value());
-                consumeMessageResDto.getCurDoneSet().add(messageDto);
+//                MessageDto messageDto = new MessageDto(record.value());
+                consumeMessageResDto.getCurDoneSet().add(record.value());
             }
 
         } catch (WakeupException e) {

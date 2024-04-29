@@ -17,6 +17,13 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      colors: {
+        "q-grey:": "#6E6B7B",
+        "q-lightgrey": "#F8F8F8",
+        "q-white": "#FFFFFF",
+        "q-blue": "#3B82F6",
+        "q-green": "#10B981",
+      },
     },
   },
   plugins: [],

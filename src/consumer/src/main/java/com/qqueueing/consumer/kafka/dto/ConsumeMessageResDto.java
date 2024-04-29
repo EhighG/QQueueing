@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class ConsumeMessageResDto {
 
-    private List<MessageDto> curDoneSet;
+    private List<String> curDoneSet;
 
     private Long batchLastIdx;
     private Long totalQueueSize;
