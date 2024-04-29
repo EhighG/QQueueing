@@ -1,5 +1,7 @@
 server:
-#  tomcat:
+  tomcat:
+    mbeanregistry:
+      enabled: true
 #    accept-count: 500
 ##    max-keep-alive-requests: -1
 ##    max-connections: 30000 # default 8192

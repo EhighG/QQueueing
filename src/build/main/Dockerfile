@@ -13,7 +13,7 @@ RUN apk --no-cache update && \
     apk --no-cache add openjdk21-jre-headless tzdata
 ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 ENV TZ=Asia/Seoul
-EXPOSE 8080
+EXPOSE 8081
 COPY build/$APP/application.yml .
 COPY --from=builder /$APP/build/libs/*.jar .
 COPY build/$APP/output.cert .
