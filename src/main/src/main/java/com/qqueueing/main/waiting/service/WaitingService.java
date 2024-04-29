@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 public class WaitingService {
 
     private final ConsumerConnector consumerConnector;
-//    private final ProducerConnector producerConnector;
     private final TargetApiConnector targetApiConnector;
+
     private final EnterProducer enterProducer;
     private final String TARGET_URL;
     private Set<String> doneSet = new HashSet<>();
@@ -72,6 +72,7 @@ public class WaitingService {
         Long myOrder = oldOrder - outCntInFront - batchLastIdx; // newOrder
         return new GetMyOrderResDto(myOrder, totalQueueSize);
     }
+
 
 //    public ResponseEntity<?> test(HttpServletRequest request) {
 //        return targetApiConnector.forwardToTarget(request);
