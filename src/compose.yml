@@ -1,0 +1,116 @@
+name: qqueueing
+services:
+  qqueueing-main:
+    build:
+      context: .
+      dockerfile: build/main/Dockerfile
+    image: qqueueing-main
+    ports:
+      - 8080:8080
+    networks:
+      - qqueueing-network
+
+  qqueueing-consumer:
+    build:
+      context: .
+      dockerfile: build/consumer/Dockerfile
+    image: qqueueing-consumer
+    networks:
+      - qqueueing-network
+    depends_on:
+      - qqueueing-kafka
+      - qqueueing-rdbms
+
+  qqueueing-frontend:
+    build:
+      context: .
+      dockerfile: build/frontend/Dockerfile
+    image: qqueueing-frontend
+    ports:
+      - 3001:3000
+    networks:
+      - qqueueing-network
+
+  qqueueing-producer:
+    build:
+      context: .
+      dockerfile: build/consumer/Dockerfile
+    image: qqueueing-producer
+    depends_on:
+      - qqueueing-kafka
+      - qqueueing-rdbms
+    networks:
+      - qqueueing-network
+
+  qqueueing-zookeeper:
+    image: bitnami/zookeeper:3.9
+    ports:
+      - "2181:2181"
+    volumes:
+      - "zookeeper_data:/bitnami"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - qqueueing-network
+
+  qqueueing-kafka:
+    image: bitnami/kafka:3.4
+    ports:
+      - "9092:9092"
+    volumes:
+      - "kafka_data:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=qqueueing-zookeeper:2181
+    depends_on:
+      - qqueueing-zookeeper
+    networks:
+      - qqueueing-network
+
+  qqueueing-rdbms:
+    image: mysql:8.0.36
+    environment:
+      MYSQL_DATABASE: queing
+      MYSQL_USER: hak
+      MYSQL_PASSWORD: hak
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysqldb-backup:/backup
+    networks:
+      - qqueueing-network
+
+  qqueueing-prometheus:
+    build: ./build/prometheus
+    depends_on:
+      - qqueueing-node-exporter
+    ports:
+      - 3003:9090
+    volumes:
+      - /opt/bitnami/prometheus/data:/opt/bitnami/prometheus/data
+    command:
+      - "--web.enable-lifecycle"
+    user: root
+    networks:
+      - qqueueing-network
+
+  qqueueing-node-exporter:
+    image: bitnami/node-exporter:1.7.0
+    networks:
+      - qqueueing-network
+
+  qqueueing-grafana:
+    image: grafana/grafana:main
+    ports:
+      - 3002:3000
+    networks:
+      - qqueueing-network
+
+volumes:
+  zookeeper_data:
+    driver: local
+  kafka_data:
+    driver: local
+  mysqldb-backup: {}
+
+networks:
+  qqueueing-network: {}
+

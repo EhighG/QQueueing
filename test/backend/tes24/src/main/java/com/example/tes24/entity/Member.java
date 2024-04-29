@@ -17,12 +17,6 @@ public class Member {
     @Column(name = "access_token")
     private String accessToken;
 
-    @Column(name = "access_token_Expiration")
-    private String accessTokenExpiration;
-
     @Column(name = "refresh_token")
     private String refreshToken;
-
-    @Column(name = "refresh_token_expiration")
-    private String refreshTokenExpiration;
 }

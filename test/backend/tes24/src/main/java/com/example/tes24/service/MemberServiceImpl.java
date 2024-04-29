@@ -22,6 +22,14 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
+    public Member updateAllTokens(Long memberId, String accessToken, String refreshToken) {
+        Member member = memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
+        member.setAccessToken(accessToken);
+        member.setRefreshToken(refreshToken);
+        return memberRepository.save(member);
+    }
+
+    @Override
     public Member updateAccessToken(Long memberId, String token) {
         Member member = memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
         member.setAccessToken(token);
@@ -37,9 +45,15 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     public Member signUp(Member member) {
-        member.setAccessToken(jwtUtils.createAccessToken(member.getMemberId()));
-        member.setRefreshToken(jwtUtils.createRefreshToken(member.getMemberId()));
+        Member savedMember = memberRepository.save(member);
+        savedMember.setAccessToken(jwtUtils.createAccessToken(member.getMemberId()));
+        savedMember.setRefreshToken(jwtUtils.createRefreshToken(member.getMemberId()));
         return memberRepository.save(member);
+    }
+
+    @Override
+    public Member login(String memberId) {
+        return login(Long.valueOf(memberId));
     }
 
     @Override
@@ -47,8 +61,4 @@ public class MemberServiceImpl implements MemberService{
         return memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
     }
 
-    @Override
-    public Member login(String memberId) {
-        return memberRepository.findById(Long.valueOf(memberId)).orElseThrow(NoSuchElementException::new);
-    }
 }

@@ -35,11 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             }
+        }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            filterChain.doFilter(request, response);
         } else {
             throw new BadCredentialsException("Can't authenticate.");
         }
-
-        filterChain.doFilter(request, response);
     }
 
     protected Authentication attemptAuthenticate(String token) {

@@ -4,11 +4,10 @@ interface AdaptAxiosRequestConfig extends AxiosRequestConfig {
   headers: AxiosRequestHeaders;
 }
 
-const AxiosInstance = () => {
+const axiosInstance = () => {
   const instance = axios.create({
-    baseURL: process.env.baseUrl,
+    baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   });
-
   // 모든 요청에 대해 기본 헤더 속성 설정
   instance.defaults.headers.common["Content-Type"] =
     "application/json; charset=utf8";
@@ -16,4 +15,4 @@ const AxiosInstance = () => {
   return instance;
 };
 
-export default AxiosInstance;
+export default axiosInstance;

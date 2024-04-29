@@ -25,7 +25,7 @@ servers: # 타 서버들의 정보 기록
     url: http://k401a10.p.ssafy.io:8082/consume/test # 대기열 적용 대상 api url
 
 kafka:
-  broker: k401a10.p.ssafy.io:9092
+  broker: localhost:9092
   topic-names:
     enter: test
 
@@ -56,4 +56,5 @@ info:
   app:
     name: qqueueing
     company: 4EVERY1
+
 

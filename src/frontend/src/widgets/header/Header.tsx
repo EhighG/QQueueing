@@ -1,9 +1,8 @@
 import React from "react";
-import styles from "./Header.module.css";
 const Header = () => {
   return (
-    <header className={styles.header}>
-      <p className={styles.title}>Admin Dashboard</p>
+    <header className="flex w-full min-h-[60px] items-center justify-center bg-white shadow-sm border-b">
+      <p className="text-[1.5rem] font-bold">QQueueing Admin Dashboard</p>
     </header>
   );
 };
