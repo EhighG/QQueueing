@@ -16,7 +16,7 @@ allowed-url:
     - /member/signup
 
 qqueue:
-  server-url: 70.12.247.128
+  server-url: k10a401.p.ssafy.io
   server-port: 8080
 
 spring:
