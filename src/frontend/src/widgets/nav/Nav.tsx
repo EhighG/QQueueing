@@ -1,43 +1,93 @@
 import React from "react";
 import { LinkButton } from "@/shared";
+import HomeIcon from "@mui/icons-material/Home";
+import ListIcon from "@mui/icons-material/List";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
+import InfoIcon from "@mui/icons-material/Info";
+import ArticleIcon from "@mui/icons-material/Article";
+import TerminalIcon from "@mui/icons-material/Terminal";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import LoyaltyIcon from "@mui/icons-material/Loyalty";
+import Diversity1Icon from "@mui/icons-material/Diversity1";
 const NavMenu = () => {
   return (
-    <nav className="max-2xl:w-[240px] w-[300px] h-full rounded-r-md border-r border-black shadow-sm">
+    <nav className="max-2xl:w-[240px] w-[300px] h-full bg-white border-r rounded-r-md shadow-sm">
       <div className="flex flex-col h-full ml-[10px] gap-[100px]">
         <dl>
           <dt className="text-[2rem] font-bold">대기열 관리</dt>
           <dd>
-            <LinkButton href="/dashboard" title="대시보드" />
+            <LinkButton
+              icon={<HomeIcon />}
+              href="/dashboard"
+              title="대시보드"
+            />
           </dd>
           <dd>
-            <LinkButton href="/list" title="대기열 리스트" />
+            <LinkButton
+              icon={<ListIcon />}
+              href="/list"
+              title="대기열 리스트"
+            />
           </dd>
           <dd>
-            <LinkButton href="/regist" title="등록 하기" />
+            <LinkButton
+              icon={<AddCircleOutlineIcon />}
+              href="/regist"
+              title="등록 하기"
+            />
           </dd>
           <dd>
-            <LinkButton href="/manage" title="대기열 상태 관리" />
+            <LinkButton
+              icon={<MonitorHeartIcon />}
+              href="/manage"
+              title="대기열 상태 관리"
+            />
           </dd>
         </dl>
         <dl>
           <dt className="text-[2rem] font-bold">QQueueing</dt>
           <dd>
-            <LinkButton href="/about" title="about"></LinkButton>
+            <LinkButton
+              icon={<InfoIcon />}
+              href="/about"
+              title="about"
+            ></LinkButton>
           </dd>
           <dd>
-            <LinkButton href="/docs" title="docs"></LinkButton>
+            <LinkButton
+              icon={<ArticleIcon />}
+              href="/docs"
+              title="docs"
+            ></LinkButton>
           </dd>
           <dd>
-            <LinkButton href="/example" title="example"></LinkButton>
+            <LinkButton
+              icon={<TerminalIcon />}
+              href="/example"
+              title="example"
+            ></LinkButton>
           </dd>
           <dd>
-            <LinkButton href="/github" title="github"></LinkButton>
+            <LinkButton
+              icon={<GitHubIcon />}
+              href="/github"
+              title="github"
+            ></LinkButton>
           </dd>
           <dd>
-            <LinkButton href="/license" title="License"></LinkButton>
+            <LinkButton
+              icon={<LoyaltyIcon />}
+              href="/license"
+              title="License"
+            ></LinkButton>
           </dd>
           <dd>
-            <LinkButton href="/contributing" title="Contributing"></LinkButton>
+            <LinkButton
+              icon={<Diversity1Icon />}
+              href="/contributing"
+              title="Contributing"
+            ></LinkButton>
           </dd>
         </dl>
       </div>

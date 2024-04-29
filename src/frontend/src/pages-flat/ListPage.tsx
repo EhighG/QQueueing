@@ -1,12 +1,11 @@
+import { Button, SectionTitle } from "@/shared";
 import Link from "next/link";
 import React from "react";
 const ListPage = () => {
   return (
-    <div className="flex flex-1 border border-slate-300 rounded-md shadow-xl">
+    <div className="flex flex-col flex-1 gap-2 bg-q-white rounded-md border">
       <div className="flex flex-col flex-1 gap-2">
-        <div className="flex w-full items-center border-b border-black h-[60px] p-3">
-          <p className="text-[1.5rem] font-bold">대기열 리스트</p>{" "}
-        </div>
+        <SectionTitle title="대기열 리스트" />
         <div className="flex flex-1 flex-col max-2xl:m-5 m-10">
           <table className="flex flex-col flex-1 border border-black rounded-md">
             <thead>
@@ -32,19 +31,9 @@ const ListPage = () => {
             </tbody>
           </table>
           <div className="flex justify-end items-center gap-[10px] h-[60px]">
-            <button
-              type="button"
-              className="px-8 py-2 border rounded-md border-black bg-blue-300 font-bold"
-            >
-              변경
-            </button>
+            <Button style="square">변경</Button>
             <Link href="/regist">
-              <button
-                type="button"
-                className="px-8 py-2 border rounded-md border-black bg-blue-300 font-bold"
-              >
-                등록
-              </button>
+              <Button style="square">등록</Button>
             </Link>
           </div>
         </div>
