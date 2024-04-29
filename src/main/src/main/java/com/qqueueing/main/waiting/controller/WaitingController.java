@@ -1,6 +1,7 @@
 package com.qqueueing.main.waiting.controller;
 
 
+import com.qqueueing.main.waiting.model.GetMyOrderReqDto;
 import com.qqueueing.main.waiting.model.GetMyOrderResDto;
 import com.qqueueing.main.waiting.service.WaitingService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,44 +20,36 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
-
     @PostMapping
-    public ResponseEntity<?> enter(HttpServletRequest request) {
-        // 요청이 프록시 등을 거쳐 넘어왔을 때, 원래 클라이언트의 ip주소를 담는 헤더
-//        String ip = request.getHeader("X-Forwarded-For");
-//        if (ip == null) {
-//            ip = request.getRemoteAddr(); // 프록시 안 거쳤을 때
-//        }
+    public ResponseEntity<?> enter(String topicName, HttpServletRequest request) {
         try {
             return ResponseEntity
-                    .ok(waitingService.enter("tmpUserId"));
+                    .ok(waitingService.enter(topicName, request));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(e);
         }
     }
 
-    @PostMapping("/{waitingIdx}")
-    public ResponseEntity<?> getMyOrder(@PathVariable Long waitingIdx,
-                                                       @RequestBody String idVal,
-                                                       HttpServletRequest request) {
-        System.out.println("idVal = " + idVal);
-        Object myOrderRes = waitingService.getMyOrder(waitingIdx, idVal, request);
+    @PostMapping("/order")
+    public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto,
+                                        HttpServletRequest request) {
+        Object myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getTopicName(),
+                getMyOrderReqDto.getWaitingIdx(),
+                getMyOrderReqDto.getIdVal(),
+                request);
         if (myOrderRes instanceof GetMyOrderResDto) {
             return ResponseEntity
                     .ok(myOrderRes);
         } else {
             return (ResponseEntity<?>) myOrderRes;
         }
-//        return ResponseEntity
-//                .ok(waitingService.getMyOrder(waitingIdx, idVal, request));
-//        if (myOrder.getTotalQueueSize() == -1) {
-//        }
     }
 
     @GetMapping("/{waitingIdx}/out")
-    public ResponseEntity<Void> out(@PathVariable Long waitingIdx) {
-        waitingService.out(waitingIdx);
+    public ResponseEntity<Void> out(@RequestParam String topic,
+                                    @PathVariable Long waitingIdx) {
+        waitingService.out(topic, waitingIdx);
         return ResponseEntity
                 .ok()
                 .build();

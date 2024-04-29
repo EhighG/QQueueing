@@ -18,6 +18,10 @@ spring:
   application:
     name: api-server
 
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/mydb
+
   threads:
     virtual:
       enabled: true

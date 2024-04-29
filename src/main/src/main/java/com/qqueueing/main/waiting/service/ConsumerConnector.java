@@ -36,9 +36,6 @@ public class ConsumerConnector {
             System.out.println("response.getBody() = " + response.getBody());
             Map<String, Object> body = (Map<String, Object>) response.getBody().get("result");
             return body;
-//            ResponseEntity<Map> response = restTemplate
-//                    .postForEntity(CONSUMER_ORIGIN + "/consume", requestEntity, Map.class);
-//
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
