@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
-import { Loading, RQProvider } from "@/shared";
+import { RQProvider } from "@/shared";
 import { Header, NavMenu } from "@/widgets";
-import { Suspense } from "react";
 
-const inter = Inter({ subsets: ["latin"] });
+//pretendard font 설정
+const pretendard = localFont({
+  src: "./PretendardVariable.woff2",
+  display: "swap",
+  weight: "45 920",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -25,14 +29,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={pretendard.className}>
         <Header />
         <RQProvider>
           <main>
             <NavMenu />
             <div className="flex flex-col flex-1">
               <div className="flex flex-col flex-1 max-2xl:m-5 m-10 gap-10">
-                <Suspense fallback={<Loading />}>{children}</Suspense>
+                {children}
               </div>
             </div>
           </main>
