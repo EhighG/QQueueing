@@ -29,20 +29,17 @@ kafka:
   topic-names:
     enter: test
 
-
 # actuator
 management:
   endpoint:
     health:
       show-details: always
+
   endpoints:
     web:
       exposure:
         include: "*"
       base-path: "/monitoring"
-
-  server:
-    port: 8080
 
   info:
     java:
