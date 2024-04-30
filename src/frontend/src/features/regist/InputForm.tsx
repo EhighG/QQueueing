@@ -1,33 +1,32 @@
 "use client";
 import { WaitingListType } from "@/entities/waitingList/type";
 import { Button, Input } from "@/shared";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { postWaiting } from "..";
 
 type InputFormProps = {
   setWaitingInfo: (data: Omit<WaitingListType, "id" | "queueImageUrl">) => void;
 };
 
-const InputForm = ({ setWaitingInfo }: InputFormProps) => {
-  const [registrationUrl, setRegistrationUrl] = useState<string>("");
+const InputForm = () => {
+  const [targetUrl, setTargetUrl] = useState<string>("");
   const [maxCapacity, setMaxCapacity] = useState<number>(0);
   const [processingPerMinute, setProcessingPerMinute] = useState<number>(0);
   const [serviceName, setServiceName] = useState("");
 
-  useEffect(() => {
-    setWaitingInfo({
-      registrationUrl,
-      maxCapacity,
-      processingPerMinute,
-      serviceName,
-    });
-  }, [
-    registrationUrl,
-    maxCapacity,
-    processingPerMinute,
-    serviceName,
-    setWaitingInfo,
-  ]);
+  // 대기열 등록
+  const mutation = useMutation({
+    mutationFn: postWaiting,
+    onSuccess: (response) => {
+      alert("success");
+      console.log(response);
+    },
+    onError: () => {
+      alert("error occur");
+    },
+  });
 
   return (
     <div className="flex flex-1 flex-col  items-center">
@@ -36,8 +35,8 @@ const InputForm = ({ setWaitingInfo }: InputFormProps) => {
           <Input
             label="대기열 등록 대상 URL"
             title="대기열 등록 대상 URL"
-            value={registrationUrl}
-            onChange={(e) => setRegistrationUrl(e.target.value)}
+            value={targetUrl}
+            onChange={(e) => setTargetUrl(e.target.value)}
           />
           <Input
             label="최대 수용 인원"
@@ -67,7 +66,19 @@ const InputForm = ({ setWaitingInfo }: InputFormProps) => {
                 미리 보기
               </Button>
             </Link>
-            <Button style="square">등록</Button>
+            <Button
+              style="square"
+              onClick={() =>
+                mutation.mutate({
+                  targetUrl,
+                  maxCapacity,
+                  processingPerMinute,
+                  serviceName,
+                })
+              }
+            >
+              등록
+            </Button>
           </div>
         </div>
       </div>
