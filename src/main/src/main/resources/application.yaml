@@ -19,6 +19,16 @@ spring:
       enabled: true
 #      enabled: false
 
+  data:
+    mongodb:
+#      host: localhost
+#      port: 27017
+#      authentication-database: admin
+#      username: test
+#      password: 1234
+#      database: test
+      uri: mongodb://localhost:27017/test
+
 servers: # 타 서버들의 정보 기록
   consumer: localhost:8082
   target: # 테스트용 사용자 서버(tes 24)
