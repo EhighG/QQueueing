@@ -102,6 +102,7 @@ public class WaitingService {
     public Set<String> removeQueue(String topicName) {
         deactivate(topicName);
         targetInfoRepository.deleteByTopicName(topicName);
+        return null;
     }
     public Object enter(String topicName, HttpServletRequest request) {
         TargetInfo targetInfo = targetInfoRepository.findByTopicName(topicName);

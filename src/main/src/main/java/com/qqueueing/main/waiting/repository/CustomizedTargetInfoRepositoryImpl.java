@@ -19,6 +19,6 @@ public class CustomizedTargetInfoRepositoryImpl implements CustomizedTargetInfoR
     }
 
     public void deleteByTopicName(String topicName) {
-        Query query = new Query(Criteria.wher)
+        return;
     }
 }
