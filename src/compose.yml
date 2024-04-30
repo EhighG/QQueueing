@@ -98,6 +98,8 @@ services:
     image: bitnami/node-exporter:1.7.0
     networks:
       - qqueueing-network
+    ports:
+      - "8100:9100"
 
   qqueueing-grafana:
     image: grafana/grafana:main
