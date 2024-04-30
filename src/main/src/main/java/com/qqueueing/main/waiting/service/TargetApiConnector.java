@@ -2,7 +2,6 @@ package com.qqueueing.main.waiting.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,17 +17,14 @@ import java.util.Enumeration;
 public class TargetApiConnector {
 
     private final RestTemplate restTemplate;
-    private String TARGET_URL;
 
-    public TargetApiConnector(RestTemplate restTemplate,
-                              @Value("${servers.target.url}") String targetUrl) {
+    public TargetApiConnector(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        TARGET_URL = targetUrl;
     }
 
-    public ResponseEntity<String> forwardToTarget(HttpServletRequest request) {
+    public ResponseEntity<String> forwardToTarget(String targetUrl, HttpServletRequest request) {
         HttpEntity<String> httpEntity = new HttpEntity<>(getAllHeaders(request));
-        return restTemplate.exchange(TARGET_URL, HttpMethod.GET, httpEntity, String.class);
+        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, String.class);
     }
 
     private HttpHeaders getAllHeaders(HttpServletRequest request) {

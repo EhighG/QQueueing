@@ -5,7 +5,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface QueueInfoRepository extends MongoRepository<TargetInfo, String>{
-    TargetInfo findByTopicName(String topicName);
-
+public interface TargetInfoRepository extends MongoRepository<TargetInfo, String>, CustomizedTargetInfoRepository {
 }

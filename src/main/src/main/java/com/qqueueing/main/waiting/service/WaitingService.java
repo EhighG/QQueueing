@@ -5,7 +5,7 @@ import com.qqueueing.main.waiting.model.BatchResDto;
 import com.qqueueing.main.waiting.model.GetMyOrderResDto;
 import com.qqueueing.main.waiting.model.WaitingStatusDto;
 import com.qqueueing.main.waiting.model.entity.TargetInfo;
-import com.qqueueing.main.waiting.repository.QueueInfoRepository;
+import com.qqueueing.main.waiting.repository.TargetInfoRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,44 +26,43 @@ public class WaitingService {
     private final ConsumerConnector consumerConnector;
     private final TargetApiConnector targetApiConnector;
     private final EnterProducer enterProducer;
-    private final QueueInfoRepository queueInfoRepository;
+    private final TargetInfoRepository targetInfoRepository;
     private final KafkaTopicManager kafkaTopicManager;
     private Set<String> activeTopicNames = new HashSet<>();
     private Map<String, WaitingStatusDto> queues = new HashMap<>();
 
-    public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector, EnterProducer enterProducer, QueueInfoRepository queueInfoRepository, KafkaTopicManager kafkaTopicManager) {
+    public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector, EnterProducer enterProducer, TargetInfoRepository targetInfoRepository, KafkaTopicManager kafkaTopicManager) {
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
         this.enterProducer = enterProducer;
-        this.queueInfoRepository = queueInfoRepository;
+        this.targetInfoRepository = targetInfoRepository;
         this.kafkaTopicManager = kafkaTopicManager;
     }
 
     @PostConstruct
     public void initQueues() {
-        List<TargetInfo> queues = queueInfoRepository.findAll();
+        List<TargetInfo> queues = targetInfoRepository.findAll();
         queues.stream()
                 .filter(TargetInfo::isActive) // isActive 상태 조작은 대기열 활성화 시점과는 별개
-                .map(TargetInfo::getTopicName)
                 .forEach(this::activate);
     }
 
     @PreDestroy
     public void offQueues() {
-        List<TargetInfo> queues = queueInfoRepository.findAll();
-        queues.stream()
-                .filter(TargetInfo::isActive) // isActive 상태 조작은 대기열 활성화 시점과는 별개
-                .map(TargetInfo::getTopicName)
-                .forEach(kafkaTopicManager::deleteTopic);
+//        List<TargetInfo> queues = targetInfoRepository.findAll();
+//        queues.stream()
+//                .filter(TargetInfo::isActive) // isActive 상태 조작은 대기열 활성화 시점과는 별개
+//                .map(TargetInfo::getTopicName)
+//                .forEach(kafkaTopicManager::deleteTopic);
     }
 
     /**
      * 대기열 실행 중 상태 변경 시, 호출 필요
-     * @param topicName
      */
-    public void activate(String topicName) {
+    public void activate(TargetInfo targetInfo) {
+        String topicName = targetInfo.getTopicName();
         activeTopicNames.add(topicName);
-        queues.put(topicName, new WaitingStatusDto(topicName, 0, 0));
+        queues.put(topicName, new WaitingStatusDto(topicName, targetInfo.getTargetUrl(), 0, 0));
         // re-init kafka topic
         kafkaTopicManager.deleteTopic(topicName);
         kafkaTopicManager.createTopic(topicName);
@@ -74,6 +73,9 @@ public class WaitingService {
      * @param topicName
      */
     public void deactivate(String topicName) {
+        if (!activeTopicNames.contains(topicName)) {
+            return;
+        }
         activeTopicNames.remove(topicName);
         queues.remove(topicName);
         kafkaTopicManager.deleteTopic(topicName);
@@ -82,7 +84,7 @@ public class WaitingService {
     // 테스트용 메소드 : 대기열 등록, 삭제
     public Set<String> addQueue(String topicName, String targetUrl) {
         // 이미 있을 때
-        TargetInfo targetInfo = queueInfoRepository.findByTopicName(topicName);
+        TargetInfo targetInfo = targetInfoRepository.findByTopicName(topicName);
 
         if (targetInfo != null) {
             if (targetInfo.isActive()) {
@@ -92,18 +94,19 @@ public class WaitingService {
         } else {
             targetInfo = new TargetInfo(topicName, targetUrl, true);
         }
-        activate(topicName);
-        queueInfoRepository.save(targetInfo); // save or update
+        activate(targetInfo);
+        targetInfoRepository.save(targetInfo); // save or update
         return activeTopicNames;
     }
 
     public Set<String> removeQueue(String topicName) {
-        // 비활성화 및 db에서 삭제
-        return null;
+        deactivate(topicName);
+        targetInfoRepository.deleteByTopicName(topicName);
     }
     public Object enter(String topicName, HttpServletRequest request) {
+        TargetInfo targetInfo = targetInfoRepository.findByTopicName(topicName);
         if (!activeTopicNames.contains(topicName)) {
-            return targetApiConnector.forwardToTarget(request);
+            return targetApiConnector.forwardToTarget(targetInfo.getTargetUrl(), request);
         }
         // 카프카에 요청자 Ip 저장
         return enterProducer.send(extractClientIp(request));
@@ -133,7 +136,7 @@ public class WaitingService {
         int lastOffset = waitingStatus.getLastOffset();
         if (doneSet.contains(ip)) {
             doneSet.remove(ip);
-            return targetApiConnector.forwardToTarget(request); // forwarding
+            return targetApiConnector.forwardToTarget(waitingStatus.getTargetUrl(), request); // forwarding
         }
         int outCntInFront = - (Collections.binarySearch(outList, oldOrder) + 1);
         Long myOrder = oldOrder - outCntInFront - lastOffset; // newOrder
@@ -146,10 +149,10 @@ public class WaitingService {
         if (activeTopicNames.isEmpty()) {
             return;
         }
-        Map<String, Object> response = consumerConnector.getNext(); // 대기 완료된 ip 목록을 가져온다.
+        Map<String, BatchResDto> response = consumerConnector.getNext(activeTopicNames); // 대기 완료된 ip 목록을 가져온다.
         for (String topicName : response.keySet()) {
             WaitingStatusDto waitingStatus = queues.get(topicName);
-            BatchResDto batchRes = (BatchResDto) response.get(topicName);
+            BatchResDto batchRes = response.get(topicName);
 
             waitingStatus.getDoneSet()
                     .addAll(batchRes.getCurDoneList());

@@ -1,19 +1,18 @@
 package com.qqueueing.main.waiting.service;
 
+import com.qqueueing.main.waiting.model.BatchResDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
-//@RequiredArgsConstructor
 @Component
 public class ConsumerConnector {
 
@@ -26,16 +25,18 @@ public class ConsumerConnector {
         this.CONSUMER_ORIGIN = "http://" + CONSUMER_ORIGIN;
     }
 
-    public Map<String, Object> getNext() {
+    public Map<String, BatchResDto> getNext(Set<String> activeTopicNames) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
-            HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-            ResponseEntity<Map> response = restTemplate
-                    .postForEntity(CONSUMER_ORIGIN + "/consume", requestEntity, Map.class);
+            HttpEntity<?> requestEntity = new HttpEntity<>(activeTopicNames, headers);
+            ResponseEntity<Map<String, BatchResDto>> response = restTemplate.exchange(
+                    CONSUMER_ORIGIN + "/consume", // 요청 URL
+                    HttpMethod.POST, // HTTP 메서드
+                    requestEntity, // 요청 헤더와 본문을 포함한 HttpEntity 객체
+                    ParameterizedTypeReference.forType(Map.class));
             System.out.println("response.getBody() = " + response.getBody());
-            Map<String, Object> body = (Map<String, Object>) response.getBody().get("result");
-            return body;
+            return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();

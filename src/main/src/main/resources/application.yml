@@ -20,7 +20,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/mydb
+      uri: mongodb://localhost:27017/qqueueing
 
   threads:
     virtual:

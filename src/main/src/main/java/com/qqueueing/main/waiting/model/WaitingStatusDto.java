@@ -16,9 +16,10 @@ public class WaitingStatusDto {
     private List<Long> outList = new LinkedList<>();
     private int lastOffset;
     private int totalQueueSize;
+    private String targetUrl;
 
     @Builder
-    public WaitingStatusDto(String topicName, int lastOffset, int totalQueueSize) {
+    public WaitingStatusDto(String topicName, String targetUrl, int lastOffset, int totalQueueSize) {
         this.topicName = topicName;
         this.lastOffset = lastOffset;
         this.totalQueueSize = totalQueueSize;
