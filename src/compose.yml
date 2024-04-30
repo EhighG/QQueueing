@@ -4,9 +4,9 @@ services:
     build:
       context: .
       dockerfile: build/main/Dockerfile
-    image: qqueueing-main
     ports:
-      - 8080:8080
+      - "8081:8081"
+    image: qqueueing-main
     networks:
       - qqueueing-network
 
@@ -17,6 +17,8 @@ services:
     image: qqueueing-consumer
     networks:
       - qqueueing-network
+    ports:
+      - "8082:8082"
     depends_on:
       - qqueueing-kafka
       - qqueueing-rdbms
@@ -96,6 +98,8 @@ services:
     image: bitnami/node-exporter:1.7.0
     networks:
       - qqueueing-network
+    ports:
+      - "8100:9100"
 
   qqueueing-grafana:
     image: grafana/grafana:main
