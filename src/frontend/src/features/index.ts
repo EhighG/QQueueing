@@ -1,1 +1,2 @@
-export { getWaiting, postWaiting } from "./waiting";
+export { getWaitingInfo, getWaitingList, postWaiting } from "./waiting";
+export { InputForm, ImageRegist, Performance } from "./regist";
