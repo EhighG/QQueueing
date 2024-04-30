@@ -42,10 +42,11 @@ public class WaitingService {
 
     @PostConstruct
     public void initQueues() {
-        List<Registration> queues = registrationRepository.findAll();
-        queues.stream()
-                .filter(Registration::getIsActive) // isActive 상태 조작은 대기열 활성화 시점과는 별개
-                .forEach(this::activate);
+//        List<Registration> queues = registrationRepository.findAll();
+//        if (queues == null || queues.isEmpty()) return;
+//        queues.stream()
+//                .filter(Registration::getIsActive) // isActive 상태 조작은 대기열 활성화 시점과는 별개
+//                .forEach(this::activate);
     }
 
     @PreDestroy

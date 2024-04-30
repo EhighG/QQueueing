@@ -62,4 +62,8 @@ info:
     name: qqueueing
     company: 4EVERY1
 
-
+#shell script 실행 관련
+shell:
+  path:
+    C:\Users\SSAFY\Desktop\qqueueing\tmp
+  fileNm:

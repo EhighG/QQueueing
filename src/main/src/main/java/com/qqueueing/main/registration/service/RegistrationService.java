@@ -12,17 +12,13 @@ public class RegistrationService {
 
 //    @Autowired
     private RegistrationRepository registrationRepository;
-    private final WaitingService waitingService;
 
-    public RegistrationService(RegistrationRepository registrationRepository, WaitingService waitingService) {
+    public RegistrationService(RegistrationRepository registrationRepository) {
         this.registrationRepository = registrationRepository;
-        this.waitingService = waitingService;
     }
 
     public Registration createRegistration(Registration registration) {
-        Registration savedRegistration = registrationRepository.save(registration);
-        waitingService.activate(registration);
-        return savedRegistration;
+        return registrationRepository.save(registration);
     }
 
     public List<Registration> getAllRegistrations() {

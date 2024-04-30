@@ -24,12 +24,11 @@ public class Registration {
     private String serviceName; // 서비스명
     private String queueImageUrl; // 대기열 이미지
     @Setter
-    private Boolean isActive; // 활성화 여부
+    private Boolean isActive = false; // 활성화 여부
 
-    public Registration(String topicName, String targetUrl, boolean isActive) {
+    public Registration(String topicName, String targetUrl) {
         this.topicName = topicName;
         this.targetUrl = targetUrl;
-        this.isActive = isActive;
+        this.isActive = false;
     }
-
 }
