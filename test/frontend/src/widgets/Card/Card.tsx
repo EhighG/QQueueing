@@ -11,37 +11,7 @@ type CardProps = {
 };
 
 const Card = ({ waiting }: CardProps) => {
-  const [trigger, setTrigger] = useState<boolean>(false);
   const router = useRouter();
-
-  const { data } = useQuery({
-    queryKey: ["waiting"],
-    queryFn: enterApi,
-    enabled: trigger,
-  });
-
-  useEffect(() => {
-    // early return
-    if (!data) return;
-    router.push(`/waiting?id=${data.order}`);
-  }, [data]);
-
-  const handleRouting = () => {
-    if (waiting) {
-      setTrigger(true);
-    } else {
-      router.push(`/waiting/1`);
-    }
-  };
-  const [hydrated, setHydrated] = React.useState(false);
-  React.useEffect(() => {
-    setHydrated(true);
-  }, []);
-  if (!hydrated) {
-    // Returns null on first render, so the client and server match
-    return null;
-  }
-
   const url = faker.image.url();
 
   return (
@@ -61,7 +31,7 @@ const Card = ({ waiting }: CardProps) => {
           <button
             type="button"
             className="bg-blue-300 border p-2 rounded-md"
-            onClick={() => handleRouting()}
+            onClick={() => router.push("/product/1")}
           >
             구매하기
           </button>
