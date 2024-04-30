@@ -40,7 +40,7 @@ public class DummyController {
                     .processingPerMinute(100)
                     .serviceName("testServiceName" + (i+1))
                     .queueImageUrl("testProductImageUrl")
-                    .isActive(false)
+                    .isActive(i % 2 == 0)
                     .build());
         }
         return ResponseEntity
