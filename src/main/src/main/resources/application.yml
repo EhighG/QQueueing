@@ -8,7 +8,7 @@ server:
   #      max: 200 # default 200 / thread 경합..? 주의
   #      min-spare: 200
 
-  port: 8080
+  port: 8081
 
   tomcat:
     mbeanregistry:
@@ -28,14 +28,17 @@ spring:
 #      enabled: false
 
 servers: # 타 서버들의 정보 기록
-  consumer: k10a401.p.ssafy.io:8082
+  consumer: localhost:8082
   target: # 테스트용 사용자 서버(tes 24)
     url: http://k401a10.p.ssafy.io:8082/consume/test # 대기열 적용 대상 api url
 
 kafka:
-  broker: k10a401.p.ssafy.io:9092
+  broker: localhost:9092
   topic-names:
     enter: test
+
+  partition:
+    max-index: 20
 
 # actuator
 management:

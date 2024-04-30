@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Getter @Setter
 public class WaitingStatusDto {
-    private String topicName;
+    private int partitionNo;
     private Set<String> doneSet = new HashSet<>();
     private List<Long> outList = new LinkedList<>();
     private int lastOffset;
@@ -19,8 +19,8 @@ public class WaitingStatusDto {
     private String targetUrl;
 
     @Builder
-    public WaitingStatusDto(String topicName, String targetUrl, int lastOffset, int totalQueueSize) {
-        this.topicName = topicName;
+    public WaitingStatusDto(int partitionNo, String targetUrl, int lastOffset, int totalQueueSize) {
+        this.partitionNo = partitionNo;
         this.lastOffset = lastOffset;
         this.totalQueueSize = totalQueueSize;
     }

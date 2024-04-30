@@ -18,13 +18,14 @@ public class Registration {
     private String id; // 자동 생성되는 식별자
     private String topicName;
     private String targetUrl;
-
     private Integer maxCapacity; // 최대 수용 인원
     private Integer processingPerMinute; // 1분당 처리 인원
     private String serviceName; // 서비스명
     private String queueImageUrl; // 대기열 이미지
     @Setter
     private Boolean isActive; // 활성화 여부
+
+    private Integer partitionNo;
 
     public Registration(String topicName, String targetUrl, boolean isActive) {
         this.topicName = topicName;

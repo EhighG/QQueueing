@@ -21,10 +21,11 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<?> enter(String topicName, HttpServletRequest request) {
+    public ResponseEntity<?> enter(@RequestParam int partitionNo,
+                                   HttpServletRequest request) {
         try {
             return ResponseEntity
-                    .ok(waitingService.enter(topicName, request));
+                    .ok(waitingService.enter(partitionNo, request));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(e);
@@ -34,7 +35,7 @@ public class WaitingController {
     @PostMapping("/order")
     public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto,
                                         HttpServletRequest request) {
-        Object myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getTopicName(),
+        Object myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getPartitionNo(),
                 getMyOrderReqDto.getWaitingIdx(),
                 getMyOrderReqDto.getIdVal(),
                 request);
@@ -47,25 +48,25 @@ public class WaitingController {
     }
 
     @GetMapping("/{waitingIdx}/out")
-    public ResponseEntity<Void> out(@RequestParam String topic,
+    public ResponseEntity<Void> out(@RequestParam int partitionNo,
                                     @PathVariable Long waitingIdx) {
-        waitingService.out(topic, waitingIdx);
+        waitingService.out(partitionNo, waitingIdx);
         return ResponseEntity
                 .ok()
                 .build();
     }
 
-    @PostMapping("/{topicName}/activate")
-    public ResponseEntity<?> activateQueue(@PathVariable String topicName) {
-        waitingService.activate(topicName);
+    @PostMapping("/{partition-no}/activate")
+    public ResponseEntity<?> activateQueue(@PathVariable("partition-no") int partitionNo) {
+        waitingService.activate(partitionNo);
         return ResponseEntity
                 .ok()
                 .build();
     }
 
-    @PostMapping("/{topicName}/deactivate")
-    public ResponseEntity<?> deactivateQueue(@PathVariable String topicName) {
-        waitingService.deactivate(topicName);
+    @PostMapping("/{partition-no}/deactivate")
+    public ResponseEntity<?> deactivateQueue(@PathVariable("partition-no") int partitionNo) {
+        waitingService.deactivate(partitionNo);
         return ResponseEntity
                 .ok()
                 .build();
