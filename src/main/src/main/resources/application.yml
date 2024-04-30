@@ -8,7 +8,7 @@ server:
   #      max: 200 # default 200 / thread 경합..? 주의
   #      min-spare: 200
 
-  port: 8080
+  port: 8081
 
   tomcat:
     mbeanregistry:
@@ -58,5 +58,4 @@ info:
   app:
     name: qqueueing
     company: 4EVERY1
-
 
