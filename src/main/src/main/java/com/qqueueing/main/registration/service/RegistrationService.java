@@ -3,7 +3,6 @@ package com.qqueueing.main.registration.service;
 import com.qqueueing.main.registration.model.Registration;
 import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.waiting.service.WaitingService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,9 +20,9 @@ public class RegistrationService {
     }
 
     public Registration createRegistration(Registration registration) {
-
-        registrationRepository.save(registration);
-        waitingService.activate(registration.getTopicName());
+        Registration savedRegistration = registrationRepository.save(registration);
+        waitingService.activate(registration);
+        return savedRegistration;
     }
 
     public List<Registration> getAllRegistrations() {

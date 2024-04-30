@@ -55,9 +55,19 @@ public class WaitingController {
                 .build();
     }
 
-//    @GetMapping("/test")
-//    public ResponseEntity<?> test(HttpServletRequest request) {
-//        Object obj = waitingService.test(request);
-//        return (ResponseEntity<?>) obj;
-//    }
+    @PostMapping("/{topicName}/activate")
+    public ResponseEntity<?> activateQueue(@PathVariable String topicName) {
+        waitingService.activate(topicName);
+        return ResponseEntity
+                .ok()
+                .build();
+    }
+
+    @PostMapping("/{topicName}/deactivate")
+    public ResponseEntity<?> deactivateQueue(@PathVariable String topicName) {
+        waitingService.deactivate(topicName);
+        return ResponseEntity
+                .ok()
+                .build();
+    }
 }
