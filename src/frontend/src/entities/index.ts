@@ -1,1 +1,1 @@
-export { getTestData } from "./test";
+export { WaitingTable } from "./waitingList";

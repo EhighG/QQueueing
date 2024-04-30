@@ -12,6 +12,16 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      keyframes: {
+        blink: {
+          "0%, 100%": { "text-decoration": "underline" },
+          "50%": { "text-decoration": "none" },
+        },
+      },
+      animation: {
+        blink: "blink 1.5s linear infinite",
+      },
+
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
