@@ -1,27 +1,44 @@
 package com.example.tes24.qqueue_module.adapter;
 
 import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
+import com.example.tes24.qqueue_module.dto.Q2HttpHeader;
 import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class Q2AdapterDelegator {
-    private static final List<Q2AdapterFactory> q2AdapterFactoryList;
+    private static final Class<? extends Q2SyncAdapterFactory> DEFAULT_Q2_SYNC_ADAPTER_FACTORY_CLASS = Q2SyncAdapterFactoryImpl.class;
+    private static final Class<? extends Q2AsyncAdapterFactory> DEFAULT_Q2_ASYNC_ADAPTER_FACTORY_CLASS = Q2AsyncAdapterFactoryImpl.class;
+    private final List<? extends Q2SyncAdapterFactory> q2SyncAdapterFactoryList;
+    private final List<? extends Q2AsyncAdapterFactory> q2AsyncAdapterFactoryList;
 
-    static {
-        List<Q2AdapterFactory> temp = new ArrayList<>();
-        temp.add(new Q2SyncAdapterFactory());
-        temp.add(new Q2AsyncAdapterFactory());
-        q2AdapterFactoryList = Collections.unmodifiableList(temp);
+    public Q2AdapterDelegator(Collection<? extends Q2SyncAdapterFactory> q2AdapterFactories, Collection<? extends Q2AsyncAdapterFactory> q2AsyncAdapterFactories) {
+        this.q2SyncAdapterFactoryList = q2AdapterFactories.stream().collect(Collectors.toUnmodifiableList());
+        this.q2AsyncAdapterFactoryList = q2AsyncAdapterFactories.stream().collect(Collectors.toUnmodifiableList());
     }
 
-    public Q2ServerResponse enqueue(Q2ClientRequest q2ClientRequest, Class<Q2Adapter> delegateClass) {
-        return q2AdapterFactoryList.stream()
-                .filter(q2AdapterFactory ->  q2AdapterFactory.getClass().equals(delegateClass))
-                .map(q2AdapterFactory -> q2AdapterFactory.getInstance(null))
+    public Q2ServerResponse delegate(Q2HttpHeader httpHeader, Q2ClientRequest q2ClientRequest) {
+        return delegate(httpHeader, q2ClientRequest, DEFAULT_Q2_SYNC_ADAPTER_FACTORY_CLASS);
+    }
+
+    public Future<Q2ServerResponse> delegateAsync(Q2HttpHeader httpHeader, Q2ClientRequest q2ClientRequest) {
+        return delegateAsync(httpHeader, q2ClientRequest, DEFAULT_Q2_ASYNC_ADAPTER_FACTORY_CLASS);
+    }
+
+    public Q2ServerResponse delegate(Q2HttpHeader httpHeader, Q2ClientRequest q2ClientRequest, Class<? extends Q2SyncAdapterFactory> q2SyncAdapterFactoryClass) {
+        return q2SyncAdapterFactoryList.stream()
+                .filter(q2AdapterFactory ->  q2AdapterFactory.getClass().equals(q2SyncAdapterFactoryClass))
+                .map(q2AdapterFactory -> q2AdapterFactory.getInstance(httpHeader))
+                .map(q2Adapter -> q2Adapter.enqueue(q2ClientRequest))
+                .findFirst().orElseThrow(NoSuchElementException::new);
+    }
+
+    public Future<Q2ServerResponse> delegateAsync(Q2HttpHeader httpHeader, Q2ClientRequest q2ClientRequest, Class<? extends Q2AsyncAdapterFactory> q2AsyncAdapterFactoryClass) {
+        return q2AsyncAdapterFactoryList.stream()
+                .filter(q2AdapterFactory ->  q2AdapterFactory.getClass().equals(q2AsyncAdapterFactoryClass))
+                .map(q2AdapterFactory -> q2AdapterFactory.getInstance(httpHeader))
                 .map(q2Adapter -> q2Adapter.enqueue(q2ClientRequest))
                 .findFirst().orElseThrow(NoSuchElementException::new);
     }

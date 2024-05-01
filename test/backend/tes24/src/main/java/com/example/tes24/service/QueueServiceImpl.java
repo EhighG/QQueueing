@@ -1,6 +1,10 @@
 package com.example.tes24.service;
 
 import com.example.tes24.dto.EnqueueResponse;
+import com.example.tes24.qqueue_module.adapter.Q2Client;
+import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
+import com.example.tes24.qqueue_module.dto.Q2HttpHeader;
+import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,29 +38,17 @@ public class QueueServiceImpl implements QueueService {
 
         return CompletableFuture.completedFuture(restClient.post().retrieve().body(EnqueueResponse.class));
 
-//        Q2Adapter q2Adapter =
-//                Q2AdapterBuilder.builder()
-//                        .url("http://" + remoteUrl + ":" + port + "/tes24")
-//                        .method("POST")
-//                        .build();
+//        Q2ClientRequest request = new Q2ClientRequest();
+//        request.setClientId("1");
+//        request.setClientKey("2");
+//        request.setUserId("3");
+//        request.setUserKey("4");
 //
-//        Q2ClientRequest q2ClientRequest = new Q2ClientRequest();
-//        q2ClientRequest.setClientId("1");
-//        q2ClientRequest.setClientKey("2");
-//        q2ClientRequest.setUserId("3");
-//        q2ClientRequest.setUserKey("4");
-//j
-//        try {
-//            Q2ServerResponse q2ServerResponse = q2Adapter.enqueue(q2ClientRequest);
-//            log.info(String.valueOf(q2ServerResponse));
-//        } catch (IOException e) {
-//            log.error(e.getMessage());
-//        }
-
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {}
-//        return CompletableFuture.completedFuture(new EnqueueResponse(0L, "id"));
+//        Q2Client q2Client = Q2Client.getQ2Client();
+//
+//        Q2ServerResponse response = q2Client.request(Q2HttpHeader.defaultQ2HttpHeader(), request);
+//
+//        return CompletableFuture.completedFuture(new EnqueueResponse(-1L, response.getClientId()));
     }
 
     @Override
