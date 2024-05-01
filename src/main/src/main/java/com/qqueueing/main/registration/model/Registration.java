@@ -27,7 +27,6 @@ public class Registration {
     @Setter
     private Integer partitionNo;
 
-
     public Registration(String topicName, String targetUrl) {
         this.topicName = topicName;
         this.targetUrl = targetUrl;

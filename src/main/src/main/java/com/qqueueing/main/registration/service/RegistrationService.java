@@ -25,8 +25,10 @@ public class RegistrationService {
     }
 
     public Registration createRegistration(Registration registration) {
+        // 카프카에 저장할 빈 공간(=파티션) 키를 찾는다.
         registration.setPartitionNo(findEmptyPartitionNo());
         Registration savedRegistration = registrationRepository.save(registration);
+        // 대기열 기능에서 쓰이는 url-파티션 키 매핑에 추가한다.
         waitingService.addUrlPartitionMapping(registration.getTargetUrl());
         return savedRegistration;
     }
