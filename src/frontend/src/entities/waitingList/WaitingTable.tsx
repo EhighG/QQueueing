@@ -2,12 +2,15 @@
 
 import React from "react";
 import { WaitingListType } from "./type";
+import { useQuery } from "@tanstack/react-query";
+import { getWaitingList } from "@/features";
 
-type WaitingTableProps = {
-  data?: WaitingListType[] | null;
-};
+const WaitingTable = () => {
+  const { data } = useQuery({
+    queryKey: ["getWaitingList"],
+    queryFn: getWaitingList,
+  });
 
-const WaitingTable = ({ data }: WaitingTableProps) => {
   return (
     <table className="flex flex-col flex-1 rounded-md shadow-lg border">
       <thead>
@@ -20,14 +23,14 @@ const WaitingTable = ({ data }: WaitingTableProps) => {
         </tr>
       </thead>
       <tbody>
-        {data ? (
+        {data && data.length > 0 ? (
           data.map((item) => (
             <tr
-              key={item.id}
+              key={item.targetUrl}
               className="flex items-center w-full text-center border-b border-black h-[60px]"
             >
-              <td className="w-[12.5%]">{item.id}</td>
-              <td className="w-[25%]">{item.registrationUrl}</td>
+              <td className="w-[12.5%]">1</td>
+              <td className="w-[25%]">{item.targetUrl}</td>
               <td className="w-[25%]">{item.maxCapacity}</td>
               <td className="w-[25%]">{item.processingPerMinute}</td>
               <td className="w-[12.5%]">활성 중</td>
