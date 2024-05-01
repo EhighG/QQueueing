@@ -1,12 +1,19 @@
 import { WaitingListType, ResponseType } from "@/entities/waitingList/type";
 import { axiosInstance } from "@/shared";
-import { AxiosInstance } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
+import { infoType, statusType } from "./type";
 
 const instance: AxiosInstance = axiosInstance();
 
+const postEnqueue = async (): Promise<infoType> => {
+  return await instance
+    .post<infoType>("/member/enqueue")
+    .then(({ data }) => data);
+};
+
 const getWaitingInfo = async (waitingIdx: number) => {
   return await instance
-    .post(`/tes24/waiting/${waitingIdx}`, {
+    .post<statusType>(`/tes24/waiting/${waitingIdx}`, {
       idVal: waitingIdx,
     })
     .then(({ data }) => data);
@@ -24,4 +31,4 @@ const postWaiting = async (
   return await instance.post("/queue", data).then(({ data }) => data);
 };
 
-export { getWaitingInfo, getWaitingList, postWaiting };
+export { postEnqueue, getWaitingInfo, getWaitingList, postWaiting };
