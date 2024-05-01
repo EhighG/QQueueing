@@ -45,8 +45,8 @@ public class QueueServiceImpl implements QueueService {
 //        request.setUserKey("4");
 //
 //        Q2Client q2Client = Q2Client.getQ2Client();
+//
 //        Q2ServerResponse response = q2Client.request(Q2HttpHeader.defaultQ2HttpHeader(), request);
-//        log.info(response.toString());
 //
 //        return CompletableFuture.completedFuture(new EnqueueResponse(-1L, response.getClientId()));
     }

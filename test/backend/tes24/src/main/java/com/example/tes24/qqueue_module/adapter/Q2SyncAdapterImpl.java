@@ -1,6 +1,7 @@
 package com.example.tes24.qqueue_module.adapter;
 
 import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
+import com.example.tes24.qqueue_module.dto.Q2HttpHeader;
 import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,7 +44,7 @@ public class Q2SyncAdapterImpl implements Q2SyncAdapter {
 
     private Optional<Object> enqueue(Q2ClientRequest q2ClientRequest, URLConnection urlConnection) {
         String contentType = urlConnection.getRequestProperty("Content-Type");
-        return contentType != null && ContentType.JSON.getTypeValue().equals(contentType) ?
+        return ContentType.JSON.getTypeValue().equals(contentType) ?
                 enqueueWithJson(q2ClientRequest, urlConnection) :
                 enqueueWithSerialization(q2ClientRequest, urlConnection);
     }

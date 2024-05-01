@@ -6,8 +6,6 @@ import com.example.tes24.qqueue_module.exception.HttpURLConnectionBuildException
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 public class HttpURLConnectionFactoryImpl extends AbstractHttpURLConnectionFactory {
     @Override
@@ -20,7 +18,7 @@ public class HttpURLConnectionFactoryImpl extends AbstractHttpURLConnectionFacto
             String url = q2HttpHeader.getUrl();
             Integer timeout = q2HttpHeader.getTimeout();
             String method = q2HttpHeader.getMethod();
-            ContentType contentType = q2HttpHeader.getContentType();
+            String contentType = q2HttpHeader.getContentType();
 
             HttpURLConnection urlConnection = (HttpURLConnection) URI.create(url).toURL().openConnection();
             urlConnection.setDoInput(true);
@@ -28,7 +26,7 @@ public class HttpURLConnectionFactoryImpl extends AbstractHttpURLConnectionFacto
             if (timeout != null) urlConnection.setConnectTimeout(timeout);
             if (method != null) urlConnection.setRequestMethod(method);
             if (contentType != null) {
-                if (contentType.equals(ContentType.JSON)) {
+                if (ContentType.JSON.getTypeValue().equals(contentType)) {
                     urlConnection.setRequestProperty("Content-Type", "application/json");
                 } else {
                     urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");

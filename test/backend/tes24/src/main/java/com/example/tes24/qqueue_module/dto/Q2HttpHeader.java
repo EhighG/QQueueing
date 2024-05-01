@@ -14,13 +14,13 @@ public final class Q2HttpHeader {
     private static final Q2HttpHeader instance;
     private static final ReentrantLock reentrantLock;
 
-    protected static final String DEFAULT_URL = "http://localhost:8080/tes24";
-    protected static final int DEFAULT_TIMEOUT = 15000;
-    protected static final String DEFAULT_METHOD = "POST";
-    protected static final ContentType DEFAULT_CONTENT_TYPE = ContentType.JSON;
+    private static final String DEFAULT_URL = "http://localhost:8080/tes24";
+    private static final int DEFAULT_TIMEOUT = 15000;
+    private static final String DEFAULT_METHOD = "POST";
+    private static final String DEFAULT_CONTENT_TYPE = "application/json";
 
     private String url = DEFAULT_URL;
-    private ContentType contentType = DEFAULT_CONTENT_TYPE;
+    private String contentType = DEFAULT_CONTENT_TYPE;
     private Integer timeout = DEFAULT_TIMEOUT;
     private String method = DEFAULT_METHOD;
 
@@ -42,7 +42,7 @@ public final class Q2HttpHeader {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         Q2HttpHeader that = (Q2HttpHeader) object;
-        return Objects.equals(url, that.url) && contentType == that.contentType && Objects.equals(timeout, that.timeout) && Objects.equals(method, that.method);
+        return Objects.equals(url, that.url) && Objects.equals(contentType, that.contentType) && Objects.equals(timeout, that.timeout) && Objects.equals(method, that.method);
     }
 
     @Override
@@ -71,7 +71,7 @@ public final class Q2HttpHeader {
             return this;
         }
 
-        public Q2HttpHeaderBuilder contentType(ContentType contentType) {
+        public Q2HttpHeaderBuilder contentType(String contentType) {
             this.q2HttpHeader.contentType = contentType;
             return this;
         }
@@ -95,7 +95,7 @@ public final class Q2HttpHeader {
         return url;
     }
 
-    public ContentType getContentType() {
+    public String getContentType() {
         return contentType;
     }
 
