@@ -21,11 +21,10 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<?> enter(@RequestParam int partitionNo,
-                                   HttpServletRequest request) {
+    public ResponseEntity<?> enter(HttpServletRequest request) {
         try {
             return ResponseEntity
-                    .ok(waitingService.enter(partitionNo, request));
+                    .ok(waitingService.enter(request));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(e);
@@ -36,7 +35,7 @@ public class WaitingController {
     public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto,
                                         HttpServletRequest request) {
         Object myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getPartitionNo(),
-                getMyOrderReqDto.getWaitingIdx(),
+                getMyOrderReqDto.getOrder(),
                 getMyOrderReqDto.getIdVal(),
                 request);
         if (myOrderRes instanceof GetMyOrderResDto) {
@@ -56,19 +55,24 @@ public class WaitingController {
                 .build();
     }
 
-    @PostMapping("/{partition-no}/activate")
-    public ResponseEntity<?> activateQueue(@PathVariable("partition-no") int partitionNo) {
+    @PostMapping("/{partitionNo}/activate")
+    public ResponseEntity<?> activateQueue(@PathVariable("partitionNo") int partitionNo) {
         waitingService.activate(partitionNo);
         return ResponseEntity
                 .ok()
                 .build();
     }
 
-    @PostMapping("/{partition-no}/deactivate")
-    public ResponseEntity<?> deactivateQueue(@PathVariable("partition-no") int partitionNo) {
+    @PostMapping("/{partitionNo}/deactivate")
+    public ResponseEntity<?> deactivateQueue(@PathVariable("partitionNo") int partitionNo) {
         waitingService.deactivate(partitionNo);
         return ResponseEntity
                 .ok()
                 .build();
+    }
+
+    @GetMapping
+    public String forwardingTest() {
+       return "forwarding success!";
     }
 }

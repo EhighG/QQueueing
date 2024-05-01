@@ -10,14 +10,12 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -30,30 +28,28 @@ public class WaitingService {
     private final EnterProducer enterProducer;
     private final RegistrationRepository registrationRepository;
 
-//    private final KafkaTopicManager kafkaTopicManager;
-    private final int MAX_PARTITION_INDEX;
     private Set<Integer> activePartitions = new HashSet<>();
     private Map<Integer, WaitingStatusDto> queues = new HashMap<>();
+    private Map<String, Integer> partitionNoMapper = new HashMap<>();
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
-                          EnterProducer enterProducer, RegistrationRepository registrationRepository,
-//                          KafkaTopicManager kafkaTopicManager,
-                          @Value("${kafka.partition.max-index}") int maxPartitionIndex){
+                          EnterProducer enterProducer, RegistrationRepository registrationRepository){
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
         this.enterProducer = enterProducer;
         this.registrationRepository = registrationRepository;
-//        this.kafkaTopicManager = kafkaTopicManager;
-        this.MAX_PARTITION_INDEX = maxPartitionIndex;
     }
 
+    /**
+     * 대기열 서버가 비정상 종료 후 다시 켜질 때, 대기열을 다시 활성화
+     */
     @PostConstruct
     public void initQueues() {
         List<Registration> queues = registrationRepository.findAll();
-//        if (queues == null || queues.isEmpty()) return;
-        queues.stream()
-                .filter(Registration::getIsActive) // isActive 상태 조작은 대기열 활성화 시점과는 별개
-                .forEach(this::activate);
+        queues.forEach(r -> {
+                    partitionNoMapper.put(r.getTargetUrl(), r.getPartitionNo());
+                    if (r.getIsActive()) activate(r);
+                });
     }
 
     @PreDestroy
@@ -65,17 +61,11 @@ public class WaitingService {
 //                .forEach(kafkaTopicManager::deleteTopic);
     }
 
-    public int findEmptyPartitionNo() {
-        Set<Integer> assigned = registrationRepository.findAll().stream()
-                .map(Registration::getPartitionNo)
-                .collect(Collectors.toSet());
-        for (int i = 0; i < MAX_PARTITION_INDEX; i++) {
-            if (!assigned.contains(i)) {
-                return i;
-            }
+    public void addUrlPartitionMapping(String targetUrl) {
+        Registration registration = registrationRepository.findByTargetUrl(targetUrl);
+        if (registration != null) {
+            partitionNoMapper.put(registration.getTargetUrl(), registration.getPartitionNo());
         }
-        // 모든 파티션이 사용중일 때
-        throw new RuntimeException("대기열을 더 이상 추가할 수 없습니다.");
     }
 
     /**
@@ -89,10 +79,8 @@ public class WaitingService {
         registration.setIsActive(true);
         registrationRepository.save(registration);
         // re-init partition
-
-//        // re-init kafka topic
-//        kafkaTopicManager.deleteTopic(partitionNo);
-//        kafkaTopicManager.createTopic(partitionNo);
+        consumerConnector.clearPartition(partitionNo);
+        log.info("activation end");
     }
 
     public void activate(int partitionNo) {
@@ -112,44 +100,36 @@ public class WaitingService {
 
         activePartitions.remove(partitionNo);
         queues.remove(partitionNo);
-//        kafkaTopicManager.deleteTopic(partitionNo);
 
         // update mongodb data
         registration.setIsActive(false);
         registrationRepository.save(registration);
     }
 
-//    // 테스트용 메소드 : 대기열 등록, 삭제
-//    public Set<String> addQueue(int partitionNo, String targetUrl) {
-//        // 이미 있을 때
-//        Registration registration = registrationRepository.findByPartitionNo(partitionNo);)
-//
-//        if (registration != null) {
-//            if (registration.getIsActive()) {
-//                return activePartitions;
-//            }
-//            registration.setIsActive(true);
-//        } else {
-//            registration = new Registration(partitionNo, targetUrl, true);
-//        }
-//        activate(registration);
-//        registrationRepository.save(registration); // save or update
-//        return activePartitions;
-//    }
+    public Object enter(HttpServletRequest request) {
+        String requestUrl = request.getRequestURL().toString();
+        log.info("requestUrl = {}", requestUrl);
+        int partitionNo = partitionNoMapper.get(requestUrl);
 
-    public Object enter(int partitionNo, HttpServletRequest request) {
-        Registration registration = registrationRepository.findByPartitionNo(partitionNo);
-        if (!activePartitions.contains(partitionNo)) {
-            return targetApiConnector.forwardToTarget(registration.getTargetUrl(), request);
+        if (activePartitions.contains(partitionNo)) {
+            // 카프카에 요청자 Ip 저장
+            return enterProducer.send(extractClientIp(request), partitionNo);
         }
-        // 카프카에 요청자 Ip 저장
-        return enterProducer.send(extractClientIp(request), partitionNo);
+        // 대기열 비활성화 상태
+        Registration registration = registrationRepository.findByPartitionNo(partitionNo);
+        return targetApiConnector.forwardToTarget(registration.getTargetUrl(), request);
+
     }
 
     private String extractClientIp(HttpServletRequest request) {
         // 요청이 프록시 등을 거쳤을 때, 원래 ip주소를 담는 헤더
         String ip = request.getHeader("X-Forwarded-For");
-        return ip != null ? ip : request.getRemoteAddr();
+        log.info("client ip(X-Forwarded-For) = {}", ip);
+        if (ip != null) return ip;
+
+        String remoteAddr = request.getRemoteAddr();
+        log.info("request.remoteAddr = {}", remoteAddr);
+        return remoteAddr;
     }
 
     public void out(int partitionNo, Long order) {
@@ -166,12 +146,12 @@ public class WaitingService {
     public Object getMyOrder(int partitionNo, Long oldOrder, String ip, HttpServletRequest request) {
         WaitingStatusDto waitingStatus = queues.get(partitionNo);
         Set<String> doneSet = waitingStatus.getDoneSet();
-        List<Long> outList = waitingStatus.getOutList();
-        int lastOffset = waitingStatus.getLastOffset();
         if (doneSet.contains(ip)) {
             doneSet.remove(ip);
             return targetApiConnector.forwardToTarget(waitingStatus.getTargetUrl(), request); // forwarding
         }
+        List<Long> outList = waitingStatus.getOutList();
+        int lastOffset = waitingStatus.getLastOffset();
         int outCntInFront = - (Collections.binarySearch(outList, oldOrder) + 1);
         Long myOrder = oldOrder - outCntInFront - lastOffset; // newOrder
         return new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize());
@@ -185,6 +165,7 @@ public class WaitingService {
                 return;
             }
             Map<Integer, BatchResDto> response = consumerConnector.getNext(activePartitions); // 대기 완료된 ip 목록을 가져온다.
+            System.out.println("response = " + response);
             for (int partitionNo : response.keySet()) {
                 WaitingStatusDto waitingStatus = queues.get(partitionNo);
                 BatchResDto batchRes = response.get(partitionNo);

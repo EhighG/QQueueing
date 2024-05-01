@@ -23,5 +23,6 @@ public class WaitingStatusDto {
         this.partitionNo = partitionNo;
         this.lastOffset = lastOffset;
         this.totalQueueSize = totalQueueSize;
+        this.targetUrl = targetUrl;
     }
 }

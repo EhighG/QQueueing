@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RegistrationRepository extends MongoRepository<Registration, String> {
     Registration findByPartitionNo(int partitinoNo);
+    Registration findByTargetUrl(String targetUrl);
 }

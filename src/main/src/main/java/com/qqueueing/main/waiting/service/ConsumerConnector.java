@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
@@ -26,19 +27,38 @@ public class ConsumerConnector {
     }
 
     public Map<Integer, BatchResDto> getNext(Set<Integer> activePartitions) {
+        System.out.println(1);
         try {
+            System.out.println(2);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
             HttpEntity<?> requestEntity = new HttpEntity<>(activePartitions, headers);
-            ResponseEntity<Map<Integer, BatchResDto>> response = restTemplate.exchange(
+            System.out.println(3);
+            ResponseEntity<Map<String, Map<Integer, BatchResDto>>> response = restTemplate.exchange(
                     CONSUMER_ORIGIN + "/consume", // 요청 URL
                     HttpMethod.POST, // HTTP 메서드
                     requestEntity, // 요청 헤더와 본문을 포함한 HttpEntity 객체
                     ParameterizedTypeReference.forType(Map.class));
             System.out.println("response.getBody() = " + response.getBody());
-            return response.getBody();
+            return response.getBody().get("result");
         } catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
+    }
+
+    public void clearPartition(int partitionNo) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
+            HttpEntity<?> requestEntity = new HttpEntity<>(partitionNo, headers);
+
+            ResponseEntity<?> response = restTemplate.postForEntity(CONSUMER_ORIGIN + "/consume/start", requestEntity, Object.class);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException();
+            }
+        } catch (RestClientException e) {
+            e.printStackTrace();
             throw new RuntimeException();
         }
     }
