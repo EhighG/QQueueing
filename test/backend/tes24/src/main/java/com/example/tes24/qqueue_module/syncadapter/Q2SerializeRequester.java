@@ -18,7 +18,7 @@ public class Q2SerializeRequester implements Q2Requester {
     }
 
     @Override
-    public boolean support(ContentType contentType) {
-        return contentType.equals(ContentType.TEXT_PLAIN);
+    public boolean support(String contentTypeValue) {
+        return ContentType.SERIALIZE.getTypeValue().equals(contentTypeValue);
     }
 }

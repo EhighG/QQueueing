@@ -24,7 +24,7 @@ public class Q2JsonRequester implements Q2Requester {
     }
 
     @Override
-    public boolean support(ContentType contentType) {
-        return contentType.equals(ContentType.JSON);
+    public boolean support(String contentTypeValue) {
+        return ContentType.JSON.getTypeValue().equals(contentTypeValue);
     }
 }
