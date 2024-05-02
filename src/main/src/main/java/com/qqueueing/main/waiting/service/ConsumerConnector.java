@@ -34,13 +34,15 @@ public class ConsumerConnector {
             headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
             HttpEntity<?> requestEntity = new HttpEntity<>(activePartitions, headers);
             System.out.println(3);
-            ResponseEntity<Map<String, Map<Integer, BatchResDto>>> response = restTemplate.exchange(
+            ResponseEntity<Map<Integer, BatchResDto>> response = restTemplate.exchange(
                     CONSUMER_ORIGIN + "/consume", // 요청 URL
                     HttpMethod.POST, // HTTP 메서드
                     requestEntity, // 요청 헤더와 본문을 포함한 HttpEntity 객체
-                    ParameterizedTypeReference.forType(Map.class));
+                    new ParameterizedTypeReference<Map<Integer, BatchResDto>>() {});
             System.out.println("response.getBody() = " + response.getBody());
-            return response.getBody().get("result");
+//            System.out.println("response.getBody().get(\"result\").getClass() = " + response.getBody().get("result").getClass());
+            Map<Integer, BatchResDto> result = response.getBody();
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();

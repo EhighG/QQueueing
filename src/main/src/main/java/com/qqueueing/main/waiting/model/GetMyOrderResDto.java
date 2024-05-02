@@ -8,7 +8,6 @@ import lombok.Setter;
 public class GetMyOrderResDto {
     private Long myOrder;
     private Integer totalQueueSize;
-    private String redirectUrl;
 
     // on waiting
     public GetMyOrderResDto(Long myOrder, Integer totalQueueSize) {
@@ -18,9 +17,9 @@ public class GetMyOrderResDto {
 
     // on waiting done
 
-    public GetMyOrderResDto(Long myOrder, Integer totalQueueSize, String redirectUrl) {
-        this.myOrder = myOrder;
-        this.totalQueueSize = totalQueueSize;
-        this.redirectUrl = redirectUrl;
-    }
+//    public GetMyOrderResDto(Long myOrder, Integer totalQueueSize, String redirectUrl) {
+//        this.myOrder = myOrder;
+//        this.totalQueueSize = totalQueueSize;
+//        this.redirectUrl = redirectUrl;
+//    }
 }

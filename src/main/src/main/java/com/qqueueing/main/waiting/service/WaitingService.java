@@ -81,6 +81,8 @@ public class WaitingService {
         // re-init partition
         consumerConnector.clearPartition(partitionNo);
         log.info("activation end");
+        // re-init auto increment client order
+        enterProducer.activate(partitionNo);
     }
 
     public void activate(int partitionNo) {
@@ -107,7 +109,8 @@ public class WaitingService {
     }
 
     public Object enter(HttpServletRequest request) {
-        String requestUrl = request.getRequestURL().toString();
+        String requestUrl = request.getHeader("Target-Url");
+        if (requestUrl == null) requestUrl = request.getRequestURL().toString();
         log.info("requestUrl = {}", requestUrl);
         int partitionNo = partitionNoMapper.get(requestUrl);
 
@@ -115,10 +118,11 @@ public class WaitingService {
             // 카프카에 요청자 Ip 저장
             return enterProducer.send(extractClientIp(request), partitionNo);
         }
-        // 대기열 비활성화 상태
-        Registration registration = registrationRepository.findByPartitionNo(partitionNo);
-        return targetApiConnector.forwardToTarget(registration.getTargetUrl(), request);
-
+//        // 대기열 비활성화 상태
+//        Registration registration = registrationRepository.findByPartitionNo(partitionNo);
+//        return targetApiConnector.forwardToTarget(registration.getTargetUrl(), request);
+        // 대기열 비활성화 상태 -> null 반환 후, 컨트롤러에서 대기열 페이지로 리다이렉트 응답
+        return null;
     }
 
     private String extractClientIp(HttpServletRequest request) {
@@ -166,17 +170,40 @@ public class WaitingService {
             }
             Map<Integer, BatchResDto> response = consumerConnector.getNext(activePartitions); // 대기 완료된 ip 목록을 가져온다.
             System.out.println("response = " + response);
-            for (int partitionNo : response.keySet()) {
+            Set<Integer> partitionNoStrs = response.keySet();
+//            Set<Integer> partitionNoStrs = response.keySet().stream()
+//                            .map(Integer::parseInt)
+//                                    .collect(Collectors.toSet());
+            System.out.println("response.keySet() = " + partitionNoStrs);
+            System.out.println("partitionNoStrs.getClass() = " + partitionNoStrs.getClass());
+            System.out.println("response.keySet().getClass() = " + response.keySet().getClass());
+//            for (int partitionNo : partitionNoStrs) {
+            for (Integer partitionNo : partitionNoStrs) {
+//                int partitionNo = Integer.parseInt(partitionNoStr);
+                System.out.println("run " + partitionNo);
                 WaitingStatusDto waitingStatus = queues.get(partitionNo);
+//                waitingStatus.getDoneSet().add("test1");
+//                System.out.println("Test1");
+//                BatchResDto batchRes = response.get(partitionNoStr);
                 BatchResDto batchRes = response.get(partitionNo);
+                System.out.println("batchRes = " + batchRes);
 
+//                waitingStatus.getDoneSet()
+//                        .addAll((List) batchRes.get("curDoneList"));
+//                waitingStatus.setLastOffset(Integer.parseInt(batchRes.get("lastOffset").toString()));
+//                waitingStatus.setTotalQueueSize(Integer.parseInt(batchRes.get("totalQueueSize").toString()));
+//                waitingStatus.getDoneSet().add("test2");
+//                System.out.println("Test2");
                 waitingStatus.getDoneSet()
                         .addAll(batchRes.getCurDoneList());
                 waitingStatus.setLastOffset(batchRes.getLastOffset());
                 waitingStatus.setTotalQueueSize(batchRes.getTotalQueueSize());
+//                waitingStatus.getDoneSet().add("test2");
+//                System.out.println("Test2");
             }
             cleanUpOutList();
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println(activePartitions);
             System.out.println(".");
         }
