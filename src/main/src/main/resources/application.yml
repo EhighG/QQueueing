@@ -66,5 +66,6 @@ info:
 #shell script 실행 관련
 shell:
   path:
-    C:\Users\SSAFY\Desktop\qqueueing\tmp
-  fileNm:
+    C:/Users/SSAFY/Desktop/qqueueing/tmp
+  fileNm: test.bat
+
