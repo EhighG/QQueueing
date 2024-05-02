@@ -7,8 +7,11 @@ services:
     ports:
       - "8081:8081"
     image: qqueueing-main
+    #    privileged: true
     networks:
       - qqueueing-network
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
   qqueueing-consumer:
     build:
