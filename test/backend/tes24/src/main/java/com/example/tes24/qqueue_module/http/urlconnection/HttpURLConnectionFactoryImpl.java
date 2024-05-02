@@ -26,14 +26,13 @@ public class HttpURLConnectionFactoryImpl extends AbstractHttpURLConnectionFacto
             urlConnection.setDoOutput(true);
             if (timeout != null) urlConnection.setConnectTimeout(timeout);
             if (method != null) urlConnection.setRequestMethod(method);
-            if (contentType != null) {
+            if (contentType != null && !contentType.isEmpty()) {
                 if (ContentType.JSON.getTypeValue().equals(contentType)) {
                     urlConnection.setRequestProperty("Content-Type", ContentType.JSON.getTypeValue());
                 } else {
-                    urlConnection.setRequestProperty("Content-Type", ContentType.TEXT_PLAIN.getTypeValue());
+                    urlConnection.setRequestProperty("Content-Type", ContentType.SERIALIZE.getTypeValue());
                 }
             }
-
             return urlConnection;
         } catch (IOException e) {
             throw new HttpURLConnectionBuildException(e);
