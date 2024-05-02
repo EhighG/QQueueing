@@ -15,6 +15,6 @@ public class ConsumeMessageResDto {
 
     private List<String> curDoneList;
 
-    private Long batchLastIdx;
+    private Long lastOffset;
     private Long totalQueueSize;
 }

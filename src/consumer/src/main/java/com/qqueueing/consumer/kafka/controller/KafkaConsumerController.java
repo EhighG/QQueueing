@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/consume")
@@ -22,20 +25,29 @@ public class KafkaConsumerController {
     private final KafkaConsumerService kafkaConsumerService;
 
     @PostMapping
-    public ResponseEntity<?> consumeMessage() {
-
-        ConsumeMessageResDto result = kafkaConsumerService.consumeMessages();
-
-        return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "메시지를 consume하였습니다.", result));
+    public Map<Integer, ConsumeMessageResDto> consumeMessage(@RequestBody List<Integer> partitionNumbers) {
+        System.out.println("partitionNumbers = " + partitionNumbers);
+//        ConsumeMessageResDto result = kafkaConsumerService.consumeMessages();
+        Map<Integer, ConsumeMessageResDto> result = kafkaConsumerService.consumeMessages(partitionNumbers);
+        System.out.println("result = " + result);
+//        return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "메시지를 consume하였습니다.", result));
+        return result;
     }
 
     @PostMapping("/start")
-    public ResponseEntity<?> startQueueing() {
+    public ResponseEntity<?> startQueueing(@RequestBody int partitionNumber) {
 
         System.out.println("start");
-        kafkaConsumerService.deleteDatasOfPartition();
+        kafkaConsumerService.deleteDatasOfPartition(partitionNumber);
 
         return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "대기열을 시작하였습니다. 새로운 partition이 할당되었습니다.", null));
+    }
+
+    @PostMapping("/close")
+    public ResponseEntity<?> closeQueueing(@RequestBody int partitionNumber) {
+        kafkaConsumerService.closeConsumer(partitionNumber);
+        return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "대기열이 삭제되었습니다. 파티션은 대기열이 새로 시작할 때 초기화됩니다.", null));
+
     }
 
     @PostMapping("/change")

@@ -1,6 +1,6 @@
 package com.qqueueing.main.waiting.service;
 
-import com.qqueueing.main.waiting.model.TestDto;
+import com.qqueueing.main.waiting.model.EnterQueueResDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -14,19 +14,20 @@ import java.util.concurrent.atomic.AtomicLong;
 public class EnterProducer {
 
     private final KafkaTemplate<Long, String> kafkaTemplate;
-    private final String enterTopic;
+    private final String TOPIC_NAME;
     private static AtomicLong id = new AtomicLong(1L);
 
     public EnterProducer(KafkaTemplate<Long, String> enterMsgTemplate,
-                         @Value("${kafka.topic-names.enter}") String enterTopic) {
+                         @Value("${kafka.topic-names.enter}") String topicName) {
         this.kafkaTemplate = enterMsgTemplate;
-        this.enterTopic = enterTopic;
+        this.TOPIC_NAME = topicName;
     }
 
-    public TestDto send(String message) {
+    public EnterQueueResDto send(String message, int partitionNo) {
         Long curIdx = id.getAndIncrement();
-        kafkaTemplate.send(enterTopic, message + curIdx);
-        return new TestDto(curIdx, message + curIdx);
+        kafkaTemplate.send(TOPIC_NAME, partitionNo, null, message + curIdx); // key null 잘 되는지 체크!!
+        return new EnterQueueResDto(partitionNo, curIdx, message + curIdx);
+//        return new EnterQueueResDto(partitionNo, curIdx);
     }
 }
 

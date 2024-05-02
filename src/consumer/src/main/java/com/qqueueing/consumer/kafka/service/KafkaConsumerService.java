@@ -19,10 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 
@@ -48,10 +46,10 @@ public class KafkaConsumerService {
     @Value("${spring.kafka.consumer.topic}")
     private String topic;
 
-    private KafkaConsumer<String, String> consumer;
+    private Map<Integer, KafkaConsumer<String, String>> consumers = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    public Properties init() {
+//    @PostConstruct
+    public Properties init(int partitionNumber) {
 
         System.out.println("init!");
 
@@ -63,49 +61,64 @@ public class KafkaConsumerService {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
         props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 10000);
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 2000);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 5);
 
 //        consumer = new KafkaConsumer<>(props);
 //        consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
 
-        consumer = new KafkaConsumer<>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         List<TopicPartition> partitions = new ArrayList<>();
-        int partitionNumber = 0;
+//        int partitionNumber = 0;
         partitions.add(new TopicPartition(topic, partitionNumber));
 
         consumer.assign(partitions);
 
+        consumers.put(partitionNumber, consumer);
+
         return props;
     }
 
-
-    public void deleteDatasOfPartition() {
-
-        try {
-
-            AdminClient adminClient = AdminClient.create(init());
-
-            TopicPartition topicPartition = new TopicPartition(topic, 0); // 삭제하려는 토픽과 파티션 지정
-
-            // 삭제할 레코드의 오프셋을 파티션의 시작 오프셋으로 지정하여 모든 레코드 삭제
-            long offset = 0;
-
-            // 레코드 삭제 실행
-            DeleteRecordsResult deleteRecordsResult = adminClient.deleteRecords(
-                    Collections.singletonMap(topicPartition, RecordsToDelete.beforeOffset(offset)));
-
-            // 결과 확인
-            KafkaFuture<Void> future = deleteRecordsResult.all();
-            future.get(); // 삭제 작업 완료를 기다림
-            System.out.println("All records before offset " + offset + " deleted successfully.");
-
-        } catch (InterruptedException | ExecutionException e) {
-
-            System.out.println(e.getMessage());
+    public void closeConsumer(int partitionNumber) {
+        KafkaConsumer<String, String> consumer = consumers.get(partitionNumber);
+        if (consumer != null) {
+            consumer.close();
         }
     }
 
+
+    public void deleteDatasOfPartition(int partitionNumber) {
+
+        try {
+
+            // AdminClient 생성
+            AdminClient adminClient = AdminClient.create(init(partitionNumber));
+
+            // 삭제할 토픽과 파티션 지정
+            TopicPartition topicPartition = new TopicPartition(topic, partitionNumber);
+
+            KafkaConsumer<String, String> consumer = consumers.get(partitionNumber);
+            Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
+
+            // 해당 파티션의 모든 레코드 삭제
+            Map<TopicPartition, RecordsToDelete> recordsToDelete = Collections.singletonMap(topicPartition, RecordsToDelete.beforeOffset(lastOffset));
+            DeleteRecordsResult deleteRecordsResult = adminClient.deleteRecords(recordsToDelete);
+
+            // 삭제 작업 완료 대기
+            deleteRecordsResult.all().get();
+
+            consumer.assign(Collections.singletonList(topicPartition));
+            consumer.seekToBeginning(Collections.singletonList(topicPartition));
+
+            System.out.println("All records in partition " + partitionNumber + " of topic " + topic + " deleted successfully.");
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
+
+    }
+
     public void changeConsumerProperties(ChangeConsumerPropertiesReqDto changeConsumerPropertiesReqDto) {
+        KafkaConsumer<String, String> consumer = consumers.get(changeConsumerPropertiesReqDto.getPartitionNumber());
 
         consumer.close();
 
@@ -122,63 +135,77 @@ public class KafkaConsumerService {
         consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
     }
 
-    public synchronized ConsumeMessageResDto consumeMessages() {
+//    public synchronized ConsumeMessageResDto consumeMessages() {
+    public synchronized Map<Integer, ConsumeMessageResDto> consumeMessages(List<Integer> partitionNumbers) {
+        Map<Integer, ConsumeMessageResDto> resMap = new HashMap<>();
+        for (Integer partitionNumber : partitionNumbers) {
+            KafkaConsumer<String, String> consumer = consumers.get(partitionNumber);
 
-        // Kafka partition number (zero-based index)
-        int partitionNumber = 0;
+//          // Kafka partition number (zero-based index)
+//          int partitionNumber = 0;
 
-        // Get partition information for the topic
-        List<PartitionInfo> partitionInfos = consumer.partitionsFor(topic);
-        System.out.println("파티션 정보 : " + partitionInfos.toString());
+            // Get partition information for the topic
+            List<PartitionInfo> partitionInfos =
+                    consumer.partitionsFor(topic);
+            System.out.println("파티션 정보 : " + partitionInfos.toString());
 
-        // Check if the requested partition number is valid
-        if (consumer.assignment().isEmpty()) {
-            log.error("No partitions assigned to the consumer. Trying to reassign partitions...");
-            consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
-            // Try to reassign partitions
+            // Check if the requested partition number is valid
             if (consumer.assignment().isEmpty()) {
-                log.error("Failed to assign partitions. Cannot consume messages.");
+                log.error("No partitions assigned to the consumer. Trying to reassign partitions...");
+                consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
+                // Try to reassign partitions
+                if (consumer.assignment().isEmpty()) {
+                    log.error("Failed to assign partitions. Cannot consume messages.");
 //                return null;
+                }
             }
-        }
 
-        // Get the partition
-        PartitionInfo partitionInfo = partitionInfos.get(partitionNumber);
+            // Get the partition
+//            PartitionInfo partitionInfo = partitionInfos.get(partitionNumber);
+            PartitionInfo partitionInfo = partitionInfos.stream()
+                    .filter(pi -> pi.partition() == partitionNumber)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("사용중이 아닌 파티션입니다."));
 
-        // Create a TopicPartition object
-        TopicPartition topicPartition = new TopicPartition(partitionInfo.topic(),
-                partitionInfo.partition());
+            // Create a TopicPartition object
+            TopicPartition topicPartition = new TopicPartition(partitionInfo.topic(),
+                    partitionInfo.partition());
 
-        // Get the current offset for the partition
-        Long currentOffset = consumer.position(topicPartition);
+            // Get the current offset for the partition
+            Long currentOffset = consumer.position(topicPartition);
 
-        Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
+            Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
 
-        ConsumeMessageResDto consumeMessageResDto = new ConsumeMessageResDto();
-        consumeMessageResDto.setCurDoneList(new ArrayList<>());
-        consumeMessageResDto.setBatchLastIdx(currentOffset);
-        consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
+            ConsumeMessageResDto consumeMessageResDto = new ConsumeMessageResDto();
+            consumeMessageResDto.setCurDoneList(new ArrayList<>());
+            consumeMessageResDto.setLastOffset(currentOffset);
+            consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
 
-        try {
+            try {
+                System.out.println("before poll");
+                System.out.println("consumer.is = " + consumer.listTopics());
+//                ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(5));
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(5));
-
-            for (ConsumerRecord<String, String> record : records) {
-                log.info("record:{}", record);
+                System.out.println("after poll");
+                for (ConsumerRecord<String, String> record : records) {
+                    log.info("record:{}", record);
 //                MessageDto messageDto = new MessageDto(record.value());
-                consumeMessageResDto.getCurDoneList().add(record.value());
+                    consumeMessageResDto.getCurDoneList().add(record.value());
+                }
+
+            } catch (WakeupException e) {
+                e.printStackTrace();
+                log.info("Wakeup Consumer");
+            } finally {
+                log.info("Consumer close");
+//            consumer.close();
             }
 
-        } catch (WakeupException e) {
-            log.info("Wakeup Consumer");
-        } finally {
-            log.info("Consumer close");
-//            consumer.close();
+//        return consumeMessageResDto;
+            resMap.put(partitionNumber, consumeMessageResDto);
         }
-
-
-
-        return consumeMessageResDto;
+        return resMap;
     }
 
 //    class ShutdownThread extends Thread {
