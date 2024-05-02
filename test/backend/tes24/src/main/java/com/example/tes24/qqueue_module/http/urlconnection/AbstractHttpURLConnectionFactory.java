@@ -1,6 +1,6 @@
-package com.example.tes24.qqueue_module.adapter;
+package com.example.tes24.qqueue_module.http.urlconnection;
 
-import com.example.tes24.qqueue_module.dto.Q2HttpHeader;
+import com.example.tes24.qqueue_module.http.Q2HttpHeader;
 
 import java.net.HttpURLConnection;
 
