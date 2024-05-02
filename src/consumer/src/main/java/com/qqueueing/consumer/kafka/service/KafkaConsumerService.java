@@ -155,7 +155,7 @@ public class KafkaConsumerService {
         Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
 
         ConsumeMessageResDto consumeMessageResDto = new ConsumeMessageResDto();
-        consumeMessageResDto.setCurDoneSet(new ArrayList<>());
+        consumeMessageResDto.setCurDoneList(new ArrayList<>());
         consumeMessageResDto.setBatchLastIdx(currentOffset);
         consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
 
@@ -166,7 +166,7 @@ public class KafkaConsumerService {
             for (ConsumerRecord<String, String> record : records) {
                 log.info("record:{}", record);
 //                MessageDto messageDto = new MessageDto(record.value());
-                consumeMessageResDto.getCurDoneSet().add(record.value());
+                consumeMessageResDto.getCurDoneList().add(record.value());
             }
 
         } catch (WakeupException e) {
