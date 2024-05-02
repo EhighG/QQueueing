@@ -29,7 +29,7 @@ FROM alpine:latest
 ARG APP=main
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
-    apk --no-cache add openjdk21-jre-headless tzdata
+    apk --no-cache add openjdk21-jre-headless tzdata bash
 ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 ENV TZ=Asia/Seoul
 EXPOSE 8081

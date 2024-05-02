@@ -12,6 +12,7 @@ services:
       - qqueueing-network
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/home/qqueueing/S10P31A401/src/pipes:/pipes"
 
   qqueueing-mongo:
     image: mongo:5.0

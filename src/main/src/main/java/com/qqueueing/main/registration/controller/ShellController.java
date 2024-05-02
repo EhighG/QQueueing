@@ -40,7 +40,11 @@ public class ShellController {
             }
             else
             {
-                pb.command("sh", "-c", fileNm, "\"" + url + "\"");
+							String tmp = "echo 'bash " + fileNm + " "+ url + "' > pipe";
+							System.out.println(tmp);
+              pb.command("bash", "-c", tmp);
+                //pb.command("bash",  fileNm,  url);
+               //pb.command("echo", "\"", "bash", fileNm, url, "\"", ">", "pipe");
             }
 
             Process process = pb.start();

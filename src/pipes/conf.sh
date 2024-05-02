@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "set nginx!!"
 
 if [[ -z $1 ]]; then
 	echo "no input"
@@ -35,7 +36,7 @@ sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
 sudo rm -rf $NGINX_PATH
 
 sudo docker exec $CONTAINER_NAME nginx -t 
-#exit 0
+#exit 1
 
 #4 restart nginx
-sudo docker exec nginx -s reload
+sudo docker exec $CONTAINER_NAME nginx -s reload
