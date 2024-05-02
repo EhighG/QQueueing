@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getWaitingInfo, postEnqueue } from "./api";
+import { getWaitingInfo, getWaitingOut, postEnqueue } from "./api";
 import { infoType, statusType } from "./type";
 import { AxiosError } from "axios";
 
-export const useEnqueue = () => {
+const useEnqueue = (target: string) => {
   const { data, isLoading, isError } = useQuery<
     infoType,
     AxiosError,
@@ -11,7 +11,8 @@ export const useEnqueue = () => {
     [_1: string]
   >({
     queryKey: ["enqueue"],
-    queryFn: postEnqueue,
+    queryFn: () => postEnqueue(target),
+    enabled: target.length > 0,
   });
 
   return {
@@ -20,8 +21,7 @@ export const useEnqueue = () => {
     isError,
   };
 };
-
-export const useGetWaitingInfo = (idx: number) => {
+const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
   const { data, isLoading, isError } = useQuery<
     statusType,
     AxiosError,
@@ -29,7 +29,7 @@ export const useGetWaitingInfo = (idx: number) => {
     [_1: string]
   >({
     queryKey: ["enqueue"],
-    queryFn: () => getWaitingInfo(idx),
+    queryFn: () => getWaitingInfo(partitionNo, idx, idVal),
     refetchInterval: 3000,
     enabled: idx > 0,
   });
@@ -40,3 +40,15 @@ export const useGetWaitingInfo = (idx: number) => {
     isError,
   };
 };
+
+const useGetWaitingOut = (partitionNo: number, order: number) => {
+  const { data, refetch } = useQuery({
+    queryKey: ["waitingOut"],
+    queryFn: () => getWaitingOut(partitionNo, order),
+    enabled: false,
+  });
+
+  return { data, refetch };
+};
+
+export { useEnqueue, useGetWaitingInfo, useGetWaitingOut };

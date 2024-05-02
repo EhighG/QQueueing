@@ -1,24 +1,45 @@
 "use client";
 import { useEnqueue, useGetWaitingInfo } from "@/features";
+import { useGetWaitingOut } from "@/features/waiting";
 import { Button, cats, logo } from "@/shared";
 import { LinearProgress } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 const WaitingPage = () => {
   const router = useRouter();
-
+  const params = useSearchParams();
+  const targetUrl = params.get("target-url") ?? "";
   const [idx, setIdx] = useState<number>(-1);
-  const { data: enqueueInfo } = useEnqueue();
-  const { data: waitingInfo } = useGetWaitingInfo(idx);
+  const [idVal, setIdVal] = useState<string>("");
+  const [partitionNo, setPartitionNo] = useState<number>(-1);
+  const { data: enqueueInfo } = useEnqueue("targetUrl");
+  const { data: waitingInfo } = useGetWaitingInfo(partitionNo, idx, idVal);
+  const { data: waitingOut, refetch: handleButton } = useGetWaitingOut(
+    partitionNo,
+    idx
+  );
+
+  useEffect(() => {
+    console.log(waitingOut);
+  }, [waitingOut]);
 
   useEffect(() => {
     if (enqueueInfo) {
       console.log("enqueueInfo", enqueueInfo);
+      setPartitionNo(enqueueInfo?.partitionNo ?? 1);
       setIdx(enqueueInfo.order);
+      setIdVal(enqueueInfo.idVal);
     }
   }, [enqueueInfo]);
+
+  useEffect(() => {
+    if (waitingInfo?.redirectUrl) {
+      router.push(waitingInfo?.redirectUrl);
+    }
+  }, [waitingInfo]);
 
   return (
     <div className="absolute z-0 flex inset-0 w-full h-full min-w-[800px] bg-black bg-opacity-70 items-center justify-center">
@@ -73,7 +94,8 @@ const WaitingPage = () => {
               </p>
               <Button
                 onClick={() => {
-                  router.back();
+                  handleButton();
+                  //router.back();
                 }}
                 className="h-[30px] border rounded-md border-black bg-red-600 px-4 text-white text-center"
               >

@@ -1,6 +1,7 @@
 type infoType = {
   order: number;
   idVal: string;
+  partitionNo?: number;
 };
 
 type statusType = {

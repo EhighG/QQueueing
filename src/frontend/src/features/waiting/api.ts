@@ -1,34 +1,45 @@
-import { WaitingListType, ResponseType } from "@/entities/waitingList/type";
 import { axiosInstance } from "@/shared";
-import { AxiosInstance, AxiosResponse } from "axios";
+import { AxiosInstance } from "axios";
 import { infoType, statusType } from "./type";
 
 const instance: AxiosInstance = axiosInstance();
 
-const postEnqueue = async (): Promise<infoType> => {
+// 대기열 입장
+const postEnqueue = async (target: string): Promise<infoType> => {
   return await instance
-    .post<infoType>("/member/enqueue")
+    .post<infoType>(
+      "/waiting",
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf8",
+          "Target-Url": target,
+        },
+      }
+    )
     .then(({ data }) => data);
 };
 
-const getWaitingInfo = async (waitingIdx: number) => {
+// 현재 나의 순번 조회
+const getWaitingInfo = async (
+  partitionNo: number,
+  order: number,
+  idVal: string
+) => {
   return await instance
-    .post<statusType>(`/tes24/waiting/${waitingIdx}`, {
-      idVal: waitingIdx,
+    .post<statusType>(`/waiting/order`, {
+      partitionNo,
+      order,
+      idVal,
     })
     .then(({ data }) => data);
 };
 
-const getWaitingList = async () => {
+// 대기열 나가기
+const getWaitingOut = async (partitionNo: number, order: number) => {
   return await instance
-    .get<ResponseType>("/queue")
-    .then(({ data }) => data.result);
+    .get(`/waiting/out?partitionNo=${partitionNo}&order=${order}`)
+    .then(({ data }) => data);
 };
 
-const postWaiting = async (
-  data: Omit<WaitingListType, "id" | "queueImageUrl">
-) => {
-  return await instance.post("/queue", data).then(({ data }) => data);
-};
-
-export { postEnqueue, getWaitingInfo, getWaitingList, postWaiting };
+export { postEnqueue, getWaitingInfo, getWaitingOut };
