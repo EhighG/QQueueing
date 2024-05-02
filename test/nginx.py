@@ -36,16 +36,25 @@ def merge_files(path):
             fulltext += text
     return fulltext
 
+def find_host_end(url):
+    url = url.strip()
+    start_index = 0
+    host = endpoint = 0
+    if url.startswith("http"):
+        start_index = 8 if url[4] == 's' else 7
+
+    for i, val in enumerate(url):
+        if i < start_index: continue
+        if val == '/':
+            host = url[start_index:i]
+            endpoint = url[i:]
+            break
+    return [host, endpoint]
+
 
 def insert_location(fulltext, url):
     port = 443
-    host = url
-    endpoint = ''
-    for i,val  in enumerate(url):
-        if val == '/':
-            host = url[:i]
-            endpoint = url[i:]
-            break
+    host, endpoint = find_host_end(url)
     host_len = len(host)
 
     count = 0
@@ -75,11 +84,14 @@ def insert_location(fulltext, url):
             elif fulltext[i:i+host_len] == host:
                 is_target_host = True
 
-    if check < -1:
+    if check == -1:
         print('check your url is valid')
         exit(1)
-    waiting_view_url = host + ':12344/waiting/1'
-    insert_text = f'location = {endpoint} {{ proxy_pass {waiting_view_url}; }}'
+    waiting_view_url = "http://" + host + ':3001/waiting/1'
+    insert_text =f'location = {endpoint} {{ '
+    insert_text+=f'proxy_pass {waiting_view_url}; '
+    insert_text+=f'proxy_set_header Target-URL {url};'
+    insert_text+=f'}}'
     complete_file = fulltext[:check] + insert_text + fulltext[check:]
     return complete_file
 
@@ -87,18 +99,23 @@ def save_conf_file(path, complete_file):
     save_path = path+'/complete.conf'
     if os.path.exists(save_path):
         os.remove(save_path)
+    os.chmod(path, 664)
     with open(save_path, 'w') as f:
         f.write(complete_file)
 
 def main(url):
     path = '/etc/nginx'
     if not os.path.exists(path):
-        print('no path exitst')
+        print('no path exist')
         exit(1)
     full_text = merge_files(path)
     complete_file = insert_location(full_text, url)
 
     save_conf_file(path, complete_file)
+#    print('save path is', path)
+#    with open(path+'/complete.conf', 'r') as f:
+#        for line in f.readlines():
+#            print(line)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
