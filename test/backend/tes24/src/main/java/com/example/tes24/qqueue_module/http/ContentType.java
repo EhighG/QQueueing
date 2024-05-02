@@ -1,6 +1,7 @@
-package com.example.tes24.qqueue_module.adapter;
+package com.example.tes24.qqueue_module.http;
 
 public enum ContentType {
+    TEXT_PLAIN("text/plain;charset=UTF-8"),
     X_FORM_URL_ENCODED("application/x-www-form-urlencoded"),
     JSON("application/json");
 
