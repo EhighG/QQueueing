@@ -1,5 +1,6 @@
 package com.example.tes24.qqueue_module;
 
+import com.example.tes24.qqueue_module.http.Q2HttpHeaderProperties;
 import com.example.tes24.qqueue_module.http.urlconnection.HttpURLConnectionFactoryImpl;
 import com.example.tes24.qqueue_module.syncadapter.*;
 
@@ -10,31 +11,42 @@ import java.util.List;
 
 public class Q2Context {
     static {
+        Q2ConfigurationLoader.load();
+
         List<Q2Requester> q2RequesterList = new ArrayList<>();
         q2RequesterList.add(new Q2SerializeRequester());
         q2RequesterList.add(new Q2JsonRequester());
-        q2Requesters = Collections.unmodifiableList(q2RequesterList);
+        Q_2_REQUESTERS = Collections.unmodifiableList(q2RequesterList);
 
         List<Q2SyncAdapterFactory> tempQ2AdapterFactoryList = new ArrayList<>();
         tempQ2AdapterFactoryList.add(new Q2SyncAdapterFactoryImpl(new HttpURLConnectionFactoryImpl()));
-
-        q2SyncAdapterFactories = Collections.unmodifiableList(tempQ2AdapterFactoryList);
+        Q_2_SYNC_ADAPTER_FACTORIES = Collections.unmodifiableList(tempQ2AdapterFactoryList);
     }
 
-    private static final Collection<? extends Q2Requester> q2Requesters;
+    private static final Collection<? extends Q2Requester> Q_2_REQUESTERS;
 
-    private static final Collection<? extends Q2SyncAdapterFactory> q2SyncAdapterFactories;
+    private static final Collection<? extends Q2SyncAdapterFactory> Q_2_SYNC_ADAPTER_FACTORIES;
+
+    private static Q2HttpHeaderProperties q2HttpHeaderProperties;
 
     public static Collection<? extends Q2Requester> getQ2Requesters() {
-        assert q2Requesters != null && q2Requesters.size() > 0;
+        assert Q_2_REQUESTERS != null && Q_2_REQUESTERS.size() > 0;
 
-        return q2Requesters;
+        return Q_2_REQUESTERS;
     }
 
     public static Collection<? extends Q2SyncAdapterFactory> getQ2SyncAdapterFactories() {
-        assert q2SyncAdapterFactories != null && q2SyncAdapterFactories.size() > 0;
+        assert Q_2_SYNC_ADAPTER_FACTORIES != null && Q_2_SYNC_ADAPTER_FACTORIES.size() > 0;
 
-        return q2SyncAdapterFactories;
+        return Q_2_SYNC_ADAPTER_FACTORIES;
+    }
+
+    public static void setQ2HttpHeaderProperties(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+        Q2Context.q2HttpHeaderProperties = q2HttpHeaderProperties;
+    }
+
+    public static Q2HttpHeaderProperties getQ2HttpHeaderProperties() {
+        return Q2Context.q2HttpHeaderProperties;
     }
 
 }

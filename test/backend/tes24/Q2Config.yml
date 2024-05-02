@@ -1,0 +1,4 @@
+url: http://localhost:8080/tes24
+timeout: 15000
+method: POST
+contentType: application/json
