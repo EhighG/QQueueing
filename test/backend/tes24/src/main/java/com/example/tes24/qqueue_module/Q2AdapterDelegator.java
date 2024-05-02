@@ -21,7 +21,6 @@ public class Q2AdapterDelegator {
         return delegate(httpHeader, q2ClientRequest, DEFAULT_Q2_SYNC_ADAPTER_FACTORY_CLASS);
     }
 
-
     public Q2ServerResponse delegate(Q2HttpHeader httpHeader, Q2ClientRequest q2ClientRequest, Class<? extends Q2SyncAdapterFactory> q2SyncAdapterFactoryClass) {
         return q2SyncAdapterFactoryList.stream()
                 .filter(q2AdapterFactory ->  q2AdapterFactory.getClass().equals(q2SyncAdapterFactoryClass))
