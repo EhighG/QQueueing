@@ -1,4 +1,4 @@
-package com.practice.apiserver;
+package com.qqueueing.main;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,6 +8,7 @@ class ApiServerApplicationTests {
 
 	@Test
 	void contextLoads() {
+		System.out.println(1);
 	}
 
 }

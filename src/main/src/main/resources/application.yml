@@ -18,6 +18,10 @@ spring:
   application:
     name: api-server
 
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/qqueueing
+
   threads:
     virtual:
       enabled: true
@@ -59,3 +63,8 @@ info:
     name: qqueueing
     company: 4EVERY1
 
+#shell script 실행 관련
+shell:
+  path:
+    C:/Users/SSAFY/Desktop/qqueueing/tmp
+  fileNm: test.bat
