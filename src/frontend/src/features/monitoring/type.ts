@@ -92,4 +92,5 @@ export type {
   ProcessCpuUsageType,
   SystemCpuUsageType,
   JvmMemoryMaxType,
+  Measurement,
 };

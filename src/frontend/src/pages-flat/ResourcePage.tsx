@@ -4,58 +4,19 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/shared";
 import { Gauge, gaugeClasses } from "@mui/x-charts";
 import {
-  useQueries,
-  useQuery,
-  useSuspenseQueries,
-} from "@tanstack/react-query";
-import {
-  getCpuUsage,
-  getDiskFree,
-  getDiskTotal,
-  getJvmMemoryMax,
-  getJvmMemoryUsed,
-} from "@/features";
+  useGetSystemCpuUsage,
+  useGetDiskFree,
+  useGetDiskTotal,
+  useGetJvmMemoryMax,
+} from "@/features/monitoring/query";
+import { useGetJvmMemoryUsed } from "../features/monitoring/query";
 
 const ResourcePage = () => {
-  const { data: cpuUsage } = useQuery({
-    queryKey: ["cpu"],
-    queryFn: getCpuUsage,
-    gcTime: 0,
-    refetchInterval: 5000,
-    select: (data) => data.measurements,
-  });
-
-  const { data: diskTotal } = useQuery({
-    queryKey: ["disk_total"],
-    queryFn: getDiskTotal,
-    gcTime: 0,
-    refetchInterval: 5000,
-    select: (data) => data.measurements,
-  });
-
-  const { data: diskFree } = useQuery({
-    queryKey: ["disk_free"],
-    queryFn: getDiskFree,
-    gcTime: 0,
-    refetchInterval: 5000,
-    select: (data) => data.measurements,
-  });
-
-  const { data: JvmTotal } = useQuery({
-    queryKey: ["jvm_total"],
-    queryFn: getJvmMemoryMax,
-    gcTime: 0,
-    refetchInterval: 5000,
-    select: (data) => data.measurements,
-  });
-
-  const { data: JvmUsed } = useQuery({
-    queryKey: ["jvm_free"],
-    queryFn: getJvmMemoryUsed,
-    gcTime: 0,
-    refetchInterval: 5000,
-    select: (data) => data.measurements,
-  });
+  const { data: cpuUsage } = useGetSystemCpuUsage();
+  const { data: diskTotal } = useGetDiskTotal();
+  const { data: diskFree } = useGetDiskFree();
+  const { data: jvmMemoryMax } = useGetJvmMemoryMax();
+  const { data: jvmMemoryUsed } = useGetJvmMemoryUsed();
 
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md">
@@ -105,15 +66,17 @@ const ResourcePage = () => {
             width={240}
             height={240}
             value={
-              JvmUsed
-                ? Math.round((JvmUsed[0].value / 1024 / 1024 / 1024) * 100) /
-                  100
+              jvmMemoryUsed
+                ? Math.round(
+                    (jvmMemoryUsed[0].value / 1024 / 1024 / 1024) * 100
+                  ) / 100
                 : 0
             }
             valueMax={
-              JvmTotal
-                ? Math.round((JvmTotal[0].value / 1024 / 1024 / 1024) * 100) /
-                  100
+              jvmMemoryMax
+                ? Math.round(
+                    (jvmMemoryMax[0].value / 1024 / 1024 / 1024) * 100
+                  ) / 100
                 : 0
             }
             sx={{
