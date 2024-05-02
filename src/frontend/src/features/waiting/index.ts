@@ -1,8 +1,5 @@
-export {
-  postEnqueue,
-  getWaitingInfo,
-  getWaitingList,
-  postWaiting,
-} from "./api";
+export { postEnqueue, getWaitingInfo, getWaitingOut } from "./api";
 
-export { useGetWaitingInfo, useEnqueue } from "./query";
+export { useEnqueue, useGetWaitingInfo, useGetWaitingOut } from "./query";
+
+export type { infoType, statusType } from "./type";
