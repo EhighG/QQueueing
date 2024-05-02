@@ -22,7 +22,7 @@ public class Q2SyncAdapterImpl implements Q2SyncAdapter {
     private final Collection<? extends Q2Requester> q2Requesters;
 
     public Q2SyncAdapterImpl(HttpURLConnection urlConnection, Collection<? extends Q2Requester> q2Requesters) {
-        assert urlConnection != null && q2Requesters != null && q2Requesters.size() > 0;
+        assert urlConnection != null && q2Requesters != null && !q2Requesters.isEmpty();
 
         this.urlConnection = urlConnection;
         this.q2Requesters = q2Requesters;
@@ -48,7 +48,7 @@ public class Q2SyncAdapterImpl implements Q2SyncAdapter {
     private Optional<Object> request(Q2ClientRequest q2ClientRequest, URLConnection urlConnection) {
         String contentType = urlConnection.getRequestProperty("Content-Type");
         q2Requesters.stream()
-                .filter(q2Requester -> q2Requester.support(ContentType.valueOf(contentType)))
+                .filter(q2Requester -> q2Requester.support(contentType))
                 .forEach(q2Requester -> q2Requester.request(q2ClientRequest, urlConnection));
         return response(urlConnection);
     }
@@ -61,6 +61,7 @@ public class Q2SyncAdapterImpl implements Q2SyncAdapter {
             }
             return Optional.of(this.objectMapper.readValue(stringBuilder.toString(), Q2ServerResponse.class));
         } catch (IOException e) {
+            System.out.println(e.getMessage());
             return Optional.empty();
         }
     }
