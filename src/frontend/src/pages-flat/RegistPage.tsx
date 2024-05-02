@@ -11,22 +11,12 @@ const RegistPage = () => {
     useState<Omit<WaitingListType, "id" | "queueImageUrl">>();
   const [imageData, setImageData] = useState<string>("");
   const queryClient = useQueryClient();
-  // 대기열 등록
-  const mutation = useMutation({
-    mutationFn: postWaiting,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["waitingLists"] });
-    },
-    onError: () => {
-      alert("error occur");
-    },
-  });
 
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md border">
       <SectionTitle title="등록 페이지" />
       <div className="flex flex-1 max-2xl:m-5 m-10 ">
-        <InputForm setWaitingInfo={setWaitingInfo} />
+        <InputForm />
         <div className="flex flex-1">
           <div className="flex flex-1  flex-col max-2xl:m-5 m-10 gap-10">
             <ImageRegist setImageData={setImageData} />
