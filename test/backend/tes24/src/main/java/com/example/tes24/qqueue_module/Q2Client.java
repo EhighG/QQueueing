@@ -25,8 +25,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since 1.0
  * @author Moon-Young Shin
  */
-public final class Q2Client {
+public class Q2Client {
     static {
+        Q2ConfigurationLoader.load();
         instance = new Q2Client();
         reentrantLock = new ReentrantLock();
     }
