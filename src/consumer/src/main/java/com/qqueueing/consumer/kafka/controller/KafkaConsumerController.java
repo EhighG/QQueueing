@@ -25,12 +25,13 @@ public class KafkaConsumerController {
     private final KafkaConsumerService kafkaConsumerService;
 
     @PostMapping
-    public ResponseEntity<?> consumeMessage(@RequestBody List<Integer> partitionNumbers) {
+    public Map<Integer, ConsumeMessageResDto> consumeMessage(@RequestBody List<Integer> partitionNumbers) {
         System.out.println("partitionNumbers = " + partitionNumbers);
 //        ConsumeMessageResDto result = kafkaConsumerService.consumeMessages();
         Map<Integer, ConsumeMessageResDto> result = kafkaConsumerService.consumeMessages(partitionNumbers);
         System.out.println("result = " + result);
-        return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "메시지를 consume하였습니다.", result));
+//        return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "메시지를 consume하였습니다.", result));
+        return result;
     }
 
     @PostMapping("/start")

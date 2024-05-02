@@ -61,7 +61,7 @@ public class KafkaConsumerService {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
         props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 10000);
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 2000);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 5);
 
 //        consumer = new KafkaConsumer<>(props);
 //        consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
@@ -90,24 +90,36 @@ public class KafkaConsumerService {
 
         try {
 
-            AdminClient adminClient = AdminClient.create(init(partitionNumber));
+            AdminClient adminClient = AdminClient.create(
+                    init(partitionNumber));
 
             TopicPartition topicPartition = new TopicPartition(topic, partitionNumber); // 삭제하려는 토픽과 파티션 지정
 
             // 삭제할 레코드의 오프셋을 파티션의 시작 오프셋으로 지정하여 모든 레코드 삭제
-            long offset = 0;
+            KafkaConsumer<String, String> consumer = consumers.get(partitionNumber);
+            consumer.seekToEnd(Collections.singleton(topicPartition));
+            long curOffset = consumer.position(topicPartition);
+            System.out.println("curOffset = " + curOffset);
+            Map<TopicPartition, RecordsToDelete> test = Collections.singletonMap(topicPartition, RecordsToDelete.beforeOffset(curOffset));
 
             // 레코드 삭제 실행
-            DeleteRecordsResult deleteRecordsResult = adminClient.deleteRecords(
-                    Collections.singletonMap(topicPartition, RecordsToDelete.beforeOffset(offset)));
+            DeleteRecordsResult deleteRecordsResult = adminClient.deleteRecords(test);
 
+            // 해당 파티션을 구독하는 컨슈머를 통해 offset을 0으로 변경
+            consumer.seek(topicPartition, 0);
             // 결과 확인
             KafkaFuture<Void> future = deleteRecordsResult.all();
-            future.get(); // 삭제 작업 완료를 기다림
-            System.out.println("All records before offset " + offset + " deleted successfully.");
+            future.whenComplete((v, e) -> {
+                if (e != null) {
+                    e.printStackTrace();
+                }
+            }); // 삭제 작업 완료를 기다림
+            System.out.println("deleteRecordsResult = " + future);
+            System.out.println("All records before offset " + curOffset + " deleted successfully.");
 
-        } catch (InterruptedException | ExecutionException e) {
-
+//        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             System.out.println(e.getMessage());
         }
     }
@@ -172,18 +184,21 @@ public class KafkaConsumerService {
             Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
 
             ConsumeMessageResDto consumeMessageResDto = new ConsumeMessageResDto();
-            consumeMessageResDto.setCurDoneSet(new ArrayList<>());
-            consumeMessageResDto.setBatchLastIdx(currentOffset);
+            consumeMessageResDto.setCurDoneList(new ArrayList<>());
+            consumeMessageResDto.setLastOffset(currentOffset);
             consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
 
             try {
+                System.out.println("before poll");
+                System.out.println("consumer.is = " + consumer.listTopics());
+//                ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(5));
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(5));
-
+                System.out.println("after poll");
                 for (ConsumerRecord<String, String> record : records) {
                     log.info("record:{}", record);
 //                MessageDto messageDto = new MessageDto(record.value());
-                    consumeMessageResDto.getCurDoneSet().add(record.value());
+                    consumeMessageResDto.getCurDoneList().add(record.value());
                 }
 
             } catch (WakeupException e) {
