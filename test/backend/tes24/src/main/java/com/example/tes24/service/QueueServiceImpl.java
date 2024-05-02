@@ -1,9 +1,9 @@
 package com.example.tes24.service;
 
 import com.example.tes24.dto.EnqueueResponse;
-import com.example.tes24.qqueue_module.adapter.Q2Client;
+import com.example.tes24.qqueue_module.Q2Client;
 import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
-import com.example.tes24.qqueue_module.dto.Q2HttpHeader;
+import com.example.tes24.qqueue_module.http.Q2HttpHeader;
 import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,15 +38,15 @@ public class QueueServiceImpl implements QueueService {
 
         return CompletableFuture.completedFuture(restClient.post().retrieve().body(EnqueueResponse.class));
 
+//        Q2Client q2Client = Q2Client.getQ2Client();
 //        Q2ClientRequest request = new Q2ClientRequest();
 //        request.setClientId("1");
 //        request.setClientKey("2");
 //        request.setUserId("3");
 //        request.setUserKey("4");
 //
-//        Q2Client q2Client = Q2Client.getQ2Client();
-//
 //        Q2ServerResponse response = q2Client.request(Q2HttpHeader.defaultQ2HttpHeader(), request);
+//        log.info(response.toString());
 //
 //        return CompletableFuture.completedFuture(new EnqueueResponse(-1L, response.getClientId()));
     }
