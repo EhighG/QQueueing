@@ -5,7 +5,7 @@ export {
   getHttpServerRequests,
   getJvmMemoryMax,
   getJvmMemoryUsed,
-  getCpuUsage,
+  getProcessCpuUsage,
   getSystemCpuUsage,
 } from "./api";
 
@@ -19,4 +19,14 @@ export type {
   ProcessCpuUsageType,
   SystemCpuUsageType,
   JvmMemoryMaxType,
+  Measurement,
 } from "./type";
+
+export {
+  useGetProcessCpuUsage,
+  useGetSystemCpuUsage,
+  useGetDiskTotal,
+  useGetDiskFree,
+  useGetJvmMemoryMax,
+  useGetJvmMemoryUsed,
+} from "./query";

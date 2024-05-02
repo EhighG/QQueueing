@@ -4,7 +4,7 @@ import { Button, Input } from "@/shared";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { postWaiting } from "..";
+import { postWaiting } from "../..";
 
 type InputFormProps = {
   setWaitingInfo: (data: Omit<WaitingListType, "id" | "queueImageUrl">) => void;
