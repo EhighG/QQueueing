@@ -42,7 +42,7 @@ public class MainController {
     }
 
     @PostMapping
-    public ResponseEntity<?> test(@RequestBody Q2ClientRequest q2ClientRequest) {
+    public ResponseEntity<?> test(Q2ClientRequest q2ClientRequest) {
         log.info(String.valueOf(q2ClientRequest));
         Q2ServerResponse q2ServerResponse = new Q2ServerResponse();
         q2ServerResponse.setClientId(q2ClientRequest.getClientId());
