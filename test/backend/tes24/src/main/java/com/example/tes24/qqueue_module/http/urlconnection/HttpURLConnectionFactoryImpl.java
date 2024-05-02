@@ -1,6 +1,7 @@
-package com.example.tes24.qqueue_module.adapter;
+package com.example.tes24.qqueue_module.http.urlconnection;
 
-import com.example.tes24.qqueue_module.dto.Q2HttpHeader;
+import com.example.tes24.qqueue_module.http.ContentType;
+import com.example.tes24.qqueue_module.http.Q2HttpHeader;
 import com.example.tes24.qqueue_module.exception.HttpURLConnectionBuildException;
 
 import java.io.IOException;
@@ -27,9 +28,9 @@ public class HttpURLConnectionFactoryImpl extends AbstractHttpURLConnectionFacto
             if (method != null) urlConnection.setRequestMethod(method);
             if (contentType != null) {
                 if (ContentType.JSON.getTypeValue().equals(contentType)) {
-                    urlConnection.setRequestProperty("Content-Type", "application/json");
+                    urlConnection.setRequestProperty("Content-Type", ContentType.JSON.getTypeValue());
                 } else {
-                    urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    urlConnection.setRequestProperty("Content-Type", ContentType.TEXT_PLAIN.getTypeValue());
                 }
             }
 
