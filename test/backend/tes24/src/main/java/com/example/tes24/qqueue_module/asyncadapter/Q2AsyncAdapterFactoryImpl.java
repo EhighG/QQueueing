@@ -1,6 +1,7 @@
-package com.example.tes24.qqueue_module.adapter;
+package com.example.tes24.qqueue_module.asyncadapter;
 
-import com.example.tes24.qqueue_module.dto.Q2HttpHeader;
+import com.example.tes24.qqueue_module.http.Q2HttpHeader;
+import com.example.tes24.qqueue_module.http.urlconnection.HttpURLConnectionFactory;
 
 public class Q2AsyncAdapterFactoryImpl extends AbstractQ2AsyncAdapterFactory {
     private final HttpURLConnectionFactory httpURLConnectionFactory;
