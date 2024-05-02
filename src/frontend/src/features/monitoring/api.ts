@@ -49,7 +49,7 @@ const getJvmMemoryUsed = async () => {
     .then(({ data }) => data);
 };
 
-const getCpuUsage = async () => {
+const getProcessCpuUsage = async () => {
   return await instance
     .get<ProcessCpuUsageType>("/monitoring/metrics/process.cpu.usage")
     .then(({ data }) => data);
@@ -68,6 +68,6 @@ export {
   getHttpServerRequests,
   getJvmMemoryMax,
   getJvmMemoryUsed,
-  getCpuUsage,
+  getProcessCpuUsage,
   getSystemCpuUsage,
 };

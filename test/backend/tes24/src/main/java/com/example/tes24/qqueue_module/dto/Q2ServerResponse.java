@@ -1,9 +1,11 @@
 package com.example.tes24.qqueue_module.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class Q2ServerResponse implements Serializable {
+    @Serial
     private static final long serialVersionUID = 5619234618L;
 
     String clientId;
