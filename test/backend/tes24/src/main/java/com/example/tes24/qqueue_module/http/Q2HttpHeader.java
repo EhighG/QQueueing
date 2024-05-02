@@ -1,5 +1,6 @@
 package com.example.tes24.qqueue_module.http;
 
+import com.example.tes24.qqueue_module.Q2Context;
 import com.example.tes24.qqueue_module.http.urlconnection.HttpURLConnectionFactory;
 
 import java.net.HttpURLConnection;
@@ -16,43 +17,29 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since 1.0
  * @author Moon-Young Shin
  */
-public final class Q2HttpHeader {
-    static {
-        instance = new Q2HttpHeader();
-        reentrantLock = new ReentrantLock();
-    }
-
-    private static final Q2HttpHeader instance;
-    private static final ReentrantLock reentrantLock;
-
-    private static final String DEFAULT_URL = "http://localhost:8080/tes24";
-    private static final int DEFAULT_TIMEOUT = 15000;
-    private static final String DEFAULT_METHOD = "POST";
-    private static final String DEFAULT_CONTENT_TYPE = "text/plain;charset=UTF-8";
-
+public class Q2HttpHeader {
     private String url;
     private String contentType;
     private Integer timeout;
     private String method;
 
-    private Q2HttpHeader() {
-        this.url = DEFAULT_URL;
-        this.contentType = DEFAULT_CONTENT_TYPE;
-        this.timeout = DEFAULT_TIMEOUT;
-        this.method = DEFAULT_METHOD;
+    private Q2HttpHeader() {}
+
+    private Q2HttpHeader(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+        this.url = q2HttpHeaderProperties.getUrl();
+        this.contentType = q2HttpHeaderProperties.getContentType();
+        this.timeout = q2HttpHeaderProperties.getTimeout();
+        this.method = q2HttpHeaderProperties.getMethod();
     }
 
     public static Q2HttpHeader defaultQ2HttpHeader() {
-        reentrantLock.lock();
-        try {
-            return instance;
-        } finally {
-            reentrantLock.unlock();
-        }
+        return new Q2HttpHeader(Q2Context.getQ2HttpHeaderProperties());
     }
 
-    public static Q2HttpHeaderBuilder builder() {
-        return new Q2HttpHeaderBuilder();
+    public static Q2HttpHeader withProperties(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+        assert q2HttpHeaderProperties != null;
+
+        return new Q2HttpHeader(q2HttpHeaderProperties);
     }
 
     @Override
@@ -78,7 +65,11 @@ public final class Q2HttpHeader {
                 '}';
     }
 
-    static class Q2HttpHeaderBuilder {
+    public static Q2HttpHeaderBuilder builder() {
+        return new Q2HttpHeaderBuilder();
+    }
+
+    public static class Q2HttpHeaderBuilder {
         private final Q2HttpHeader q2HttpHeader;
         private Q2HttpHeaderBuilder() {
             this.q2HttpHeader = new Q2HttpHeader();
