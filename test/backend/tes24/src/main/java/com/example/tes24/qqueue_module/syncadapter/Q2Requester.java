@@ -6,6 +6,6 @@ import com.example.tes24.qqueue_module.http.ContentType;
 import java.net.URLConnection;
 
 public interface Q2Requester {
-    void request(Q2ClientRequest q2ClientRequest, URLConnection urlConnection;
+    void request(Q2ClientRequest q2ClientRequest, URLConnection urlConnection);
     boolean support(ContentType contentType);
 }
