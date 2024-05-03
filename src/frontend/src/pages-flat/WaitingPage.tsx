@@ -11,7 +11,7 @@ import { useSearchParams } from "next/navigation";
 const WaitingPage = () => {
   const router = useRouter();
   const params = useSearchParams();
-  const targetUrl = params.get("target-url") ?? "";
+  const targetUrl = params.get("Target-URL") ?? "";
   const [idx, setIdx] = useState<number>(-1);
   const [idVal, setIdVal] = useState<string>("");
   const [partitionNo, setPartitionNo] = useState<number>(-1);

@@ -1,40 +1,47 @@
-package com.example.tes24.qqueue_module.dto;
+package com.example.tes24.qqueue_module.http;
 
-import com.example.tes24.qqueue_module.adapter.ContentType;
+import com.example.tes24.qqueue_module.Q2Context;
+import com.example.tes24.qqueue_module.http.urlconnection.HttpURLConnectionFactory;
 
+import java.net.HttpURLConnection;
+import java.net.http.HttpHeaders;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
-public final class Q2HttpHeader {
-    static {
-        instance = new Q2HttpHeader();
-        reentrantLock = new ReentrantLock();
+/**
+ * The class which has HTTP header's information to performing HTTP connection correctly between The QQueuing api server.
+ * You can customize uri to request, timeout, method and content type.
+ *
+ * <p>The {@link HttpURLConnectionFactory} constructs {@link HttpURLConnection} instance base on this class.
+ *
+ * @since 1.0
+ * @author Moon-Young Shin
+ */
+public class Q2HttpHeader {
+    private String url;
+    private String contentType;
+    private Integer timeout;
+    private String method;
+
+    private Q2HttpHeader() {}
+
+    private Q2HttpHeader(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+        assert q2HttpHeaderProperties != null;
+
+        this.url = q2HttpHeaderProperties.getUrl();
+        this.contentType = q2HttpHeaderProperties.getContentType();
+        this.timeout = q2HttpHeaderProperties.getTimeout();
+        this.method = q2HttpHeaderProperties.getMethod();
     }
-
-    private static final Q2HttpHeader instance;
-    private static final ReentrantLock reentrantLock;
-
-    private static final String DEFAULT_URL = "http://localhost:8080/tes24";
-    private static final int DEFAULT_TIMEOUT = 15000;
-    private static final String DEFAULT_METHOD = "POST";
-    private static final String DEFAULT_CONTENT_TYPE = "application/json";
-
-    private String url = DEFAULT_URL;
-    private String contentType = DEFAULT_CONTENT_TYPE;
-    private Integer timeout = DEFAULT_TIMEOUT;
-    private String method = DEFAULT_METHOD;
 
     public static Q2HttpHeader defaultQ2HttpHeader() {
-        reentrantLock.lock();
-        try {
-            return instance;
-        } finally {
-            reentrantLock.unlock();
-        }
+        return new Q2HttpHeader(Q2Context.getDefaultHeaderProperties());
     }
 
-    public static Q2HttpHeaderBuilder builder() {
-        return new Q2HttpHeaderBuilder();
+    public static Q2HttpHeader fromProperties(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+        assert q2HttpHeaderProperties != null;
+
+        return new Q2HttpHeader(q2HttpHeaderProperties);
     }
 
     @Override
@@ -60,7 +67,11 @@ public final class Q2HttpHeader {
                 '}';
     }
 
-    static class Q2HttpHeaderBuilder {
+    public static Q2HttpHeaderBuilder builder() {
+        return new Q2HttpHeaderBuilder();
+    }
+
+    public static class Q2HttpHeaderBuilder {
         private final Q2HttpHeader q2HttpHeader;
         private Q2HttpHeaderBuilder() {
             this.q2HttpHeader = new Q2HttpHeader();

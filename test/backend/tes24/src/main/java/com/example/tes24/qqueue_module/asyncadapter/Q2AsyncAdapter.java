@@ -1,4 +1,4 @@
-package com.example.tes24.qqueue_module.adapter;
+package com.example.tes24.qqueue_module.asyncadapter;
 
 import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
 import com.example.tes24.qqueue_module.dto.Q2ServerResponse;

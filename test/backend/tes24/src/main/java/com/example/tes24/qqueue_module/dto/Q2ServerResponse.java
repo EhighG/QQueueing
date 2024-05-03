@@ -9,7 +9,9 @@ public class Q2ServerResponse implements Serializable {
     private static final long serialVersionUID = 5619234618L;
 
     String clientId;
+    String clientKey;
     String userId;
+    String userKey;
     Long userSequence;
     Long currentQueueSize;
     Long capacity;
@@ -22,12 +24,28 @@ public class Q2ServerResponse implements Serializable {
         this.clientId = clientId;
     }
 
+    public String getClientKey() {
+        return clientKey;
+    }
+
+    public void setClientKey(String clientKey) {
+        this.clientKey = clientKey;
+    }
+
     public String getUserId() {
         return userId;
     }
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserKey() {
+        return userKey;
+    }
+
+    public void setUserKey(String userKey) {
+        this.userKey = userKey;
     }
 
     public Long getUserSequence() {
@@ -55,23 +73,25 @@ public class Q2ServerResponse implements Serializable {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        Q2ServerResponse that = (Q2ServerResponse) object;
-        return Objects.equals(clientId, that.clientId) && Objects.equals(userId, that.userId) && Objects.equals(userSequence, that.userSequence) && Objects.equals(currentQueueSize, that.currentQueueSize) && Objects.equals(capacity, that.capacity);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Q2ServerResponse that = (Q2ServerResponse) o;
+        return Objects.equals(clientId, that.clientId) && Objects.equals(clientKey, that.clientKey) && Objects.equals(userId, that.userId) && Objects.equals(userKey, that.userKey) && Objects.equals(userSequence, that.userSequence) && Objects.equals(currentQueueSize, that.currentQueueSize) && Objects.equals(capacity, that.capacity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clientId, userId, userSequence, currentQueueSize, capacity);
+        return Objects.hash(clientId, clientKey, userId, userKey, userSequence, currentQueueSize, capacity);
     }
 
     @Override
     public String toString() {
         return "Q2ServerResponse{" +
                 "clientId='" + clientId + '\'' +
+                ", clientKey='" + clientKey + '\'' +
                 ", userId='" + userId + '\'' +
+                ", userKey='" + userKey + '\'' +
                 ", userSequence=" + userSequence +
                 ", currentQueueSize=" + currentQueueSize +
                 ", capacity=" + capacity +

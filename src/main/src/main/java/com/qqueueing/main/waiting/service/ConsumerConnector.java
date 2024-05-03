@@ -25,20 +25,32 @@ public class ConsumerConnector {
         this.CONSUMER_ORIGIN = "http://" + CONSUMER_ORIGIN;
     }
 
-    public Map<String, BatchResDto> getNext(Set<String> activeTopicNames) {
+    public Map<Integer, BatchResDto> getNext(Set<Integer> activePartitions) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
-            HttpEntity<?> requestEntity = new HttpEntity<>(activeTopicNames, headers);
-            ResponseEntity<Map<String, BatchResDto>> response = restTemplate.exchange(
+            HttpEntity<?> requestEntity = new HttpEntity<>(activePartitions, headers);
+            ResponseEntity<Map<Integer, BatchResDto>> response = restTemplate.exchange(
                     CONSUMER_ORIGIN + "/consume", // 요청 URL
                     HttpMethod.POST, // HTTP 메서드
                     requestEntity, // 요청 헤더와 본문을 포함한 HttpEntity 객체
-                    ParameterizedTypeReference.forType(Map.class));
-            System.out.println("response.getBody() = " + response.getBody());
-            return response.getBody();
+                    new ParameterizedTypeReference<Map<Integer, BatchResDto>>() {});
+            Map<Integer, BatchResDto> result = response.getBody();
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException();
+        }
+    }
+
+    public void clearPartition(int partitionNo) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
+        HttpEntity<?> requestEntity = new HttpEntity<>(partitionNo, headers);
+
+        ResponseEntity<?> response = restTemplate.postForEntity(CONSUMER_ORIGIN + "/consume/start", requestEntity, Object.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            log.error("error clearing partition! message = {}", response.getBody());
             throw new RuntimeException();
         }
     }
