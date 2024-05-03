@@ -1,5 +1,6 @@
 package com.qqueueing.main.waiting.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qqueueing.main.waiting.model.EnterQueueResDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,6 +19,7 @@ public class EnterProducer {
     private final KafkaTemplate<Long, String> kafkaTemplate;
     private final String TOPIC_NAME;
     private static Map<Integer, AtomicLong> ids;
+    private ObjectMapper mapper = new ObjectMapper();
 
     public EnterProducer(KafkaTemplate<Long, String> enterMsgTemplate,
                          @Value("${kafka.topic-names.enter}") String topicName) {
@@ -32,11 +34,18 @@ public class EnterProducer {
 
     public EnterQueueResDto send(String message, int partitionNo) {
         AtomicLong id = ids.get(partitionNo);
-        System.out.println("partitionNo = " + partitionNo);
-        System.out.println("id = " + id);
+//        System.out.println("partitionNo = " + partitionNo);
+//        System.out.println("id = " + id);
         Long curIdx = id.getAndIncrement();
-        kafkaTemplate.send(TOPIC_NAME, partitionNo, null, message + curIdx); // key null 잘 되는지 체크!!
-        return new EnterQueueResDto(partitionNo, curIdx, message + curIdx);
+        String sampleIp = message + curIdx;
+        kafkaTemplate.send(TOPIC_NAME, partitionNo, null, sampleIp); // key null 잘 되는지 체크!!
+//        EnterInfoDto enterInfoDto = new EnterInfoDto(curIdx, message);
+//        try {
+////            kafkaTemplate.send(TOPIC_NAME, partitionNo, null, mapper.writeValueAsString(enterInfoDto)); // key null 잘 되는지 체크!!
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
+        return new EnterQueueResDto(partitionNo, curIdx, sampleIp);
 //        return new EnterQueueResDto(partitionNo, curIdx);
     }
 }

@@ -1,8 +1,8 @@
 package com.qqueueing.consumer.kafka.service;
 
-import com.qqueueing.consumer.kafka.dto.ChangeConsumerPropertiesReqDto;
-import com.qqueueing.consumer.kafka.dto.ConsumeMessageResDto;
-import com.qqueueing.consumer.kafka.dto.MessageDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.qqueueing.consumer.kafka.dto.*;
 import com.qqueueing.consumer.kafka.listener.RebalanceListener;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +46,8 @@ public class KafkaConsumerService {
     @Value("${spring.kafka.consumer.topic}")
     private String topic;
 
+    private Map<Integer, Long> initialOffsets = new HashMap<>();
+
     private Map<Integer, KafkaConsumer<String, String>> consumers = new ConcurrentHashMap<>();
 
 //    @PostConstruct
@@ -61,22 +63,37 @@ public class KafkaConsumerService {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
         props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 10000);
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 5);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 2);
 
 //        consumer = new KafkaConsumer<>(props);
-//        consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
+//        consumer.subscribe(Collections.singletonList(topic), new RebalanceListener()); // 모든 파티션을 읽어온다.
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         List<TopicPartition> partitions = new ArrayList<>();
-//        int partitionNumber = 0;
         partitions.add(new TopicPartition(topic, partitionNumber));
 
         consumer.assign(partitions);
 
         consumers.put(partitionNumber, consumer);
 
+        setInitialOffset(partitionNumber, consumer);
+
         return props;
     }
+
+    private void setInitialOffset(int partitionNumber, KafkaConsumer<String, String> consumer) {
+        // find initial offset
+        PartitionInfo partitionInfo = consumer.partitionsFor(topic).stream()
+                .filter(pi -> pi.partition() == partitionNumber)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("사용중이 아닌 파티션입니다."));
+
+        TopicPartition topicPartition = new TopicPartition(partitionInfo.topic(),
+                partitionInfo.partition());
+
+        initialOffsets.put(partitionNumber, consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition));
+    }
+
 
     public void closeConsumer(int partitionNumber) {
         KafkaConsumer<String, String> consumer = consumers.get(partitionNumber);
@@ -87,9 +104,7 @@ public class KafkaConsumerService {
 
 
     public void deleteDatasOfPartition(int partitionNumber) {
-
         try {
-
             // AdminClient 생성
             AdminClient adminClient = AdminClient.create(init(partitionNumber));
 
@@ -114,7 +129,6 @@ public class KafkaConsumerService {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
-
     }
 
     public void changeConsumerProperties(ChangeConsumerPropertiesReqDto changeConsumerPropertiesReqDto) {
@@ -135,14 +149,10 @@ public class KafkaConsumerService {
         consumer.subscribe(Collections.singletonList(topic), new RebalanceListener());
     }
 
-//    public synchronized ConsumeMessageResDto consumeMessages() {
     public synchronized Map<Integer, ConsumeMessageResDto> consumeMessages(List<Integer> partitionNumbers) {
         Map<Integer, ConsumeMessageResDto> resMap = new HashMap<>();
         for (Integer partitionNumber : partitionNumbers) {
             KafkaConsumer<String, String> consumer = consumers.get(partitionNumber);
-
-//          // Kafka partition number (zero-based index)
-//          int partitionNumber = 0;
 
             // Get partition information for the topic
             List<PartitionInfo> partitionInfos =
@@ -160,8 +170,7 @@ public class KafkaConsumerService {
                 }
             }
 
-            // Get the partition
-//            PartitionInfo partitionInfo = partitionInfos.get(partitionNumber);
+            // Get the partition - partitions is not sequential
             PartitionInfo partitionInfo = partitionInfos.stream()
                     .filter(pi -> pi.partition() == partitionNumber)
                     .findFirst()
@@ -174,35 +183,34 @@ public class KafkaConsumerService {
             // Get the current offset for the partition
             Long currentOffset = consumer.position(topicPartition);
 
-            Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
 
             ConsumeMessageResDto consumeMessageResDto = new ConsumeMessageResDto();
             consumeMessageResDto.setCurDoneList(new ArrayList<>());
-            consumeMessageResDto.setLastOffset(currentOffset);
-            consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
 
             try {
                 System.out.println("before poll");
                 System.out.println("consumer.is = " + consumer.listTopics());
-//                ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(5));
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
                 System.out.println("after poll");
+                Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
+
                 for (ConsumerRecord<String, String> record : records) {
                     log.info("record:{}", record);
-//                MessageDto messageDto = new MessageDto(record.value());
-                    consumeMessageResDto.getCurDoneList().add(record.value());
+                    MessageDto messageDto = new MessageDto(record.value());
+                    log.info("messageDto = {}", messageDto);
+                    consumeMessageResDto.getCurDoneList().add(messageDto.getIp());
                 }
+                Long initialOffset = initialOffsets.get(partitionNumber);
+                consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
+                consumeMessageResDto.setLastOffset(currentOffset - initialOffset);
 
             } catch (WakeupException e) {
                 e.printStackTrace();
                 log.info("Wakeup Consumer");
             } finally {
                 log.info("Consumer close");
-//            consumer.close();
             }
-
-//        return consumeMessageResDto;
             resMap.put(partitionNumber, consumeMessageResDto);
         }
         return resMap;

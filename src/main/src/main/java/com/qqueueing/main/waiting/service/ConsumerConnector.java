@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
@@ -39,8 +38,6 @@ public class ConsumerConnector {
                     HttpMethod.POST, // HTTP 메서드
                     requestEntity, // 요청 헤더와 본문을 포함한 HttpEntity 객체
                     new ParameterizedTypeReference<Map<Integer, BatchResDto>>() {});
-            System.out.println("response.getBody() = " + response.getBody());
-//            System.out.println("response.getBody().get(\"result\").getClass() = " + response.getBody().get("result").getClass());
             Map<Integer, BatchResDto> result = response.getBody();
             return result;
         } catch (Exception e) {
@@ -50,17 +47,13 @@ public class ConsumerConnector {
     }
 
     public void clearPartition(int partitionNo) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
-            HttpEntity<?> requestEntity = new HttpEntity<>(partitionNo, headers);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
+        HttpEntity<?> requestEntity = new HttpEntity<>(partitionNo, headers);
 
-            ResponseEntity<?> response = restTemplate.postForEntity(CONSUMER_ORIGIN + "/consume/start", requestEntity, Object.class);
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException();
-            }
-        } catch (RestClientException e) {
-            e.printStackTrace();
+        ResponseEntity<?> response = restTemplate.postForEntity(CONSUMER_ORIGIN + "/consume/start", requestEntity, Object.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            log.error("error clearing partition! message = {}", response.getBody());
             throw new RuntimeException();
         }
     }

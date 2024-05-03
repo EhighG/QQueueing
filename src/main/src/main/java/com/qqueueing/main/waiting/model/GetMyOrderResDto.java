@@ -14,12 +14,4 @@ public class GetMyOrderResDto {
         this.myOrder = myOrder;
         this.totalQueueSize = totalQueueSize;
     }
-
-    // on waiting done
-
-//    public GetMyOrderResDto(Long myOrder, Integer totalQueueSize, String redirectUrl) {
-//        this.myOrder = myOrder;
-//        this.totalQueueSize = totalQueueSize;
-//        this.redirectUrl = redirectUrl;
-//    }
 }

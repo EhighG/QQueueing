@@ -49,6 +49,7 @@ public class WaitingController {
         }
     }
 
+
     @PostMapping("/order")
     public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto,
                                         HttpServletRequest request) {
@@ -90,5 +91,31 @@ public class WaitingController {
     @GetMapping
     public String forwardingTest() {
        return "forwarding success!";
+    }
+
+    // 여러 대기열 테스트용 메소드들
+
+    @PostMapping("/testlink2")
+    public ResponseEntity<?> enter2(HttpServletRequest request, HttpServletResponse response) {
+        Object result = waitingService.enter(request);
+        if (result != null) {
+            return ResponseEntity
+                    .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
+        }
+        try {
+            // 대기열 비활성화 시 -> redirect
+            return ResponseEntity
+                    .status(302)
+                    .location(new URI(frontUrl))
+                    .build();
+        } catch (URISyntaxException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException("리다이렉트 설정 중 에러");
+        }
+    }
+
+    @GetMapping("/testlink2")
+    public String forwardingTest2() {
+        return "TestLink2 : forwardingdingding!";
     }
 }
