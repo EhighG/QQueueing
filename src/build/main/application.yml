@@ -21,9 +21,16 @@ spring:
   data:
     mongodb:
       uri: mongodb://root:example@qqueueing-mongo:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1
+<<<<<<< Updated upstream
       #uri: mongodb://qqueueing-mongo:27017/qqueueing
       #      username: root
       #      password: example
+=======
+      # uri: mongodb://qqueueing-mongo:27017/qqueueing
+      username: root
+      password: example
+
+>>>>>>> Stashed changes
   threads:
     virtual:
       enabled: true
@@ -31,9 +38,7 @@ spring:
 
 servers: # 타 서버들의 정보 기록
   consumer: qqueueing-consumer:8082
-#  consumer: localhost:8082
-  target: # 테스트용 사용자 서버(tes 24)
-    url: http://k401a10.p.ssafy.io:8082/consume/test # 대기열 적용 대상 api url
+  front: qqueueing-frontend:3000
 
 kafka:
   broker: qqueueing-kafka:9092
@@ -51,6 +56,7 @@ management:
         include: "*"
       base-path: "/monitoring"
       cors:
+<<<<<<< Updated upstream
         # for test
         allowed-origins: "*"
         # real
@@ -61,6 +67,11 @@ management:
         allowed-headers: "*"
         allowed-methods: GET, POST, PATCH, DELETE, OPTIONS
 
+=======
+        allowed-origins: "*"
+        allowed-headers: "*"
+        allowed-methods: GET, POST, PATCH, DELETE, OPTIONS
+>>>>>>> Stashed changes
   info:
     java:
       enabled: true
