@@ -41,18 +41,6 @@ public class MainController {
         return ResponseEntity.ok("This is home page.");
     }
 
-    @PostMapping
-    public ResponseEntity<?> test(@RequestBody Q2ClientRequest q2ClientRequest) {
-        log.info(String.valueOf(q2ClientRequest));
-        Q2ServerResponse q2ServerResponse = new Q2ServerResponse();
-        q2ServerResponse.setClientId(q2ClientRequest.getClientId());
-        q2ServerResponse.setUserId(q2ClientRequest.getUserId());
-        q2ServerResponse.setCapacity(1000L);
-        q2ServerResponse.setUserSequence(10L);
-        q2ServerResponse.setCurrentQueueSize(Long.MAX_VALUE);
-        return ResponseEntity.ok(q2ServerResponse);
-    }
-
     @Operation(
             summary = "Request waiting status",
             description = "Calling this api will response with current waiting status include current queue size and order.",
@@ -74,5 +62,19 @@ public class MainController {
         }
 
         return ResponseEntity.ok().body(response);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> test(@RequestBody Q2ClientRequest q2ClientRequest) {
+        log.info(String.valueOf(q2ClientRequest));
+        Q2ServerResponse q2ServerResponse = new Q2ServerResponse();
+        q2ServerResponse.setClientId(q2ClientRequest.getClientId());
+        q2ServerResponse.setClientKey(q2ClientRequest.getClientKey());
+        q2ServerResponse.setUserId(q2ClientRequest.getUserId());
+        q2ServerResponse.setUserKey(q2ClientRequest.getUserKey());
+        q2ServerResponse.setCapacity(1000L);
+        q2ServerResponse.setUserSequence(10L);
+        q2ServerResponse.setCurrentQueueSize(Long.MAX_VALUE);
+        return ResponseEntity.ok(q2ServerResponse);
     }
 }
