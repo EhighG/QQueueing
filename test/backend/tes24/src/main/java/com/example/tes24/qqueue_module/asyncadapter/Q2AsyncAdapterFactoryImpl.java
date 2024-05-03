@@ -11,6 +11,6 @@ public class Q2AsyncAdapterFactoryImpl extends AbstractQ2AsyncAdapterFactory {
     }
     @Override
     protected Q2AsyncAdapter createQ2Adapter(Q2HttpHeader q2HttpHeader) {
-        return new Q2AsyncAdapterImpl(httpURLConnectionFactory.getInstance(q2HttpHeader));
+        return new Q2AsyncAdapterImpl(q2HttpHeader);
     }
 }
