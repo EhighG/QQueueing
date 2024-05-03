@@ -4,7 +4,7 @@ import com.example.tes24.qqueue_module.Q2Context;
 import com.example.tes24.qqueue_module.http.Q2HttpHeader;
 import com.example.tes24.qqueue_module.http.urlconnection.HttpURLConnectionFactory;
 
-public class Q2SyncAdapterFactoryImpl extends AbstractQ2SyncAdapterFactory {
+public final class Q2SyncAdapterFactoryImpl extends AbstractQ2SyncAdapterFactory {
     private final HttpURLConnectionFactory httpURLConnectionFactory;
 
     public Q2SyncAdapterFactoryImpl(HttpURLConnectionFactory httpURLConnectionFactory) {
