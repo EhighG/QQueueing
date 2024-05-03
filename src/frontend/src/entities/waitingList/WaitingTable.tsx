@@ -1,16 +1,11 @@
-"use client";
-
 import React from "react";
 import { WaitingListType } from "./type";
-import { useQuery } from "@tanstack/react-query";
-import { getWaitingList } from "@/features";
 
-const WaitingTable = () => {
-  const { data } = useQuery({
-    queryKey: ["getWaitingList"],
-    queryFn: getWaitingList,
-  });
+type waitingListType = {
+  waitingList: WaitingListType[];
+};
 
+const WaitingTable = ({ waitingList }: waitingListType) => {
   return (
     <table className="flex flex-col flex-1 rounded-md shadow-lg border">
       <thead>
@@ -23,8 +18,8 @@ const WaitingTable = () => {
         </tr>
       </thead>
       <tbody>
-        {data && data.length > 0 ? (
-          data.map((item) => (
+        {waitingList && waitingList.length > 0 ? (
+          waitingList.map((item) => (
             <tr
               key={item.targetUrl}
               className="flex items-center w-full text-center border-b border-black h-[60px]"
