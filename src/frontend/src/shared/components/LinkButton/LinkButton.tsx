@@ -16,7 +16,7 @@ const LinkButton = ({ href, title, icon }: LinkButtonProps) => {
     <Link
       href={href}
       className={cls(
-        "flex items-center gap-[10px] m-2 p-2",
+        "flex items-center gap-[10px] m-2 p-2 hover:opacity-80",
         href === pathname &&
           "bg-blue-500 rounded-md bg-gradient-to-r from-blue-500 to-blue-200 shadow-xl"
       )}
