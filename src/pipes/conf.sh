@@ -1,12 +1,15 @@
 #!/bin/bash
 echo "set nginx!!"
 
+echo "initialize nginx for test"
+GIT_ROOT=$(git rev-parse --show-toplevel)
+$GIT_ROOT/test/test.sh nginx -d
+
 if [[ -z $1 ]]; then
 	echo "no input"
 	exit 1
 fi
 
-#./test.sh nginx -d
 
 #0 set variable
 CONTAINER_NAME="test-nginx"
