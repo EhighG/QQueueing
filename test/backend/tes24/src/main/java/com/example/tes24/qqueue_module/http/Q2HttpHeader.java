@@ -26,6 +26,8 @@ public class Q2HttpHeader {
     private Q2HttpHeader() {}
 
     private Q2HttpHeader(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+        assert q2HttpHeaderProperties != null;
+
         this.url = q2HttpHeaderProperties.getUrl();
         this.contentType = q2HttpHeaderProperties.getContentType();
         this.timeout = q2HttpHeaderProperties.getTimeout();
@@ -33,10 +35,10 @@ public class Q2HttpHeader {
     }
 
     public static Q2HttpHeader defaultQ2HttpHeader() {
-        return new Q2HttpHeader(Q2Context.getQ2HttpHeaderProperties());
+        return new Q2HttpHeader(Q2Context.getDefaultHeaderProperties());
     }
 
-    public static Q2HttpHeader withProperties(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+    public static Q2HttpHeader fromProperties(Q2HttpHeaderProperties q2HttpHeaderProperties) {
         assert q2HttpHeaderProperties != null;
 
         return new Q2HttpHeader(q2HttpHeaderProperties);

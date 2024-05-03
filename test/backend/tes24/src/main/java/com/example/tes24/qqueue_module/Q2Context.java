@@ -4,12 +4,11 @@ import com.example.tes24.qqueue_module.http.Q2HttpHeaderProperties;
 import com.example.tes24.qqueue_module.http.urlconnection.HttpURLConnectionFactoryImpl;
 import com.example.tes24.qqueue_module.syncadapter.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Q2Context {
+    private Q2Context() {}
+
     static {
         Q2ConfigurationLoader.load();
 
@@ -27,7 +26,8 @@ public class Q2Context {
 
     private static final Collection<? extends Q2SyncAdapterFactory> Q_2_SYNC_ADAPTER_FACTORIES;
 
-    private static Q2HttpHeaderProperties q2HttpHeaderProperties;
+    private static Q2HttpHeaderProperties defaultHeaderProperties;
+    private static Q2HttpHeaderProperties monitorHeaderProperties;
 
     public static Collection<? extends Q2Requester> getQ2Requesters() {
         assert Q_2_REQUESTERS != null && Q_2_REQUESTERS.size() > 0;
@@ -41,12 +41,18 @@ public class Q2Context {
         return Q_2_SYNC_ADAPTER_FACTORIES;
     }
 
-    public static void setQ2HttpHeaderProperties(Q2HttpHeaderProperties q2HttpHeaderProperties) {
-        Q2Context.q2HttpHeaderProperties = q2HttpHeaderProperties;
+    public static void setDefaultHeader(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+        Q2Context.defaultHeaderProperties = q2HttpHeaderProperties;
     }
 
-    public static Q2HttpHeaderProperties getQ2HttpHeaderProperties() {
-        return Q2Context.q2HttpHeaderProperties;
+    public static Q2HttpHeaderProperties getDefaultHeaderProperties() {
+        return Q2Context.defaultHeaderProperties;
     }
+
+    public static void setMonitorHeader(Q2HttpHeaderProperties q2HttpHeaderProperties) {
+        Q2Context.monitorHeaderProperties = q2HttpHeaderProperties;
+    }
+
+    public static Q2HttpHeaderProperties getMonitorHeaderProperties() { return Q2Context.monitorHeaderProperties; }
 
 }
