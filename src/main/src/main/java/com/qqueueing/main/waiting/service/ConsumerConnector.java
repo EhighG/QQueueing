@@ -26,13 +26,10 @@ public class ConsumerConnector {
     }
 
     public Map<Integer, BatchResDto> getNext(Set<Integer> activePartitions) {
-        System.out.println(1);
         try {
-            System.out.println(2);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
             HttpEntity<?> requestEntity = new HttpEntity<>(activePartitions, headers);
-            System.out.println(3);
             ResponseEntity<Map<Integer, BatchResDto>> response = restTemplate.exchange(
                     CONSUMER_ORIGIN + "/consume", // 요청 URL
                     HttpMethod.POST, // HTTP 메서드
