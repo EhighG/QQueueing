@@ -21,16 +21,13 @@ spring:
   data:
     mongodb:
       uri: mongodb://root:example@qqueueing-mongo:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1
-<<<<<<< Updated upstream
       #uri: mongodb://qqueueing-mongo:27017/qqueueing
       #      username: root
       #      password: example
-=======
       # uri: mongodb://qqueueing-mongo:27017/qqueueing
       username: root
       password: example
 
->>>>>>> Stashed changes
   threads:
     virtual:
       enabled: true
@@ -56,22 +53,9 @@ management:
         include: "*"
       base-path: "/monitoring"
       cors:
-<<<<<<< Updated upstream
-        # for test
-        allowed-origins: "*"
-        # real
-#        allowed-origins:
-#          - http://k10a401.p.ssafy.io/3001
-#          - https://k10a401.p.ssafy.io/3001
-#          - http://localhost:3001
-        allowed-headers: "*"
-        allowed-methods: GET, POST, PATCH, DELETE, OPTIONS
-
-=======
         allowed-origins: "*"
         allowed-headers: "*"
         allowed-methods: GET, POST, PATCH, DELETE, OPTIONS
->>>>>>> Stashed changes
   info:
     java:
       enabled: true

@@ -87,11 +87,7 @@ def insert_location(fulltext, url):
     if check == -1:
         print('check your url is valid')
         exit(1)
-<<<<<<< Updated upstream
-    waiting_view_url = "http://" + host + f':3001/waiting/1?target-url={url}'
-=======
     waiting_view_url = "http://" + host + f':3001/waiting/1?Target-URL={url}'
->>>>>>> Stashed changes
     insert_text =f''
 
     insert_text+=f'location  {endpoint} {{ '
