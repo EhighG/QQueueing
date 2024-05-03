@@ -33,7 +33,7 @@ public class Q2SyncAdapterImpl implements Q2SyncAdapter {
             Optional<Object> response = request(q2ClientRequest, urlConnection);
             urlConnection.disconnect();
 
-            if (response.orElseThrow(IOException::new) instanceof Q2ServerResponse qqResponse) {
+            if (response.orElseThrow(() -> new IOException("No response.")) instanceof Q2ServerResponse qqResponse) {
                 return qqResponse;
             } else {
                 throw new ClassCastException("The response is not Q2ServerResponse type.");
