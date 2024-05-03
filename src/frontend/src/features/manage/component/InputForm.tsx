@@ -62,12 +62,12 @@ const InputForm = () => {
           />
           <div className="flex w-full justify-around">
             <Link href="/waiting/1">
-              <Button type="button" style="square">
+              <Button type="button" edgeType="square">
                 미리 보기
               </Button>
             </Link>
             <Button
-              style="square"
+              edgeType="square"
               onClick={() =>
                 mutation.mutate({
                   targetUrl,
