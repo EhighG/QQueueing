@@ -22,8 +22,6 @@ public class Q2SyncAdapterImpl implements Q2SyncAdapter {
     private final Collection<? extends Q2Requester> q2Requesters;
 
     public Q2SyncAdapterImpl(HttpURLConnection urlConnection, Collection<? extends Q2Requester> q2Requesters) {
-        assert urlConnection != null && q2Requesters != null && !q2Requesters.isEmpty();
-
         this.urlConnection = urlConnection;
         this.q2Requesters = q2Requesters;
     }
