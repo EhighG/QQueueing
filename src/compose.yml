@@ -7,8 +7,23 @@ services:
     ports:
       - "8081:8081"
     image: qqueueing-main
+    #    privileged: true
     networks:
       - qqueueing-network
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/home/qqueueing/S10P31A401/src/pipes:/pipes"
+
+  qqueueing-mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - qqueueing-network
+
 
   qqueueing-consumer:
     build:
