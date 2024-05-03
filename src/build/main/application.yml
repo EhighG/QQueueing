@@ -21,7 +21,8 @@ spring:
   data:
     mongodb:
       uri: mongodb://qqueueing-mongo:27017/qqueueing
-
+      username: root
+      password: example
   threads:
     virtual:
       enabled: true
