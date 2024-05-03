@@ -13,4 +13,7 @@ WORKDIR /$app
 COPY --from=builder /$app/.next ./.next
 COPY --from=builder /$app/package.json /$app/next.config.mjs ./
 COPY --from=builder /$app/node_modules ./node_modules
-CMD ["npm", "start"]
+#CMD ["npm", "start"]
+COPY --from=builder /$app .
+
+CMD ["npm", "run", "dev"]
