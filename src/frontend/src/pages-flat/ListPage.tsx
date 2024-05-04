@@ -14,9 +14,8 @@ const ListPage = () => {
         <div className="flex flex-1 flex-col max-2xl:m-5 m-10">
           <WaitingTable waitingList={data ?? []} />
           <div className="flex justify-end items-center gap-[10px] h-[60px] mt-2">
-            <Button style="square">변경</Button>
             <Link href="/regist">
-              <Button style="square">등록</Button>
+              <Button edgeType="square">등록</Button>
             </Link>
           </div>
         </div>
