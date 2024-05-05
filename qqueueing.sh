@@ -3,6 +3,7 @@
 ##################################PATH SETTING##################################
 ################################################################################
 URL=k10a401.p.ssafy.io
+COMPOSE_PATH=src/compose.yml
 
 ################################################################################
 ################################################################################
@@ -24,6 +25,14 @@ usage() {
     printf "\n"
 }
 
+make_env() {
+	tee .env << EOF
+ROOT_DIR=$(git rev-parse --show-toplevel)
+EOF
+
+echo "initial env created"
+}
+
 # need to verify docker, compose exists
 # need to check their version
 # need to check user set files
@@ -43,7 +52,17 @@ case $1 in
   
 
   start)
-    docker-compose up -d
+	# if end, need to be deleted
+	if [[ -z .env ]];then
+		echo "first install"
+		make_env
+	fi
+
+	mkfifo src/pipes/pipe
+	sudo -s source src/pipes/listen.sh &
+	echo $! > src/pipes/id.txt
+	exit 0
+    docker-compose up -f $COMPOSE_PATH -d
     if [[ "${FOLLOW_OPENVIDU_LOGS}" == "true" ]]; then
       docker-compose logs -f --tail 10 openvidu-server
     fi
@@ -76,39 +95,11 @@ case $1 in
     kurento_logs "$2"
     ;;
 
-  upgrade)
-    if [ -z "$2" ]; then
-      UPGRADE_VERSION="latest"
-    else
-      UPGRADE_VERSION="$2"
-    fi
-
-    read -r -p "  You're about to update OpenVidu CE to '${UPGRADE_VERSION}' version. Are you sure? [y/N]: " response
-    case "$response" in
-      [yY][eE][sS]|[yY])
-        upgrade_ov "${UPGRADE_VERSION}"
-        ;;
-      *)
-        exit 0
-        ;;
-    esac
-    ;;
 
   version)
     version_ov
     ;;
 
-  report)
-    read -r -p "  You are about to generate a report on the current status of Openvidu, this may take some time. Do you want to continue? [y/N]: " response
-    case "$response" in
-      [yY][eE][sS]|[yY])
-        generate_report
-        ;;
-      *)
-        exit 0
-        ;;
-    esac
-    ;;
   *)
     usage
     ;;
