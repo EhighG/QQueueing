@@ -53,11 +53,13 @@ case $1 in
 
   start)
 	# if end, need to be deleted
-	if [[ -z .env ]];then
-		echo "first install"
-		make_env
-	fi
+#	if [[ -z .env ]];then
+#		echo "first install"
+#		make_env
+#	fi
 
+	make_env
+	exit 0
 	mkfifo src/pipes/pipe
 	sudo -s source src/pipes/listen.sh &
 	echo $! > src/pipes/id.txt
