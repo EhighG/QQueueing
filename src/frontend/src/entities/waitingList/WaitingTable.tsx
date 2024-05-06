@@ -1,11 +1,14 @@
+"use client";
 import React from "react";
 import { WaitingListType } from "./type";
+import { useRouter } from "next/navigation";
 
 type waitingListType = {
   waitingList: WaitingListType[];
 };
 
 const WaitingTable = ({ waitingList }: waitingListType) => {
+  const router = useRouter();
   return (
     <table className="flex flex-col flex-1 rounded-md shadow-lg border">
       <thead>
@@ -22,7 +25,10 @@ const WaitingTable = ({ waitingList }: waitingListType) => {
           waitingList.map((item) => (
             <tr
               key={item.targetUrl}
-              className="flex items-center w-full text-center border-b border-black h-[60px]"
+              className="flex items-center w-full text-center border-b border-black h-[60px] cursor-pointer"
+              onClick={() => {
+                router.push("/manage/1");
+              }}
             >
               <td className="w-[12.5%]">1</td>
               <td className="w-[25%]">{item.targetUrl}</td>

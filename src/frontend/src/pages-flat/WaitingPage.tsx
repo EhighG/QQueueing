@@ -15,7 +15,7 @@ const WaitingPage = () => {
   const [idx, setIdx] = useState<number>(-1);
   const [idVal, setIdVal] = useState<string>("");
   const [partitionNo, setPartitionNo] = useState<number>(-1);
-  const { data: enqueueInfo } = useEnqueue("targetUrl");
+  const { data: enqueueInfo } = useEnqueue(targetUrl);
   const { data: waitingInfo } = useGetWaitingInfo(partitionNo, idx, idVal);
   const { data: waitingOut, refetch: handleButton } = useGetWaitingOut(
     partitionNo,
@@ -36,6 +36,7 @@ const WaitingPage = () => {
   }, [enqueueInfo]);
 
   useEffect(() => {
+    console.log("waitingInfo", waitingInfo);
     if (waitingInfo?.redirectUrl) {
       router.push(waitingInfo?.redirectUrl);
     }
