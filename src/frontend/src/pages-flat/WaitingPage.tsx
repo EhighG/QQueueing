@@ -37,7 +37,7 @@ const WaitingPage = () => {
     if (waitingOut) {
       router.back();
     }
-  }, [waitingOut]);
+  }, [waitingOut, router]);
 
   useEffect(() => {
     if (enqueueInfo) {
