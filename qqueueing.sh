@@ -27,13 +27,29 @@ usage() {
 
 make_env() {
 	tee .env << EOF
+################################################################################
+####################################SETTING#####################################
+################################################################################
+# This file is for your customization.
+
+# This var should not be changed unless you change your project directory.
 ROOT_DIR=$(git rev-parse --show-toplevel)
+
 EOF
 
 echo "initial env created"
 }
 
 # need to verify docker, compose exists
+docker -v && docker compose version ||\
+	echo "Make sure you installed docker and compose"
+if [[ -z $(groups | grep docker) ]]; then
+	echo "add user in docker group to avoid additional sudo privileges"
+	sudo usermod -aG docker ${USER} 
+	sudo service docker restart
+	echo "Please enter into new terminal. "
+	exit 0
+fi
 # need to check their version
 # need to check user set files
 case $1 in
@@ -53,18 +69,22 @@ case $1 in
 
   start)
 	# if end, need to be deleted
-#	if [[ -z .env ]];then
-#		echo "first install"
-#		make_env
-#	fi
+	if [[ ! -e .env ]];then
+		make_env
+	fi
 
-	make_env
-	exit 0
+	if [[ -e src/pipes/id.txt ]];then
+		echo "reconnect pipe"
+		sudo kill $(cat src/pipes/id.txt)
+		sudo rm src/pipes/id.txt src/pipes/pipe
+	fi
+
 	mkfifo src/pipes/pipe
 	sudo -s source src/pipes/listen.sh &
 	echo $! > src/pipes/id.txt
+    docker compose -f $COMPOSE_PATH up -d
+	#docker compose -f $COMPOSE_PATH up qqueueing-main
 	exit 0
-    docker-compose up -f $COMPOSE_PATH -d
     if [[ "${FOLLOW_OPENVIDU_LOGS}" == "true" ]]; then
       docker-compose logs -f --tail 10 openvidu-server
     fi
