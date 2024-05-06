@@ -1,13 +1,14 @@
 import { axiosInstance } from "@/shared";
 import { AxiosInstance } from "axios";
 import { infoType, statusType } from "./type";
+import { ResponseType } from "..";
 
 const instance: AxiosInstance = axiosInstance();
 
 // 대기열 입장
 const postEnqueue = async (target: string): Promise<infoType> => {
   return await instance
-    .post<infoType>(
+    .post<ResponseType<infoType>>(
       "/waiting",
       {},
       {
@@ -17,7 +18,7 @@ const postEnqueue = async (target: string): Promise<infoType> => {
         },
       }
     )
-    .then(({ data }) => data);
+    .then(({ data }) => data.result);
 };
 
 // 현재 나의 순번 조회
@@ -27,7 +28,7 @@ const getWaitingInfo = async (
   idVal: string
 ) => {
   return await instance
-    .post<statusType>(`/waiting/order`, {
+    .post<any>(`/waiting/order`, {
       partitionNo,
       order,
       idVal,
