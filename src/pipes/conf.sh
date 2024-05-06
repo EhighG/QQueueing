@@ -17,8 +17,11 @@ NGINX_PATH="/etc/nginx"
 URL_PATH=$1
 COMPLETE_FILE="/complete.conf"
 
+# this is for test
 sudo rm -rf $NGINX_PATH
+
 #1 copy nginx files from container
+# todo: if user have nginx in host, need to handle that
 if test -d $NGINX_PATH
 then echo "path already exists"
 	exit 0
