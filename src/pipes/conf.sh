@@ -1,12 +1,15 @@
 #!/bin/bash
 echo "set nginx!!"
 
+echo "initialize nginx for test"
+GIT_ROOT=$(git rev-parse --show-toplevel)
+$GIT_ROOT/test/test.sh nginx -d
+
 if [[ -z $1 ]]; then
 	echo "no input"
 	exit 1
 fi
 
-#./test.sh nginx -d
 
 #0 set variable
 CONTAINER_NAME="test-nginx"
@@ -14,8 +17,11 @@ NGINX_PATH="/etc/nginx"
 URL_PATH=$1
 COMPLETE_FILE="/complete.conf"
 
+# this is for test
 sudo rm -rf $NGINX_PATH
+
 #1 copy nginx files from container
+# todo: if user have nginx in host, need to handle that
 if test -d $NGINX_PATH
 then echo "path already exists"
 	exit 0
