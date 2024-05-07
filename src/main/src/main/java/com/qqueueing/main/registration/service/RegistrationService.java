@@ -18,10 +18,12 @@ public class RegistrationService {
 //    @Autowired
     private RegistrationRepository registrationRepository;
     private final WaitingService waitingService;
+    private final ScriptExecService scriptExecService;
     private final int MAX_PARTITION_INDEX;
-    public RegistrationService(RegistrationRepository registrationRepository, WaitingService waitingService,
+    public RegistrationService(RegistrationRepository registrationRepository, ScriptExecService scriptExecService, WaitingService waitingService,
                                @Value("${kafka.partition.max-index}") int maxPartitionIndex) {
         this.registrationRepository = registrationRepository;
+        this.scriptExecService = scriptExecService;
         this.waitingService = waitingService;
         this.MAX_PARTITION_INDEX = maxPartitionIndex;
     }
@@ -30,6 +32,8 @@ public class RegistrationService {
         // 카프카에 저장할 빈 공간(=파티션) 키를 찾는다.
         registration.setPartitionNo(findEmptyPartitionNo());
         Registration savedRegistration = registrationRepository.save(registration);
+        // 등록 스크립트 실행
+        scriptExecService.execShell(registration.getTargetUrl(), "register");
         // 대기열 기능에서 쓰이는 url-파티션 키 매핑에 추가한다.
         waitingService.addUrlPartitionMapping(registration.getTargetUrl());
         return savedRegistration;
@@ -55,6 +59,9 @@ public class RegistrationService {
         if (!registrationRepository.existsById(id)) {
             throw new ChangeSetPersister.NotFoundException();
         }
+        Registration registration = registrationRepository.findById(id)
+                .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
+        scriptExecService.execShell(registration.getTargetUrl(), "delete");
         registrationRepository.deleteById(id);
     }
 
