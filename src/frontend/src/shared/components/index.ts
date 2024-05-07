@@ -4,3 +4,4 @@ export { SectionTitle } from "./SectionTitle";
 export { Button } from "./Button";
 export { PerformanceCard } from "./PerformanceCard";
 export { Input } from "./Input";
+export { SelectBox } from "./SelectBox";
