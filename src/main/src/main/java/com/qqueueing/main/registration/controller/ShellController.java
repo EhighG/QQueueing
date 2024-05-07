@@ -24,7 +24,7 @@ public class ShellController {
 
 
     @GetMapping
-    public String execShell(@RequestParam String url){
+    public String execRegShell(@RequestParam String url, @RequestParam String param){
         try {
             // os check
             boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
@@ -36,13 +36,29 @@ public class ShellController {
             System.out.println(":: execDirectory is "+ PATH);
             if (isWindows)
             {
-                pb.command("cmd.exe", "/c", fileNm, "\"" + url + "\"");
+                String tmp;
+                if (param.equals("register")) {
+                    tmp = "echo 'bash " + fileNm + " register " + url + "' > pipe";
+                } else if (param.equals("delete")) {
+                    tmp = "echo 'bash " + fileNm + " delete " + url + "' > pipe";
+                } else {
+                    throw new IllegalArgumentException("Invalid requestParam value");
+                }
+                System.out.println(tmp);
+                pb.command("cmd.exe", "/c", tmp);
             }
             else
             {
-							String tmp = "echo 'bash " + fileNm + " "+ url + "' > pipe";
-							System.out.println(tmp);
-              pb.command("bash", "-c", tmp);
+                String tmp;
+                if (param.equals("register")) {
+                    tmp = "echo 'bash " + fileNm + " register " + url + "' > pipe";
+                } else if (param.equals("delete")) {
+                    tmp = "echo 'bash " + fileNm + " delete " + url + "' > pipe";
+                } else {
+                    throw new IllegalArgumentException("Invalid requestParam value");
+                }
+                System.out.println(tmp);
+                pb.command("bash", "-c", tmp);
                 //pb.command("bash",  fileNm,  url);
                //pb.command("echo", "\"", "bash", fileNm, url, "\"", ">", "pipe");
             }
@@ -76,64 +92,6 @@ public class ShellController {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             return "API request fail.";
-        }
-    }
-
-    @GetMapping("/exec")
-    public void execShell(){
-
-        try {
-//            // 스크립트 실행 전 실행 권한을 부여하는 명령어 추가
-//            ProcessBuilder pb = new ProcessBuilder();
-//            pb.command("chmod 777", PATH + fileNm);
-//
-//            // 스크립트 실행
-//            Process chmodProcess = pb.start();
-//            chmodProcess.waitFor(); // 실행이 완료될 때까지 기다림
-
-            // os check
-            boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
-            System.out.println(":: OS is "+ (isWindows ? "window" : "mac"));
-
-            // Run script
-            ProcessBuilder pb = new ProcessBuilder();
-            pb.directory(new File(PATH)); // 스크립트가 실행될 디렉토리 설정
-            System.out.println(":: execDirectory is "+ PATH);
-            if (isWindows)
-            {
-                pb.command("cmd.exe", "/c", fileNm, "\"url\"");
-            }
-            else
-            {
-                pb.command("sh", "-c", fileNm);
-            }
-
-            Process process = pb.start();
-            process.waitFor();
-
-            // Read output
-            StringBuilder output = new StringBuilder();
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line);
-            }
-
-            // 에러 스트림 읽기
-            reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-
-            // checking the command in list
-            System.out.println(":: command: " + pb.command());
-            // checking the output
-            System.out.println(output.toString());
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }
