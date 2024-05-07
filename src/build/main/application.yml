@@ -21,12 +21,8 @@ spring:
   data:
     mongodb:
       uri: mongodb://root:example@qqueueing-mongo:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1
-      #uri: mongodb://qqueueing-mongo:27017/qqueueing
-      #      username: root
-      #      password: example
       # uri: mongodb://qqueueing-mongo:27017/qqueueing
-      username: root
-      password: example
+      auto-index-creation: true  # 자동 인덱스
 
   threads:
     virtual:
