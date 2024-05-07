@@ -3,6 +3,7 @@
 ##################################PATH SETTING##################################
 ################################################################################
 URL=k10a401.p.ssafy.io
+COMPOSE_PATH=src/compose.yml
 
 ################################################################################
 ################################################################################
@@ -15,16 +16,36 @@ usage() {
     printf "\n\tstop\t\t\tStop all services"
     printf "\n\trestart\t\t\tRestart all stopped and running services"
     printf "\n\tlogs [-f]\t\tShow openvidu logs."
-    printf "\n\tkms-logs [-f]\t\tShow kms logs"
-    printf "\n\tupgrade\t\t\tUpgrade to the latest Openvidu version"
-    printf "\n\tupgrade [version]\tUpgrade to the specific Openvidu version"
     printf "\n\tversion\t\t\tShow version of Openvidu Server"
-    printf "\n\treport\t\t\tGenerate a report with the current status of Openvidu"
     printf "\n\thelp\t\t\tShow help for openvidu command"
     printf "\n"
 }
 
+make_env() {
+	tee .env << EOF
+################################################################################
+####################################SETTING#####################################
+################################################################################
+# This file is for your customization.
+
+# This var should not be changed unless you change your project directory.
+ROOT_DIR=$(git rev-parse --show-toplevel)
+
+EOF
+
+echo "initial env created"
+}
+
 # need to verify docker, compose exists
+docker -v && docker compose version ||\
+	echo "Make sure you installed docker and compose"
+if [[ -z $(groups | grep docker) ]]; then
+	echo "add user in docker group to avoid additional sudo privileges"
+	sudo usermod -aG docker ${USER} 
+	sudo service docker restart
+	echo "Please enter into new terminal. "
+	exit 0
+fi
 # need to check their version
 # need to check user set files
 case $1 in
@@ -32,29 +53,40 @@ case $1 in
 	if [[ -z $2 ]];then
 	  printf "\tno extra input\n"
 	  printf "\tbuild all application\n"
-	  bash $PWD/src/build/main/build.sh
 	fi
+    docker compose -f $COMPOSE_PATH build
 	echo "build images to run containers"
-	echo $PWD
-
-	# front, main, con, pro, kaf, 
 	;;
 
   
 
   start)
-    docker-compose up -d
-    if [[ "${FOLLOW_OPENVIDU_LOGS}" == "true" ]]; then
-      docker-compose logs -f --tail 10 openvidu-server
-    fi
+	# if end, need to be deleted
+	if [[ ! -e .env ]];then
+		make_env
+	fi
+
+	if [[ -e src/pipes/id.txt ]];then
+		echo "reconnect pipe"
+		sudo kill $(cat src/pipes/id.txt)
+		sudo rm src/pipes/id.txt src/pipes/pipe
+	fi
+
+	mkfifo src/pipes/pipe
+	sudo -s source src/pipes/listen.sh &
+	echo $! > src/pipes/id.txt
+    docker compose -f $COMPOSE_PATH build
+    docker compose -f $COMPOSE_PATH up -d
     ;;
 
   stop)
-    docker-compose down
+    docker compose -f $COMPOSE_PATH down
+	sudo kill $(cat src/pipes/id.txt)
+	sudo rm src/pipes/id.txt src/pipes/pipe
     ;;
 
   restart)
-    docker-compose down
+    docker compose -f $COMPOSE_PATH down
     docker-compose up -d
     if [[ "${FOLLOW_OPENVIDU_LOGS}" == "true" ]]; then
       docker-compose logs -f --tail 10 openvidu-server
@@ -72,43 +104,11 @@ case $1 in
     esac
     ;;
 
-  kms-logs)
-    kurento_logs "$2"
-    ;;
-
-  upgrade)
-    if [ -z "$2" ]; then
-      UPGRADE_VERSION="latest"
-    else
-      UPGRADE_VERSION="$2"
-    fi
-
-    read -r -p "  You're about to update OpenVidu CE to '${UPGRADE_VERSION}' version. Are you sure? [y/N]: " response
-    case "$response" in
-      [yY][eE][sS]|[yY])
-        upgrade_ov "${UPGRADE_VERSION}"
-        ;;
-      *)
-        exit 0
-        ;;
-    esac
-    ;;
 
   version)
     version_ov
     ;;
 
-  report)
-    read -r -p "  You are about to generate a report on the current status of Openvidu, this may take some time. Do you want to continue? [y/N]: " response
-    case "$response" in
-      [yY][eE][sS]|[yY])
-        generate_report
-        ;;
-      *)
-        exit 0
-        ;;
-    esac
-    ;;
   *)
     usage
     ;;
