@@ -1,5 +1,5 @@
 type WaitingListType = {
-  id: number;
+  id: string;
   targetUrl: string;
   maxCapacity: number;
   processingPerMinute: number;

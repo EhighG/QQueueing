@@ -1,58 +1,77 @@
 "use client";
 import { WaitingListType } from "@/entities/waitingList/type";
-import { Button, Input } from "@/shared";
-import { useMutation } from "@tanstack/react-query";
+import { Button, Input, SelectBox } from "@/shared";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { postWaiting } from "../..";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useRegistWaiting } from "..";
 
 type InputFormProps = {
-  setWaitingInfo: (data: Omit<WaitingListType, "id" | "queueImageUrl">) => void;
+  waitingInfo?: WaitingListType;
+  setWaitingInfo?: Dispatch<SetStateAction<WaitingListType>>;
 };
-
-const InputForm = () => {
+const InputForm = ({ waitingInfo, setWaitingInfo }: InputFormProps) => {
   const [targetUrl, setTargetUrl] = useState<string>("");
   const [maxCapacity, setMaxCapacity] = useState<number>(0);
   const [processingPerMinute, setProcessingPerMinute] = useState<number>(0);
   const [serviceName, setServiceName] = useState("");
 
-  // 대기열 등록
-  const mutation = useMutation({
-    mutationFn: postWaiting,
-    onSuccess: (response) => {
-      alert("success");
-      console.log(response);
-    },
-    onError: () => {
-      alert("error occur");
-    },
+  useEffect(() => {
+    if (waitingInfo) {
+      setTargetUrl(waitingInfo.targetUrl);
+      setMaxCapacity(waitingInfo.maxCapacity);
+      setProcessingPerMinute(waitingInfo.processingPerMinute);
+      setServiceName(waitingInfo.serviceName);
+    }
+  }, [waitingInfo]);
+
+  useEffect(() => {
+    if (!waitingInfo) return;
+    setTargetUrl(targetUrl);
+    setMaxCapacity(maxCapacity);
+    setProcessingPerMinute(processingPerMinute);
+    setServiceName(serviceName);
+    setWaitingInfo &&
+      setWaitingInfo((prev) => ({
+        ...prev,
+        targetUrl,
+        maxCapacity,
+        processingPerMinute,
+        serviceName,
+      }));
+  }, [targetUrl, maxCapacity, processingPerMinute, serviceName]);
+
+  const { mutate: registHandle } = useRegistWaiting({
+    targetUrl,
+    maxCapacity,
+    processingPerMinute,
+    serviceName,
   });
 
   return (
     <div className="flex flex-1 flex-col  items-center">
       <div className="flex flex-1 flex-col w-full p-10">
-        <div className="flex flex-col flex-1  gap-5">
+        <form className="flex flex-col flex-1  gap-5">
           <Input
             label="대기열 등록 대상 URL"
             title="대기열 등록 대상 URL"
             value={targetUrl}
             onChange={(e) => setTargetUrl(e.target.value)}
           />
-          <Input
-            label="최대 수용 인원"
-            title="최대 수용 인원"
-            type="number"
-            value={maxCapacity}
-            onChange={(e) => setMaxCapacity(parseInt(e.target.value))}
-          />
-          <Input
-            label="1분 당 처리 인원"
-            title=" 1분 당 처리 인원"
-            type="number"
-            min={0}
-            value={processingPerMinute}
-            onChange={(e) => setProcessingPerMinute(parseInt(e.target.value))}
-          />
+          <div className="flex justify-around gap-2">
+            <SelectBox
+              label="최대 수용 인원"
+              step={100}
+              onChange={setMaxCapacity}
+              value={maxCapacity}
+            />
+
+            <SelectBox
+              label="1분 당 처리 가능 인원"
+              step={10}
+              onChange={setProcessingPerMinute}
+              value={processingPerMinute}
+            />
+          </div>
           <Input
             label="서비스 명"
             title="서비스 명"
@@ -66,21 +85,11 @@ const InputForm = () => {
                 미리 보기
               </Button>
             </Link>
-            <Button
-              edgeType="square"
-              onClick={() =>
-                mutation.mutate({
-                  targetUrl,
-                  maxCapacity,
-                  processingPerMinute,
-                  serviceName,
-                })
-              }
-            >
+            <Button edgeType="square" onClick={() => registHandle()}>
               등록
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

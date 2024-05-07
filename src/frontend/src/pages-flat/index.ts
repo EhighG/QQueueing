@@ -12,3 +12,4 @@ export { default as DocsPage } from "./DocsPage";
 export { default as ExamplePage } from "./ExamplePage";
 export { default as LicensePage } from "./LicensePage";
 export { default as ContributingPage } from "./ContributingPage";
+export { default as Login } from "./Login";

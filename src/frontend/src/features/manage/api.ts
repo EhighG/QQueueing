@@ -13,12 +13,14 @@ const getWaitingList = async () => {
 };
 
 // 대기열 등록
-const postWaiting = async (
-  data: Omit<WaitingListType, "id" | "queueImageUrl">
-) => {
+const postWaiting = async (data: Partial<WaitingListType>) => {
   return await instance
     .post<ResponseType<WaitingListType>>("/queue", data)
     .then(({ data }) => data.result);
+};
+
+const getWaitingDetail = async (id: string) => {
+  return await instance.get(`/queue/${id}`).then(({ data }) => data.result);
 };
 
 // 대기열 활성화
@@ -35,9 +37,22 @@ const postWaitingDeActivate = async (partitionNo: number) => {
     .then(({ data }) => data);
 };
 
+// 대기열 수정
+const patchWaiting = async (id: string, data: WaitingListType) => {
+  return await instance.patch(`/queue/${id}`, data).then(({ data }) => data);
+};
+
+// 대기열 삭제
+const deleteWaiting = async (id: string) => {
+  return await instance.delete(`/queue/${id}`).then(({ data }) => data.result);
+};
+
 export {
   getWaitingList,
+  getWaitingDetail,
+  patchWaiting,
   postWaiting,
   postWaitingActivate,
   postWaitingDeActivate,
+  deleteWaiting,
 };
