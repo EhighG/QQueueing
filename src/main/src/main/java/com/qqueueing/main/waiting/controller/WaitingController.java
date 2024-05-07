@@ -2,6 +2,7 @@ package com.qqueueing.main.waiting.controller;
 
 
 import com.qqueueing.main.common.SuccessResponse;
+import com.qqueueing.main.waiting.model.EnterQueueResDto;
 import com.qqueueing.main.waiting.model.GetMyOrderReqDto;
 import com.qqueueing.main.waiting.model.GetMyOrderResDto;
 import com.qqueueing.main.waiting.service.WaitingService;
@@ -33,36 +34,37 @@ public class WaitingController {
     @PostMapping
     public ResponseEntity<?> enter(HttpServletRequest request, HttpServletResponse response) {
         Object result = waitingService.enter(request);
-        if (result != null) {
-            return ResponseEntity
-                    .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
-        }
-        try {
-            // 대기열 비활성화 시 -> redirect
-            return ResponseEntity
-                    .status(302)
-                    .location(new URI(frontUrl))
-                    .build();
-        } catch (URISyntaxException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("리다이렉트 설정 중 에러");
-        }
+        String resMsg = result instanceof EnterQueueResDto ? "대기열에 입장되었습니다." : "요청에 성공했습니다";
+        return ResponseEntity
+                .ok(new SuccessResponse(HttpStatus.OK.value(), resMsg, result));
+//        try {
+//            // 대기열 비활성화 시 -> redirect
+//            return ResponseEntity
+//                    .status(302)
+//                    .location(new URI(frontUrl))
+//                    .build();
+//        } catch (URISyntaxException e) {
+//            log.error(e.getMessage());
+//            throw new RuntimeException("리다이렉트 설정 중 에러");
+//        }
     }
 
 
     @PostMapping("/order")
     public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto,
                                         HttpServletRequest request) {
-        Object myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getPartitionNo(),
+        GetMyOrderResDto myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getPartitionNo(),
                 getMyOrderReqDto.getOrder(),
                 getMyOrderReqDto.getIdVal(),
                 request);
-        if (myOrderRes instanceof GetMyOrderResDto) {
-            return ResponseEntity
-                    .ok(myOrderRes);
-        } else {
-            return (ResponseEntity<?>) myOrderRes;
-        }
+        return ResponseEntity
+                .ok(myOrderRes);
+    }
+
+    @GetMapping("/page-req")
+    public ResponseEntity<?> forwardToTarget(@RequestParam String token,
+                                             HttpServletRequest request) {
+        return waitingService.forwardToTarget(token, request);
     }
 
     @GetMapping("/out")

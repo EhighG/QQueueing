@@ -3,7 +3,6 @@ import { LinkButton } from "@/shared";
 import HomeIcon from "@mui/icons-material/Home";
 import ListIcon from "@mui/icons-material/List";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import InfoIcon from "@mui/icons-material/Info";
 import ArticleIcon from "@mui/icons-material/Article";
 import TerminalIcon from "@mui/icons-material/Terminal";
@@ -35,13 +34,6 @@ const NavMenu = () => {
               icon={<AddCircleOutlineIcon />}
               href="/regist"
               title="등록 하기"
-            />
-          </dd>
-          <dd>
-            <LinkButton
-              icon={<MonitorHeartIcon />}
-              href="/manage"
-              title="대기열 상태 관리"
             />
           </dd>
         </dl>

@@ -28,7 +28,7 @@ const getWaitingInfo = async (
   idVal: string
 ) => {
   return await instance
-    .post<any>(`/waiting/order`, {
+    .post<statusType>(`/waiting/order`, {
       partitionNo,
       order,
       idVal,

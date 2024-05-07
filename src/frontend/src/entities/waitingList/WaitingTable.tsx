@@ -13,7 +13,6 @@ const WaitingTable = ({ waitingList }: waitingListType) => {
     <table className="flex flex-col flex-1 rounded-md shadow-lg border">
       <thead>
         <tr className="flex items-center w-full text-center border-b border-slate-300 text-[1.5rem] font-bold h-[60px]">
-          <th className="w-[12.5%]">ID</th>
           <th className="w-[25%]">등록 URL</th>
           <th className="w-[25%]">최대 수용 인원</th>
           <th className="w-[25%]">예상 수용</th>
@@ -27,10 +26,9 @@ const WaitingTable = ({ waitingList }: waitingListType) => {
               key={item.targetUrl}
               className="flex items-center w-full text-center border-b border-black h-[60px] cursor-pointer"
               onClick={() => {
-                router.push("/manage/1");
+                router.push(`/manage/${item.id}`);
               }}
             >
-              <td className="w-[12.5%]">1</td>
               <td className="w-[25%]">{item.targetUrl}</td>
               <td className="w-[25%]">{item.maxCapacity}</td>
               <td className="w-[25%]">{item.processingPerMinute}</td>

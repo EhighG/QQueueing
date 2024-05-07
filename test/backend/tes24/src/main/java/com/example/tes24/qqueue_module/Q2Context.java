@@ -23,21 +23,16 @@ public class Q2Context {
     }
 
     private static final Collection<? extends Q2Requester> Q_2_REQUESTERS;
-
     private static final Collection<? extends Q2SyncAdapterFactory> Q_2_SYNC_ADAPTER_FACTORIES;
 
     private static Q2HttpHeaderProperties defaultHeaderProperties;
     private static Q2HttpHeaderProperties monitorHeaderProperties;
 
     public static Collection<? extends Q2Requester> getQ2Requesters() {
-        assert Q_2_REQUESTERS != null && Q_2_REQUESTERS.size() > 0;
-
         return Q_2_REQUESTERS;
     }
 
     public static Collection<? extends Q2SyncAdapterFactory> getQ2SyncAdapterFactories() {
-        assert Q_2_SYNC_ADAPTER_FACTORIES != null && Q_2_SYNC_ADAPTER_FACTORIES.size() > 0;
-
         return Q_2_SYNC_ADAPTER_FACTORIES;
     }
 

@@ -45,14 +45,10 @@ public class Q2Client {
     }
 
     public static Q2Client getQ2Client() {
-         assert instance != null;
-
         return instance;
     }
 
     public Q2ServerResponse request(Q2HttpHeader httpHeader, Q2ClientRequest request) {
-        assert httpHeader != null;
-
         reentrantLock.lock();
         try {
             return delegator.delegate(httpHeader, request);
