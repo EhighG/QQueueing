@@ -1,9 +1,11 @@
 package com.qqueueing.main.registration.service;
 
 import com.qqueueing.main.registration.model.Registration;
+import com.qqueueing.main.registration.model.RegistrationUpdateRequest;
 import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.waiting.service.WaitingService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,6 +38,33 @@ public class RegistrationService {
     public List<Registration> getAllRegistrations() {
         return registrationRepository.findAll();
     }
+
+    public Registration getRegistrationById(String id) throws ChangeSetPersister.NotFoundException {
+        return registrationRepository.findById(id)
+                .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
+    }
+
+    public Registration updateRegistrationById(String id, RegistrationUpdateRequest request) throws ChangeSetPersister.NotFoundException {
+        Registration registration = registrationRepository.findById(id)
+                .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
+        registration.update(request.getTargetUrl(), request.getMaxCapacity(), request.getProcessingPerMinute(), request.getServiceName(), registration.getQueueImageUrl());
+        return registrationRepository.save(registration);
+    }
+
+    public void deleteRegistrationById(String id) throws ChangeSetPersister.NotFoundException {
+        if (!registrationRepository.existsById(id)) {
+            throw new ChangeSetPersister.NotFoundException();
+        }
+        registrationRepository.deleteById(id);
+    }
+
+//    public Registration createRegistration(Registration registration) {
+//        return registrationRepository.save(registration);
+//    }
+//    public Registration createRegistration(Registration registration) {
+//        return registrationRepository.save(registration);
+//    }
+
 
     private int findEmptyPartitionNo() {
         Set<Integer> assigned = registrationRepository.findAll().stream()
