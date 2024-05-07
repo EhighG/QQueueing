@@ -50,16 +50,6 @@ services:
     networks:
       - qqueueing-network
 
-  qqueueing-producer:
-    build:
-      context: .
-      dockerfile: build/consumer/Dockerfile
-    image: qqueueing-producer
-    depends_on:
-      - qqueueing-kafka
-      - qqueueing-rdbms
-    networks:
-      - qqueueing-network
 
   qqueueing-zookeeper:
     image: bitnami/zookeeper:3.9

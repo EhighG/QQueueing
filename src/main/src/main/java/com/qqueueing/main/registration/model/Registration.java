@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +25,7 @@ public class Registration {
     @Id
     private String id; // 자동 생성되는 식별자
     private String topicName;
+    @Indexed(unique = true)
     private String targetUrl;
     private Integer maxCapacity; // 최대 수용 인원
     private Integer processingPerMinute; // 1분당 처리 인원
@@ -48,6 +50,24 @@ public class Registration {
         } catch (Exception e) {
             // 파일 저장 실패 시 예외 처리
             // 예외 처리 로직 추가
+        }
+    }
+
+    public void update(String targetUrl, Integer maxCapacity, Integer processingPerMinute, String serviceName, String queueImageUrl) {
+        if (targetUrl != null) {
+            this.targetUrl = targetUrl;
+        }
+        if (maxCapacity != null) {
+            this.maxCapacity = maxCapacity;
+        }
+        if (processingPerMinute != null) {
+            this.processingPerMinute = processingPerMinute;
+        }
+        if (serviceName != null) {
+            this.serviceName = serviceName;
+        }
+        if (queueImageUrl != null) {
+            this.queueImageUrl = queueImageUrl;
         }
     }
 

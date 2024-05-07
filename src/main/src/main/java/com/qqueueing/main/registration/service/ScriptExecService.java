@@ -1,30 +1,22 @@
-package com.qqueueing.main.registration.controller;
+package com.qqueueing.main.registration.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
-@RestController
-@RequestMapping("/shell")
-@Slf4j
-public class ShellController {
-
+@Service
+public class ScriptExecService {
     @Value("${shell.path}")
     private String PATH;
 
     @Value("${shell.fileNm}")
     private String fileNm;
 
-
-    @GetMapping
-    public String execRegShell(@RequestParam String url, @RequestParam String param){
+    public String execShell(String url, String param){
         try {
             // os check
             boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
@@ -60,7 +52,7 @@ public class ShellController {
                 System.out.println(tmp);
                 pb.command("bash", "-c", tmp);
                 //pb.command("bash",  fileNm,  url);
-               //pb.command("echo", "\"", "bash", fileNm, url, "\"", ">", "pipe");
+                //pb.command("echo", "\"", "bash", fileNm, url, "\"", ">", "pipe");
             }
 
             Process process = pb.start();

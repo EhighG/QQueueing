@@ -91,11 +91,11 @@ public class WaitingService {
         // update mongodb data
         registration.setIsActive(true);
         registrationRepository.save(registration);
-        // re-init partition
-        consumerConnector.clearPartition(partitionNo);
+//        // re-init partition
+//        consumerConnector.clearPartition(partitionNo);
         log.info("activation end");
-        // re-init auto increment client order
-        enterProducer.activate(partitionNo);
+//        // re-init auto increment client order
+//        enterProducer.activate(partitionNo);
     }
 
     public void activate(int partitionNo) {
@@ -222,10 +222,18 @@ public class WaitingService {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
-        /*
-            파싱 로직 추가 위치
-         */
-        return targetApiConnector.forward(targetUrl, request);
+
+
+        String[] urlSplitList = targetUrl.split("p.ssafy.io");
+        String endPoint = urlSplitList[1];
+
+        String html = targetApiConnector.forward(token, request).getBody();
+        log.info("html : " + html);
+
+        String newHtml = html.replace("/_next", endPoint + "/_next");
+        log.info("newHtml : " + newHtml);
+
+        return ResponseEntity.ok().body(newHtml);
     }
 
     @Async
