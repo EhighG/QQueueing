@@ -67,8 +67,11 @@ public class WaitingService {
 //        if (topics.contains(TOPIC_NAME)) {
 //            kafkaTopicManager.deleteTopic(TOPIC_NAME);
 //        }
-        kafkaTopicManager.createTopic(TOPIC_NAME);
-        log.info("End -- checkTopicr");
+        if (!topics.contains(TOPIC_NAME)) {
+            log.info("topic {} not present, create...", TOPIC_NAME);
+            kafkaTopicManager.createTopic(TOPIC_NAME);
+        }
+        log.info("End -- checkTopic");
     }
 
     /**
