@@ -10,7 +10,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 #      value-deserializer: com.fasterxml.jackson.databind.JsonDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      topic: test
+      topic: test3
 
 logging:
   level:
