@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter @Setter
 public class GetMyOrderReqDto {
-    private Long waitingIdx;
+    private Long order;
     private String idVal;
-    private String topicName;
+    private Integer partitionNo;
 }
