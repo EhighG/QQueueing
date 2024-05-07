@@ -36,23 +36,37 @@ public class WaitingService {
     private Map<Integer, WaitingStatusDto> queues = new HashMap<>();
     private Map<String, Integer> partitionNoMapper = new HashMap<>();
     private Map<String, String> targetUrlMapper = new HashMap<>();
-//    private final String SERVER_ORIGIN = "https://k10a401.p.ssafy.io:8081";
+    private final KafkaTopicManager kafkaTopicManager;
     private final String SERVER_ORIGIN;
     private final String QUEUE_PAGE_API = "/waiting/queue-page";
     private final String TARGET_PAGE_URI = "/waiting/page-req";
     private final String QUEUE_PAGE_FRONT;
     private final int TOKEN_LEN = 20;
+    private final String TOPIC_NAME;
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
-                          EnterProducer enterProducer, RegistrationRepository registrationRepository,
+                          EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
                           @Value("${servers.front}") String queuePageFront,
-                          @Value("${servers.main}") String serverOrigin){
+                          @Value("${servers.main}") String serverOrigin,
+                          @Value("${kafka.topic-names}") String topicName){
+        checkTopic();
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
         this.enterProducer = enterProducer; // init every partitions
         this.registrationRepository = registrationRepository;
+        this.kafkaTopicManager = kafkaTopicManager;
         this.QUEUE_PAGE_FRONT = queuePageFront;
         this.SERVER_ORIGIN = serverOrigin;
+        this.TOPIC_NAME = topicName;
+    }
+
+    private void checkTopic() {
+        Set<String> topics = kafkaTopicManager.getTopics();
+        // for Test -- init every time main server restart
+        if (topics.contains(TOPIC_NAME)) {
+            kafkaTopicManager.deleteTopic(TOPIC_NAME);
+        }
+        kafkaTopicManager.createTopic(TOPIC_NAME);
     }
 
     /**
