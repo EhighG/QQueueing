@@ -170,6 +170,7 @@ public class WaitingService {
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
+        targetUrlMapper.remove(token);
         /*
             파싱 로직 추가 위치
          */
