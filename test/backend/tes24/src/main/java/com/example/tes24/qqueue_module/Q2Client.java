@@ -1,6 +1,5 @@
 package com.example.tes24.qqueue_module;
 
-import com.example.tes24.qqueue_module.http.ContentType;
 import com.example.tes24.qqueue_module.syncadapter.*;
 import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
 import com.example.tes24.qqueue_module.http.Q2HttpHeader;
@@ -9,9 +8,6 @@ import com.example.tes24.qqueue_module.http.urlconnection.HttpURLConnectionFacto
 import com.example.tes24.qqueue_module.http.urlconnection.HttpURLConnectionFactoryImpl;
 
 import java.net.HttpURLConnection;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -33,7 +29,6 @@ public class Q2Client {
         Q2ConfigurationLoader.load();
         instance = new Q2Client();
         reentrantLock = new ReentrantLock();
-        Q2Monitoring.initiateTimer();
     }
 
     private static final Q2Client instance;
@@ -54,29 +49,6 @@ public class Q2Client {
             return delegator.delegate(httpHeader, request);
         } finally {
             reentrantLock.unlock();
-        }
-    }
-
-    static class Q2Monitoring {
-        private static final Timer timer = new Timer();
-
-        private static final Q2HttpHeader timetQ2HttpHeader = Q2HttpHeader.fromProperties(Q2Context.getMonitorHeaderProperties());
-
-        private static final Q2ClientRequest timerQ2ClientRequest = new Q2ClientRequest();
-
-        private static final TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                Q2Client.getQ2Client().request(timetQ2HttpHeader, timerQ2ClientRequest);
-            }
-        };
-
-        private static void initiateTimer() {
-            timer.schedule(timerTask, new Date(), 5000);
-        }
-
-        private void terminateTimer() {
-            timer.cancel();
         }
     }
 }
