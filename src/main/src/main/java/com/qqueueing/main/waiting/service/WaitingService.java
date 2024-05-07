@@ -162,16 +162,22 @@ public class WaitingService {
         return result;
     }
 
+    /**
+     * 타겟 프론트 페이지 포워딩 메소드
+     */
     public ResponseEntity<String> forwardToTarget(String token, HttpServletRequest request) {
         String targetUrl = targetUrlMapper.get(token);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
+        /*
+            파싱 로직 추가 위치
+         */
         return targetApiConnector.forwardToTarget(token, request);
     }
 
     @Async
-    @Scheduled(cron = "0/5 * * * * *") // 매 분 0초부터, 3초마다
+    @Scheduled(cron = "0/5 * * * * *") // 매 분 0초부터, 5초마다
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
