@@ -27,32 +27,33 @@ public class EnterProducer {
         this.kafkaTemplate = enterMsgTemplate;
         this.TOPIC_NAME = topicName;
         this.ids = new HashMap<>();
+        initialize();
     }
 
-    public void initialize() {
+    private void initialize() {
         IntStream.range(0, 20)
-                .forEach(num -> kafkaTemplate.send(TOPIC_NAME, num, null, "re-init"));
+                .forEach(num -> kafkaTemplate.send(TOPIC_NAME, num, (long)num, "re-init"));
     }
 
     public void activate(int partitionNo) {
         ids.put(partitionNo, new AtomicLong(1L));
     }
 
-    public EnterQueueResDto send(String message, int partitionNo) {
+    public EnterQueueResDto send(String message, long key, int partitionNo) {
         AtomicLong id = ids.get(partitionNo);
-//        System.out.println("partitionNo = " + partitionNo);
-//        System.out.println("id = " + id);
+
+        if(id == null) {
+            id = new AtomicLong();
+        }
         Long curIdx = id.getAndIncrement();
         String sampleIp = message + curIdx;
-        kafkaTemplate.send(TOPIC_NAME, partitionNo, null, sampleIp); // key null 잘 되는지 체크!!
-//        EnterInfoDto enterInfoDto = new EnterInfoDto(curIdx, message);
-//        try {
-////            kafkaTemplate.send(TOPIC_NAME, partitionNo, null, mapper.writeValueAsString(enterInfoDto)); // key null 잘 되는지 체크!!
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
+
+//        log.info("기본 토픽 : " + kafkaTemplate.getDefaultTopic());
+
+        // 파티션 번호를 키로 사용하여 메시지 보냄
+        kafkaTemplate.send(TOPIC_NAME, partitionNo, key, sampleIp);
+
         return new EnterQueueResDto(partitionNo, curIdx, sampleIp);
-//        return new EnterQueueResDto(partitionNo, curIdx);
     }
 }
 
