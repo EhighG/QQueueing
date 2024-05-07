@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function Home() {
-  return <main className="flex flex-1"></main>;
+  return redirect("/dashboard");
 }

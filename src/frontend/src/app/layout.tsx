@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { RQProvider } from "@/shared";
-import { Header, NavMenu } from "@/widgets";
 
 //pretendard font 설정
 const pretendard = localFont({
@@ -30,16 +29,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={pretendard.className}>
-        <Header />
         <RQProvider>
-          <main>
-            <NavMenu />
-            <div className="flex flex-col flex-1">
-              <div className="flex flex-col flex-1 max-2xl:m-5 m-10 gap-10">
-                {children}
-              </div>
-            </div>
-          </main>
+          <>{children}</>
         </RQProvider>
       </body>
     </html>

@@ -5,9 +5,9 @@ type infoType = {
 };
 
 type statusType = {
-  myOrder: number;
-  totalQueueSize: number;
-  redirectUrl: string;
+  myOrder?: number;
+  totalQueueSize?: number;
+  token?: string;
 };
 
 export type { infoType, statusType };
