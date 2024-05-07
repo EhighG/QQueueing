@@ -24,6 +24,7 @@ spring:
 #      uri: mongodb://localhost:27017/qqueueing
       auto-index-creation: true  # 자동 인덱스
 
+
   threads:
     virtual:
       enabled: true
@@ -31,7 +32,11 @@ spring:
 
 servers: # 타 서버들의 정보 기록
   consumer: k10a401.p.ssafy.io:8082
-  front: http://k10a401.p.ssafy.io:3001
+#  consumer: localhost:8082
+  front: http://k10a401.p.ssafy.io:3001/dashboard
+  main: http://k10a401.p.ssafy.io:8081
+
+#  front: http://localhost:8081/waiting/testQueuePage
 
 kafka:
   broker: k10a401.p.ssafy.io:9092
