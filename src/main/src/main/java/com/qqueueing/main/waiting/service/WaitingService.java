@@ -72,11 +72,11 @@ public class WaitingService {
         // update mongodb data
         registration.setIsActive(true);
         registrationRepository.save(registration);
-        // re-init partition
-        consumerConnector.clearPartition(partitionNo);
+//        // re-init partition
+//        consumerConnector.clearPartition(partitionNo);
         log.info("activation end");
-        // re-init auto increment client order
-        enterProducer.activate(partitionNo);
+//        // re-init auto increment client order
+//        enterProducer.activate(partitionNo);
     }
 
     public void activate(int partitionNo) {
