@@ -10,12 +10,15 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.*;
 
 
@@ -33,14 +36,30 @@ public class WaitingService {
     private Map<Integer, WaitingStatusDto> queues = new HashMap<>();
     private Map<String, Integer> partitionNoMapper = new HashMap<>();
     private Map<String, String> targetUrlMapper = new HashMap<>();
+//    private final String SERVER_ORIGIN = "https://k10a401.p.ssafy.io:8081";
+    private final String SERVER_ORIGIN;
+    private final String QUEUE_PAGE_API = "/waiting/queue-page";
+    private final String TARGET_PAGE_URI = "/waiting/page-req";
+    private final String QUEUE_PAGE_FRONT;
     private final int TOKEN_LEN = 20;
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
-                          EnterProducer enterProducer, RegistrationRepository registrationRepository){
+                          EnterProducer enterProducer, RegistrationRepository registrationRepository,
+                          @Value("${servers.front}") String queuePageFront,
+                          @Value("${servers.main}") String serverOrigin){
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
-        this.enterProducer = enterProducer;
+        this.enterProducer = enterProducer; // init every partitions
         this.registrationRepository = registrationRepository;
+        this.QUEUE_PAGE_FRONT = queuePageFront;
+        this.SERVER_ORIGIN = serverOrigin;
+    }
+
+    /**
+     * kafka producing test
+     */
+    public Object send(Integer partitionNo, long key, String message) {
+        return enterProducer.send(message, key, partitionNo);
     }
 
     /**
@@ -94,34 +113,66 @@ public class WaitingService {
         }
         Registration registration = registrationRepository.findByPartitionNo(partitionNo);
 
-        activePartitions.remove(partitionNo);
-        queues.remove(partitionNo);
+//        activePartitions.remove(partitionNo);
+//        queues.remove(partitionNo);
 
         // update mongodb data
         registration.setIsActive(false);
         registrationRepository.save(registration);
     }
 
-    public Object enter(HttpServletRequest request) {
-        String requestUrl = request.getHeader("Target-Url");
-        if (requestUrl == null) requestUrl = request.getRequestURL().toString();
-        log.info("requestUrl = {}", requestUrl);
-        int partitionNo = partitionNoMapper.get(requestUrl);
-
-        if (activePartitions.contains(partitionNo)) {
-            // 카프카에 요청자 Ip 저장
-            return enterProducer.send(extractClientIp(request), partitionNo);
+    /**
+     * 대기열 적용된 요청 시, 처음 거치는 메소드
+     * @param targetUrl
+     * @return redirect url; queue-page req api url || target-page req api url
+     */
+    public URI enter(String targetUrl) {
+        log.info("targetUrl = {}", targetUrl);
+        log.info("activePartitions = {}", activePartitions);
+        Integer partitionNo = partitionNoMapper.get(targetUrl);
+        if (partitionNo == null) {
+            log.error("wrong target url; proxy path applied to wrong target");
         }
-        // 대기열 비활성화 상태 -> null 반환 후, 컨트롤러에서 대기열 페이지로 리다이렉트 응답
-        return createTempToken(requestUrl);
+        log.info("partitionNo = {}", partitionNo);
+        UriComponentsBuilder uriBuilder;
+        if (activePartitions.contains(partitionNo)) { // 대기 필요
+            log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
+            uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + QUEUE_PAGE_API)
+                    .queryParam("Target-URL", targetUrl);
+            return uriBuilder.build().toUri();
+        } else { // 대기 불필요
+            log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
+            String tempToken = createTempToken(targetUrl); // 토큰 생성
+            uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + TARGET_PAGE_URI)
+                    .queryParam("token", tempToken);
+            return uriBuilder.build().toUri();
+        }
     }
+
+    public ResponseEntity<String> getQueuePage(HttpServletRequest request) {
+        return targetApiConnector.forward(QUEUE_PAGE_FRONT, request);
+    }
+
+    /**
+     * 실제 대기열 진입 메소드. 항상 대기가 필요한 경우에만 들어옴
+     * @param targetUrl
+     * @return
+     */
+    public Object enqueue(String targetUrl, HttpServletRequest request) {
+        log.info("targetUrl = {}", targetUrl);
+        Integer partitionNo = partitionNoMapper.get(targetUrl);
+
+//         카프카에 요청자 ip 저장 후, 대기 정보 반환
+        return enterProducer.send(extractClientIp(request), (long) partitionNo, partitionNo);
+    }
+
 
     private String createTempToken(String targetUrl) {
         String tempToken = RandomStringUtils.randomAlphanumeric(TOKEN_LEN);
         while (targetUrlMapper.get(tempToken) != null) {
             tempToken = RandomStringUtils.randomAlphanumeric(TOKEN_LEN);
         }
-        targetUrlMapper.put(targetUrl, tempToken);
+        targetUrlMapper.put(tempToken, targetUrl);
         return tempToken;
     }
 
@@ -165,7 +216,7 @@ public class WaitingService {
     /**
      * 타겟 프론트 페이지 포워딩 메소드
      */
-    public ResponseEntity<String> forwardToTarget(String token, HttpServletRequest request) {
+    public ResponseEntity<String> forward(String token, HttpServletRequest request) {
         String targetUrl = targetUrlMapper.get(token);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
@@ -174,7 +225,7 @@ public class WaitingService {
         /*
             파싱 로직 추가 위치
          */
-        return targetApiConnector.forwardToTarget(token, request);
+        return targetApiConnector.forward(targetUrl, request);
     }
 
     @Async

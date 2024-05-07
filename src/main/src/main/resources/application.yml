@@ -20,8 +20,8 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://root:example@k10a401.p.ssafy.io:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1
-#      uri: mongodb://localhost:27017/qqueueing
+#      uri: mongodb://root:example@k10a401.p.ssafy.io:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1
+      uri: mongodb://localhost:27017/qqueueing
 
   threads:
     virtual:
@@ -29,11 +29,15 @@ spring:
 #      enabled: false
 
 servers: # 타 서버들의 정보 기록
-  consumer: k10a401.p.ssafy.io:8082
-  front: http://k10a401.p.ssafy.io:3001
+#  consumer: k10a401.p.ssafy.io:8082
+  consumer: localhost:8082
+  front: http://k10a401.p.ssafy.io:3001/dashboard
+  main: http://k10a401.p.ssafy.io:8081
+
+#  front: http://localhost:8081/waiting/testQueuePage
 
 kafka:
-  broker: k10a401.p.ssafy.io:9092
+  broker: localhost:9092
   topic-names:
     enter: test
 
