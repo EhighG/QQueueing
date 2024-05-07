@@ -1,34 +1,43 @@
 #!/bin/bash
+
+# test
+
 if [[ -z $2 ]];then
 	echo "needed exact 2 arguements"
 	exit 1
 fi
 #0 set variable
-CONTAINER_NAME="test-nginx"
+NGINX_PID=$(ps -ef | grep "nginx: master"| head -1 | awk '{print $2 }')
+DIFF=$(diff <(sudo ls -Al /proc/1/ns | awk '{ print $11 }')  <(sudo ls -Al /proc/$NGINX_PID/ns | awk '{ print $11 }'))
+if [[ -z $DIFF ]];then
+	echo "Your nginx is in your host condition"
+else
+	echo "Your nginx is in container"
+	is_ngnix_ctnr=1
+fi
+CONTAINER_NAME=$(docker ps -a | grep ">80/tcp"| awk '{print $NF}')
 NGINX_PATH="/etc/nginx"
 URL_PATH=$2
 COMPLETE_FILE="/complete.conf"
+
 
 
 case $1 in
 	register)
 		echo "set nginx!!"
 
-		# this is only for test. must not forget
-		echo "initialize nginx for test"
-		GIT_ROOT=$(git rev-parse --show-toplevel)
-		$GIT_ROOT/test/test.sh nginx -d
-		docker network connect qqueueing_qqueueing-network $CONTAINER_NAME
-		# this is for test
-		sudo rm -rf $NGINX_PATH
+#		# this is only for test. must not forget
+#		echo "initialize nginx for test"
+#		GIT_ROOT=$(git rev-parse --show-toplevel)
+#		$GIT_ROOT/test/test.sh nginx -d
+#		docker network connect qqueueing_qqueueing-network $CONTAINER_NAME
 
 
 
 		#1 copy nginx files from container
 		# todo: if user have nginx in host, need to handle that
-		if test -d $NGINX_PATH
-		then echo "path already exists"
-			exit 0
+		if [[ -d $NGINX_PATH ]];then
+			sudo rm -rf $NGINX_PATH
 		fi
 		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
 		sudo touch $NGINX_PATH$COMPLETE_FILE
