@@ -21,6 +21,7 @@ public class TargetApiConnector {
 
     public ResponseEntity<String> forward(String targetUrl, HttpServletRequest request) {
         HttpEntity<String> httpEntity = new HttpEntity<>(getAllHeaders(request));
+        System.out.println("targetUrl = " + targetUrl);
         return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, String.class);
     }
 

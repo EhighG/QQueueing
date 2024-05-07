@@ -48,8 +48,7 @@ public class WaitingService {
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
                           @Value("${servers.front}") String queuePageFront,
                           @Value("${servers.main}") String serverOrigin,
-                          @Value("${kafka.topic-names}") String topicName){
-        checkTopic();
+                          @Value("${kafka.topic-names.enter}") String topicName){
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
         this.enterProducer = enterProducer; // init every partitions
@@ -61,12 +60,15 @@ public class WaitingService {
     }
 
     private void checkTopic() {
+        log.info("Start -- checkTopicr");
         Set<String> topics = kafkaTopicManager.getTopics();
         // for Test -- init every time main server restart
-        if (topics.contains(TOPIC_NAME)) {
-            kafkaTopicManager.deleteTopic(TOPIC_NAME);
-        }
+        // disable to remove kafka topic without restart zookeeper-server, kafka-broker now
+//        if (topics.contains(TOPIC_NAME)) {
+//            kafkaTopicManager.deleteTopic(TOPIC_NAME);
+//        }
         kafkaTopicManager.createTopic(TOPIC_NAME);
+        log.info("End -- checkTopicr");
     }
 
     /**
@@ -81,6 +83,10 @@ public class WaitingService {
      */
     @PostConstruct
     public void initQueues() {
+        // init kafka topic
+        checkTopic(); // 카프카 토픽 (있으면 지우고) 생성
+        enterProducer.initialize(); // 토픽 내 0~19번 파티션까지 초기화
+
         List<Registration> queues = registrationRepository.findAll();
         queues.forEach(r -> {
                     partitionNoMapper.put(r.getTargetUrl(), r.getPartitionNo());
@@ -106,10 +112,10 @@ public class WaitingService {
         registration.setIsActive(true);
         registrationRepository.save(registration);
 //        // re-init partition
-//        consumerConnector.clearPartition(partitionNo);
+        consumerConnector.clearPartition(partitionNo);
         log.info("activation end");
-//        // re-init auto increment client order
-//        enterProducer.activate(partitionNo);
+        // re-init auto increment client order
+        enterProducer.activate(partitionNo);
     }
 
     public void activate(int partitionNo) {
@@ -127,8 +133,8 @@ public class WaitingService {
         }
         Registration registration = registrationRepository.findByPartitionNo(partitionNo);
 
-//        activePartitions.remove(partitionNo);
-//        queues.remove(partitionNo);
+        activePartitions.remove(partitionNo);
+        queues.remove(partitionNo);
 
         // update mongodb data
         registration.setIsActive(false);
@@ -151,9 +157,10 @@ public class WaitingService {
         UriComponentsBuilder uriBuilder;
         if (activePartitions.contains(partitionNo)) { // 대기 필요
             log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
-            uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + QUEUE_PAGE_API)
-                    .queryParam("Target-URL", targetUrl);
-            return uriBuilder.build().toUri();
+//            uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + QUEUE_PAGE_API)
+//                    .queryParam("Target-URL", targetUrl);
+//            return uriBuilder.build().toUri();
+            return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + QUEUE_PAGE_API);
         } else { // 대기 불필요
             log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
             String tempToken = createTempToken(targetUrl); // 토큰 생성
@@ -241,7 +248,7 @@ public class WaitingService {
         String[] urlSplitList = targetUrl.split("p.ssafy.io");
         String endPoint = urlSplitList[1];
 
-        String html = targetApiConnector.forward(token, request).getBody();
+        String html = targetApiConnector.forward(targetUrl, request).getBody();
         log.info("html : " + html);
 
         String newHtml = html.replace("/_next", endPoint + "/_next");
