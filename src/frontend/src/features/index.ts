@@ -8,8 +8,10 @@ export {
 export {
   useRegistWaiting,
   useGetWaitingList,
+  useGetWaitingDetail,
   usePostWaitingActivate,
   usePostWaitingDeActivate,
+  useDeleteWaiting,
 } from "./manage";
 export type { ResponseType } from "./manage";
 
