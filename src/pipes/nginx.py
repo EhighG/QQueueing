@@ -89,6 +89,8 @@ def insert_location(fulltext, url):
         exit(1)
     # send to api server
     #waiting_view_url = "http://" + host + f':3001/waiting/1?Target-URL={url}'
+    #host= 'qqueueing-api'
+    host= 'qqueueing-main'
     waiting_view_url = "http://" + host + f':8081/waiting?Target-URL={url}'
 
     insert_text =f''

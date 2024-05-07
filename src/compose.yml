@@ -133,5 +133,6 @@ volumes:
   mysqldb-backup: {}
 
 networks:
-  qqueueing-network: {}
+  qqueueing-network: 
+    name: qqueueing-network
 

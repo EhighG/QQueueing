@@ -1,9 +1,17 @@
 #!/bin/bash
 echo "set nginx!!"
+#0 set variable
+CONTAINER_NAME="test-nginx"
+NGINX_PATH="/etc/nginx"
+URL_PATH=$1
+COMPLETE_FILE="/complete.conf"
 
+# this is only for test. must not forget
 echo "initialize nginx for test"
 GIT_ROOT=$(git rev-parse --show-toplevel)
 $GIT_ROOT/test/test.sh nginx -d
+docker network connect qqueueing_qqueueing-network $CONTAINER_NAME
+
 
 if [[ -z $1 ]]; then
 	echo "no input"
@@ -29,6 +37,8 @@ fi
 sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
 sudo touch $NGINX_PATH$COMPLETE_FILE
 #ls -al $NGINX_PATH
+
+# if in first setting, nginx container must include our network
 
 #2 execute python script
 sudo python3 nginx.py $URL_PATH
