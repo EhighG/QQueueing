@@ -4,7 +4,7 @@
   method: POST
   contentType: application/json
 "monitorHeader":
-  url: http://localhost:8080/tes24
+  url: http://k10a401.p.ssafy.io:3003
   timeout: 15000
   method: POST
   contentType: application/json
