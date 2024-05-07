@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +25,7 @@ public class Registration {
     @Id
     private String id; // 자동 생성되는 식별자
     private String topicName;
+    @Indexed(unique = true)
     private String targetUrl;
     private Integer maxCapacity; // 최대 수용 인원
     private Integer processingPerMinute; // 1분당 처리 인원
