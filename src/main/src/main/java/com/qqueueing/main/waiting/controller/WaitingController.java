@@ -64,6 +64,7 @@ public class WaitingController {
     @GetMapping("/page-req")
     public ResponseEntity<?> forwardToTarget(@RequestParam String token,
                                              HttpServletRequest request) {
+
         return waitingService.forwardToTarget(token, request);
     }
 

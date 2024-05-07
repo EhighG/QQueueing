@@ -171,10 +171,17 @@ public class WaitingService {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
-        /*
-            파싱 로직 추가 위치
-         */
-        return targetApiConnector.forwardToTarget(token, request);
+
+        String[] urlSplitList = targetUrl.split("p.ssafy.io");
+        String endPoint = urlSplitList[1];
+
+        String html = targetApiConnector.forwardToTarget(token, request).getBody();
+        log.info("html : " + html);
+
+        String newHtml = html.replace("/_next", endPoint + "/_next");
+        log.info("newHtml : " + newHtml);
+
+        return ResponseEntity.ok().body(newHtml);
     }
 
     @Async
