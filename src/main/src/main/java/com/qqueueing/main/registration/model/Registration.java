@@ -51,6 +51,24 @@ public class Registration {
         }
     }
 
+    public void update(String targetUrl, Integer maxCapacity, Integer processingPerMinute, String serviceName, String queueImageUrl) {
+        if (targetUrl != null) {
+            this.targetUrl = targetUrl;
+        }
+        if (maxCapacity != null) {
+            this.maxCapacity = maxCapacity;
+        }
+        if (processingPerMinute != null) {
+            this.processingPerMinute = processingPerMinute;
+        }
+        if (serviceName != null) {
+            this.serviceName = serviceName;
+        }
+        if (queueImageUrl != null) {
+            this.queueImageUrl = queueImageUrl;
+        }
+    }
+
     private String saveFile(MultipartFile file) throws IOException {
         // 파일 저장 로직
         String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
