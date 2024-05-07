@@ -22,8 +22,6 @@ public class Q2SyncAdapterImpl implements Q2SyncAdapter {
     private final Collection<? extends Q2Requester> q2Requesters;
 
     public Q2SyncAdapterImpl(HttpURLConnection urlConnection, Collection<? extends Q2Requester> q2Requesters) {
-        assert urlConnection != null && q2Requesters != null && !q2Requesters.isEmpty();
-
         this.urlConnection = urlConnection;
         this.q2Requesters = q2Requesters;
     }
@@ -35,7 +33,7 @@ public class Q2SyncAdapterImpl implements Q2SyncAdapter {
             Optional<Object> response = request(q2ClientRequest, urlConnection);
             urlConnection.disconnect();
 
-            if (response.orElseThrow(IOException::new) instanceof Q2ServerResponse qqResponse) {
+            if (response.orElseThrow(() -> new IOException("No response.")) instanceof Q2ServerResponse qqResponse) {
                 return qqResponse;
             } else {
                 throw new ClassCastException("The response is not Q2ServerResponse type.");
