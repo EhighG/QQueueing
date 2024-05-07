@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
 
 //@Slf4j
 @Transactional
@@ -26,6 +27,11 @@ public class EnterProducer {
         this.kafkaTemplate = enterMsgTemplate;
         this.TOPIC_NAME = topicName;
         this.ids = new HashMap<>();
+    }
+
+    public void initialize() {
+        IntStream.range(0, 20)
+                .forEach(num -> kafkaTemplate.send(TOPIC_NAME, num, null, "re-init"));
     }
 
     public void activate(int partitionNo) {
