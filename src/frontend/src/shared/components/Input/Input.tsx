@@ -12,6 +12,7 @@ type InputProps = {
     | "email"
     | "password"
     | "tel"
+    | "image"
     | "url";
   title?: string;
   min?: number;

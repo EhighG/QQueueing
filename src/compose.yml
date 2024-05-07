@@ -4,11 +4,28 @@ services:
     build:
       context: .
       dockerfile: build/main/Dockerfile
-    image: qqueueing-main
     ports:
-      - 8080:8080
+      - "8081:8081"
+    image: qqueueing-main
+    #    privileged: true
     networks:
       - qqueueing-network
+    volumes:
+      - "/home/qqueueing/S10P31A401/src/pipes:/pipes"
+    depends_on:
+      - qqueueing-kafka
+      - qqueueing-mongo
+
+  qqueueing-mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - qqueueing-network
+
 
   qqueueing-consumer:
     build:
@@ -17,6 +34,8 @@ services:
     image: qqueueing-consumer
     networks:
       - qqueueing-network
+    ports:
+      - "8082:8082"
     depends_on:
       - qqueueing-kafka
       - qqueueing-rdbms
@@ -96,6 +115,8 @@ services:
     image: bitnami/node-exporter:1.7.0
     networks:
       - qqueueing-network
+    ports:
+      - "8100:9100"
 
   qqueueing-grafana:
     image: grafana/grafana:main

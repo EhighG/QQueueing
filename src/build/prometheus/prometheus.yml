@@ -12,4 +12,4 @@ scrape_configs:
     metrics_path: "/monitoring/prometheus"
     scrape_interval: 1s
     static_configs:
-      - targets: ['qqueueing-main:8080']
+      - targets: ['qqueueing-main:8081']
