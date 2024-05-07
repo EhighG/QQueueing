@@ -18,6 +18,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLOutput;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,6 +99,7 @@ public class KafkaConsumerService {
 
             KafkaConsumer<String, String> consumer = consumers.get(partitionNumber);
             Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
+            System.out.println("마지막 offset : " + lastOffset);
 
             // 해당 파티션의 모든 레코드 삭제
             Map<TopicPartition, RecordsToDelete> recordsToDelete = Collections.singletonMap(topicPartition, RecordsToDelete.beforeOffset(lastOffset));
@@ -106,8 +108,32 @@ public class KafkaConsumerService {
             // 삭제 작업 완료 대기
             deleteRecordsResult.all().get();
 
-            consumer.assign(Collections.singletonList(topicPartition));
+//            consumer.seek(topicPartition, 0L);
             consumer.seekToBeginning(Collections.singletonList(topicPartition));
+
+            for(int i=0; i<10; i++) {
+                System.out.println("poll 작동");
+                consumer.poll(Duration.ofMillis(100));
+            }
+
+            consumer.commitSync();
+            System.out.println("현재 파티션의 오프셋 : " + consumer.position(topicPartition));
+
+            Long lastOffset2 = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
+            System.out.println("마지막 offset이 0으로 초기화됨: " + lastOffset2);
+
+            System.out.println("현재 할당된 파티션 : " + consumer.assignment());
+            System.out.println("현재 파티션의 오프셋 : " + consumer.position(topicPartition));
+
+//            consumer.assign(Collections.singletonList(topicPartition));
+//            consumer.seek(topicPartition, lastOffset);
+//
+//            consumer.commitSync();
+//
+//            Long lastOffset2 = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
+//            System.out.println("찐 마지막 offset : " + lastOffset2);
+
+//            consumer.seekToBeginning(Collections.singletonList(topicPartition));
 
             System.out.println("All records in partition " + partitionNumber + " of topic " + topic + " deleted successfully.");
         } catch (InterruptedException | ExecutionException e) {
