@@ -12,6 +12,7 @@ allowed-url:
     - /websocket/**
     - /member/enqueue/**
     - /tes24/**
+    - /logs/**
   anonymous:
     - /member/signup
 
