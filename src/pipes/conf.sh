@@ -38,6 +38,7 @@ case $1 in
 
 
 			#2 execute python script
+			echo "REGITSTERING $URL_PATH"
 			sudo python3 nginx.py $URL_PATH
 			sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
 			sudo cat $NGINX_PATH$COMPLETE_FILE | grep $URL_PATH

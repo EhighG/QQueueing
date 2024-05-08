@@ -10,7 +10,7 @@ spring:
       #      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      topic: test
+      topic: queueing.waiting-queue.enter # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
 
 logging:
   level:

@@ -90,13 +90,14 @@ def insert_location(fulltext, url):
     # send to api server
     #waiting_view_url = "http://" + host + f':3001/waiting/1?Target-URL={url}'
     host= 'qqueueing-main:8081'
-    waiting_view_url = "http://" + host + f'/enter'
+    waiting_view_url = "http://" + host + f'waiting/enter'
 
     insert_text =f''
 
     insert_text+=f'location  {endpoint} {{ '
 
     #insert_text+=f'return 308 {waiting_view_url} ; '
+    #insert_text+=f'proxy_pass  {waiting_view_url} ; '
     insert_text+=f'proxy_pass  {waiting_view_url}$request_uri ; '
     insert_text+=f'proxy_set_header Target-URL {url};'
 #    insert_text+=f'proxy_set_header    Host                $host:$server_port;'

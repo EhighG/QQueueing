@@ -32,13 +32,13 @@ spring:
 
 servers: # 타 서버들의 정보 기록
   consumer: qqueueing-consumer:8082
-  front: qqueueing-frontend:3000/waiting
-  main: http://k10a401.p.ssafy.io:8081
+  front: http://qqueueing-frontend:3000/waiting
+  main: http://k10a401.p.ssafy.io
 
 kafka:
   broker: qqueueing-kafka:9092
   topic-names:
-    enter: test
+    enter: queueing.waiting-queue.enter # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
   partition:
     max-index: 20
 
