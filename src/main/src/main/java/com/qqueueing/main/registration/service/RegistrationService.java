@@ -7,6 +7,7 @@ import com.qqueueing.main.waiting.service.WaitingService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -28,9 +29,12 @@ public class RegistrationService {
         this.MAX_PARTITION_INDEX = maxPartitionIndex;
     }
 
-    public Registration createRegistration(Registration registration) {
+    public Registration createRegistration(Registration registration, MultipartFile file) {
         // 카프카에 저장할 빈 공간(=파티션) 키를 찾는다.
         registration.setPartitionNo(findEmptyPartitionNo());
+        // 이미지 업로드
+        registration.uploadImage(file);
+        // DB 저장
         Registration savedRegistration = registrationRepository.save(registration);
         // 등록 스크립트 실행
         scriptExecService.execShell(registration.getTargetUrl(), "register");
@@ -63,6 +67,12 @@ public class RegistrationService {
                 .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
         scriptExecService.execShell(registration.getTargetUrl(), "delete");
         registrationRepository.deleteById(id);
+    }
+
+    public String getImageById(String id) throws ChangeSetPersister.NotFoundException {
+        Registration registration = registrationRepository.findById(id)
+                .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
+        return registration.getQueueImageUrl();
     }
 
 //    public Registration createRegistration(Registration registration) {
