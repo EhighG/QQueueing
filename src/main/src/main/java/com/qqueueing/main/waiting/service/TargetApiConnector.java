@@ -25,6 +25,13 @@ public class TargetApiConnector {
         return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, String.class);
     }
 
+    public ResponseEntity<String> forwardToWaitingPage(String queuePageUrl, String targetUrl, HttpServletRequest request) {
+        HttpEntity<String> httpEntity = new HttpEntity<>(getAllHeaders(request));
+        String requestUrl = queuePageUrl + "?Target-URL=" + targetUrl;
+        System.out.println("main server -> next.js request url = " + requestUrl);
+        return restTemplate.exchange(requestUrl, HttpMethod.GET, httpEntity, String.class);
+    }
+
     private HttpHeaders getAllHeaders(HttpServletRequest request) {
         Enumeration<String> headerNames = request.getHeaderNames();
         if (headerNames == null) {

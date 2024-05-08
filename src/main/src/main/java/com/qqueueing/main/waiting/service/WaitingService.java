@@ -8,10 +8,10 @@ import com.qqueueing.main.waiting.model.GetMyOrderResDto;
 import com.qqueueing.main.waiting.model.WaitingStatusDto;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -43,6 +43,9 @@ public class WaitingService {
     private final String QUEUE_PAGE_FRONT;
     private final int TOKEN_LEN = 20;
     private final String TOPIC_NAME;
+    // for test
+    @Setter
+    private String endPoint = "/waiting";
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
@@ -54,7 +57,7 @@ public class WaitingService {
         this.enterProducer = enterProducer; // init every partitions
         this.registrationRepository = registrationRepository;
         this.kafkaTopicManager = kafkaTopicManager;
-        this.QUEUE_PAGE_FRONT = queuePageFront;
+        this.QUEUE_PAGE_FRONT = "http://" + queuePageFront;
         this.SERVER_ORIGIN = serverOrigin;
         this.TOPIC_NAME = topicName;
     }
@@ -163,7 +166,7 @@ public class WaitingService {
 //            uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + QUEUE_PAGE_API)
 //                    .queryParam("Target-URL", targetUrl);
 //            return uriBuilder.build().toUri();
-            return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + QUEUE_PAGE_API);
+            return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + targetUrl);
         } else { // 대기 불필요
             log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
             String tempToken = createTempToken(targetUrl); // 토큰 생성
@@ -173,8 +176,10 @@ public class WaitingService {
         }
     }
 
-    public ResponseEntity<String> getQueuePage(HttpServletRequest request) {
-        return targetApiConnector.forward(QUEUE_PAGE_FRONT, request);
+    public String getQueuePage(String targetUrl, HttpServletRequest request) {
+        String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl, request).getBody();
+
+        return parseHtmlPage(QUEUE_PAGE_FRONT, html);
     }
 
     /**
@@ -240,24 +245,24 @@ public class WaitingService {
     /**
      * 타겟 프론트 페이지 포워딩 메소드
      */
-    public ResponseEntity<String> forward(String token, HttpServletRequest request) {
+    public String forward(String token, HttpServletRequest request) {
         String targetUrl = targetUrlMapper.get(token);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
 
+        return targetApiConnector.forward(targetUrl, request).getBody();
+    }
 
-        String[] urlSplitList = targetUrl.split("p.ssafy.io");
-        String endPoint = urlSplitList[1];
-
-        String html = targetApiConnector.forward(targetUrl, request).getBody();
+    private String parseHtmlPage(String targetUrl, String html) {
+//        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
+//        String endPoint = urlSplitList[1];
         log.info("html : " + html);
 
         String newHtml = html.replace("/_next", endPoint + "/_next");
         log.info("newHtml : " + newHtml);
-
-        return ResponseEntity.ok().body(newHtml);
+        return newHtml;
     }
 
     @Async
