@@ -28,7 +28,7 @@ const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
     statusType,
     [_1: string]
   >({
-    queryKey: ["enqueue"],
+    queryKey: ["waitingInfo"],
     queryFn: () => getWaitingInfo(partitionNo, idx, idVal),
     refetchInterval: 3000,
     enabled: idx > 0,
