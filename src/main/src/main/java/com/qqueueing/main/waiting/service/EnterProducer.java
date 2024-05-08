@@ -2,17 +2,20 @@ package com.qqueueing.main.waiting.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qqueueing.main.waiting.model.EnterQueueResDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
-//@Slf4j
+@Slf4j
 @Transactional
 @Component
 public class EnterProducer {
@@ -24,15 +27,31 @@ public class EnterProducer {
 
     public EnterProducer(KafkaTemplate<Long, String> enterMsgTemplate,
                          @Value("${kafka.topic-names.enter}") String topicName) {
+        log.info("Start -- EnterProducer constructor");
         this.kafkaTemplate = enterMsgTemplate;
         this.TOPIC_NAME = topicName;
         this.ids = new HashMap<>();
-        initialize();
+//        initialize();
+        log.info("End -- EnterProducer constructor");
     }
 
-    private void initialize() {
+    public void initialize() {
+        log.info("Start -- EnterProducer.initialize()");
         IntStream.range(0, 20)
-                .forEach(num -> kafkaTemplate.send(TOPIC_NAME, num, (long)num, "re-init"));
+                .forEach(num -> {
+                    CompletableFuture<SendResult<Long, String>> sendResult = kafkaTemplate.send(TOPIC_NAME, num, (long) num, "re-init");
+                    sendResult.whenComplete((response, exception) -> {
+                        if (exception != null) {
+                            exception.printStackTrace();
+                            System.out.println("error!");
+                        }
+                        if (response != null) {
+                            log.info("response = {}", response);
+                        }
+                    });
+                    log.info("while enterProducer.initialize... init partition {}", num);
+                });
+        log.info("End -- EnterProducer.initialize()");
     }
 
     public void activate(int partitionNo) {

@@ -36,7 +36,10 @@ public class WaitingController {
     }
 
     @GetMapping("/enter")
-    public ResponseEntity<?> enter(@RequestParam(value = "Target-URL") String targetUrl) {
+    public ResponseEntity<?> enter(HttpServletRequest request) {
+        String targetUrl = request.getHeader("Target-URL");
+        if (targetUrl == null) targetUrl = request.getRequestURL().toString();
+
         URI redirectUrl = waitingService.enter(targetUrl);
         log.info("redirectUrl.toString() = {}", redirectUrl.toString());
         return ResponseEntity
