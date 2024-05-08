@@ -236,8 +236,9 @@ public class WaitingService {
         Long myOrder = oldOrder - outCntInFront - lastOffset; // newOrder
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize());
         if (doneSet.contains(ip)) { // waiting done
+            log.info("ip addr {} requested, and return tempToken");
             doneSet.remove(ip);
-            result.setTempToken(createTempToken(waitingStatus.getTargetUrl()));
+            result.setToken(createTempToken(waitingStatus.getTargetUrl()));
         }
         return result;
     }

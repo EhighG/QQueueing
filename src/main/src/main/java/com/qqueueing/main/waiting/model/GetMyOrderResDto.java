@@ -9,7 +9,7 @@ public class GetMyOrderResDto {
     private Long myOrder;
     private Integer totalQueueSize;
     @Setter
-    private String tempToken;
+    private String token;
 
     // on waiting
     public GetMyOrderResDto(Long myOrder, Integer totalQueueSize) {
