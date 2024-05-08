@@ -26,11 +26,14 @@ const WaitingPage = () => {
 
   // 대기 순번을 받은 순간 부터 timer 시작
   useEffect(() => {
-    if (enqueueInfo) {
-      setInterval(() => {
-        setWaitingTime((prev) => prev + 1);
-      }, 1000);
-    }
+    // enqueueInfo가 있을 때만 인터벌 설정
+    if (!enqueueInfo) return;
+    const interval = setInterval(() => {
+      setWaitingTime((prev) => prev + 1);
+    }, 1000);
+
+    // 컴포넌트가 언마운트되거나 enqueueInfo가 변경되면 인터벌 정리
+    return () => clearInterval(interval);
   }, [enqueueInfo]);
 
   useEffect(() => {
@@ -50,7 +53,7 @@ const WaitingPage = () => {
 
   useEffect(() => {
     if (waitingInfo?.token) {
-      window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}/waiting/page-req?token=${waitingInfo.token}}`;
+      window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}waiting/page-req?token=${waitingInfo.token}`;
     }
   }, [waitingInfo]);
 

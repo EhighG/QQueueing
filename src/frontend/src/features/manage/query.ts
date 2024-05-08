@@ -5,14 +5,17 @@ import {
   postWaitingActivate,
   postWaitingDeActivate,
 } from "@/features";
-import { WaitingListType } from "@/entities/waitingList/type";
+import {
+  WaitingListType,
+  waitingRegistType,
+} from "@/entities/waitingList/type";
 import { AxiosError } from "axios";
 import { getWaitingDetail } from ".";
-import { deleteWaiting, patchWaiting } from "./api";
+import { deleteWaiting, patchWaiting, postWaitingImage } from "./api";
 import Swal from "sweetalert2";
 
 // 대기열 등록
-const useRegistWaiting = (waitingInfo: Partial<WaitingListType>) => {
+const useRegistWaiting = (waitingInfo: waitingRegistType) => {
   const { mutate } = useMutation({
     mutationFn: () => postWaiting(waitingInfo),
     onSuccess: () => {
@@ -48,6 +51,14 @@ const useGetWaitingDetail = (id: string) => {
   });
 
   return { data };
+};
+
+const usePostWaitingImage = (formData: FormData) => {
+  const { mutate, data } = useMutation({
+    mutationFn: () => postWaitingImage(formData),
+  });
+
+  return { mutate, data };
 };
 
 const usePatchWaiting = (id: string, data: WaitingListType) => {
@@ -170,6 +181,7 @@ export {
   useGetWaitingDetail,
   usePostWaitingActivate,
   usePostWaitingDeActivate,
+  usePostWaitingImage,
   useDeleteWaiting,
   usePatchWaiting,
 };
