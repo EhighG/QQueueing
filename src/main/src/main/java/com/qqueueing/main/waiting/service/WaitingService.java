@@ -54,7 +54,7 @@ public class WaitingService {
         this.enterProducer = enterProducer; // init every partitions
         this.registrationRepository = registrationRepository;
         this.kafkaTopicManager = kafkaTopicManager;
-        this.QUEUE_PAGE_FRONT = queuePageFront;
+        this.QUEUE_PAGE_FRONT = "http://" + queuePageFront;
         this.SERVER_ORIGIN = serverOrigin;
         this.TOPIC_NAME = topicName;
     }
