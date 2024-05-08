@@ -1,7 +1,3 @@
-import AboutPage from "./AboutPage";
-import ExamplePage from "./ExamplePage";
-import LicensePage from "./LicensePage";
-import ContributingPage from "./ContributingPage";
 export { default as ListPage } from "./ListPage";
 export { default as ManagePage } from "./ManagePage";
 export { default as ResourcePage } from "./ResourcePage";
@@ -12,3 +8,5 @@ export { default as DocsPage } from "./DocsPage";
 export { default as ExamplePage } from "./ExamplePage";
 export { default as LicensePage } from "./LicensePage";
 export { default as ContributingPage } from "./ContributingPage";
+export { default as Login } from "./Login";
+export { default as LineChartPage } from "./LineChartPage";

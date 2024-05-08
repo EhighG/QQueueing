@@ -2,12 +2,10 @@ package com.qqueueing.main.waiting.controller;
 
 
 import com.qqueueing.main.common.SuccessResponse;
-import com.qqueueing.main.waiting.model.EnterQueueResDto;
 import com.qqueueing.main.waiting.model.GetMyOrderReqDto;
 import com.qqueueing.main.waiting.model.GetMyOrderResDto;
 import com.qqueueing.main.waiting.service.WaitingService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 
 @Slf4j
@@ -31,22 +28,41 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
-    @PostMapping
-    public ResponseEntity<?> enter(HttpServletRequest request, HttpServletResponse response) {
-        Object result = waitingService.enter(request);
-        String resMsg = result instanceof EnterQueueResDto ? "대기열에 입장되었습니다." : "요청에 성공했습니다";
+    @GetMapping("/write")
+    public Object produceTest(@RequestParam(value = "partitionNo") Integer partitionNo,
+                              @RequestParam(value = "key") Long key,
+                              @RequestParam(value = "message") String message) {
+        return waitingService.send(partitionNo, key, message);
+    }
+
+    @GetMapping("/enter")
+    public ResponseEntity<?> enter(HttpServletRequest request) {
+        String targetUrl = request.getHeader("Target-URL");
+        if (targetUrl == null) targetUrl = request.getRequestURL().toString();
+
+        URI redirectUrl = waitingService.enter(targetUrl);
+        log.info("redirectUrl.toString() = {}", redirectUrl.toString());
         return ResponseEntity
-                .ok(new SuccessResponse(HttpStatus.OK.value(), resMsg, result));
-//        try {
-//            // 대기열 비활성화 시 -> redirect
-//            return ResponseEntity
-//                    .status(302)
-//                    .location(new URI(frontUrl))
-//                    .build();
-//        } catch (URISyntaxException e) {
-//            log.error(e.getMessage());
-//            throw new RuntimeException("리다이렉트 설정 중 에러");
-//        }
+                .status(302)
+                .location(redirectUrl) // queue-page or target-page
+                .build();
+    }
+
+    @GetMapping("/queue-page")
+    public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,
+                                          HttpServletRequest request) {
+        log.info("queue-page 포워딩 api called");
+        return waitingService.getQueuePage(request);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> enqueue(@RequestParam(value = "Target-URL") String targetUrl,
+                                     HttpServletRequest request) {
+        log.info("enqueue api called");
+        Object result = waitingService.enqueue(targetUrl, request);
+        return ResponseEntity
+                .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
+
     }
 
 
@@ -62,10 +78,10 @@ public class WaitingController {
     }
 
     @GetMapping("/page-req")
-    public ResponseEntity<?> forwardToTarget(@RequestParam String token,
+    public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token,
                                              HttpServletRequest request) {
-
-        return waitingService.forwardToTarget(token, request);
+        log.info("target page 포워딩 api called");
+        return waitingService.forward(token, request);
     }
 
     @GetMapping("/out")
@@ -96,29 +112,39 @@ public class WaitingController {
        return "forwarding success!";
     }
 
+//    @GetMapping("/testQueuePage")
+//    public String testQueuePage() {
+//        return "<!DOCTYPE html>\n" +
+//                "<html lang=\"en\">\n" +
+//                "<head>\n" +
+//                "    <meta charset=\"UTF-8\">\n" +
+//                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+//                "    <title>TargetUrl Response Page</title>\n" +
+//                "</head>\n" +
+//                "<body>\n" +
+//                "    \n" +
+//                "</body>\n" +
+//                "</html>";
+//    }
+
     // 여러 대기열 테스트용 메소드들
 
-    @PostMapping("/testlink2")
-    public ResponseEntity<?> enter2(HttpServletRequest request, HttpServletResponse response) {
-        Object result = waitingService.enter(request);
-        if (result != null) {
-            return ResponseEntity
-                    .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
-        }
-        try {
-            // 대기열 비활성화 시 -> redirect
-            return ResponseEntity
-                    .status(302)
-                    .location(new URI(frontUrl))
-                    .build();
-        } catch (URISyntaxException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("리다이렉트 설정 중 에러");
-        }
-    }
-
-    @GetMapping("/testlink2")
-    public String forwardingTest2() {
-        return "TestLink2 : forwardingdingding!";
-    }
+//    @PostMapping("/testlink2")
+//    public ResponseEntity<?> enter2(HttpServletRequest request, HttpServletResponse response) {
+//        Object result = waitingService.enter(request);
+//        if (result != null) {
+//            return ResponseEntity
+//                    .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
+//        }
+//        try {
+//            // 대기열 비활성화 시 -> redirect
+//            return ResponseEntity
+//                    .status(302)
+//                    .location(new URI(frontUrl))
+//                    .build();
+//        } catch (URISyntaxException e) {
+//            log.error(e.getMessage());
+//            throw new RuntimeException("리다이렉트 설정 중 에러");
+//        }
+//    }
 }

@@ -23,7 +23,7 @@ const WaitingTable = ({ waitingList }: waitingListType) => {
         {waitingList && waitingList.length > 0 ? (
           waitingList.map((item) => (
             <tr
-              key={item.targetUrl}
+              key={item.id}
               className="flex items-center w-full text-center border-b border-black h-[60px] cursor-pointer"
               onClick={() => {
                 router.push(`/manage/${item.id}`);

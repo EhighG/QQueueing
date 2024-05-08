@@ -82,6 +82,12 @@ type Measurement = {
   value: number;
 };
 
+type ServerLogsType = {
+  nodeMemoryMemAvailableBytes: string;
+  diskAvailableBytes: string;
+  cpuUsageRate: string;
+};
+
 export type {
   VirtualThreadType,
   DiskTotalType,
@@ -93,4 +99,5 @@ export type {
   SystemCpuUsageType,
   JvmMemoryMaxType,
   Measurement,
+  ServerLogsType,
 };
