@@ -14,7 +14,7 @@ const postEnqueue = async (target: string): Promise<infoType> => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf8",
-          "Target-Url": target,
+          "Target-URL": target,
         },
       }
     )

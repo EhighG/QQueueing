@@ -9,4 +9,4 @@ export { default as ExamplePage } from "./ExamplePage";
 export { default as LicensePage } from "./LicensePage";
 export { default as ContributingPage } from "./ContributingPage";
 export { default as Login } from "./Login";
-export { default as LineChartPage } from "./LineChartPage";
+export { default as MonitoringDetailPage } from "./MonitoringDetailPage";
