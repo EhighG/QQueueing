@@ -28,6 +28,16 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
+
+    // for test
+    @GetMapping("/endpoint")
+    public ResponseEntity<?> changeEndPoint(@RequestParam(value = "endpoint") String endPoint) {
+        waitingService.setEndPoint(endPoint);
+        return ResponseEntity
+                .ok()
+                .build();
+    }
+
     @GetMapping("/write")
     public Object produceTest(@RequestParam(value = "partitionNo") Integer partitionNo,
                               @RequestParam(value = "key") Long key,
@@ -47,6 +57,8 @@ public class WaitingController {
                 .location(redirectUrl) // queue-page or target-page
                 .build();
     }
+
+    @GetMapping
 
     @GetMapping("/queue-page")
     public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,

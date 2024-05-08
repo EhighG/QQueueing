@@ -8,6 +8,7 @@ import com.qqueueing.main.waiting.model.GetMyOrderResDto;
 import com.qqueueing.main.waiting.model.WaitingStatusDto;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,9 @@ public class WaitingService {
     private final String QUEUE_PAGE_FRONT;
     private final int TOKEN_LEN = 20;
     private final String TOPIC_NAME;
+    // for test
+    @Setter
+    private String endPoint = "/waiting";
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
@@ -175,7 +179,7 @@ public class WaitingService {
     public String getQueuePage(String targetUrl, HttpServletRequest request) {
         String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl, request).getBody();
 
-        return parseHtmlPage(targetUrl, html);
+        return parseHtmlPage(QUEUE_PAGE_FRONT, html);
     }
 
     /**
@@ -251,9 +255,9 @@ public class WaitingService {
         return targetApiConnector.forward(targetUrl, request).getBody();
     }
 
-    private static String parseHtmlPage(String targetUrl, String html) {
-        String[] urlSplitList = targetUrl.split("p.ssafy.io");
-        String endPoint = urlSplitList[1];
+    private String parseHtmlPage(String targetUrl, String html) {
+//        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
+//        String endPoint = urlSplitList[1];
         log.info("html : " + html);
 
         String newHtml = html.replace("/_next", endPoint + "/_next");
