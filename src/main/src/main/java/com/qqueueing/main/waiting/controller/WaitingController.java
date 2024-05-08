@@ -59,16 +59,17 @@ public class WaitingController {
     }
 
     @GetMapping("/queue-page")
-    public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,
-                                          HttpServletRequest request) {
+    public ResponseEntity<?> getQueuePage(HttpServletRequest request) {
+        String targetUrl = request.getHeader("Target-URL");
+        log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
         return ResponseEntity
                 .ok(waitingService.getQueuePage(targetUrl, request));
     }
 
     @PostMapping
-    public ResponseEntity<?> enqueue(@RequestParam(value = "Target-URL") String targetUrl,
-                                     HttpServletRequest request) {
+    public ResponseEntity<?> enqueue(HttpServletRequest request) {
+        String targetUrl = request.getHeader("Target-URL");
         log.info("enqueue api called");
         Object result = waitingService.enqueue(targetUrl, request);
         return ResponseEntity
