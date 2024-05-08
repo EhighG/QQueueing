@@ -20,6 +20,7 @@ export type {
   SystemCpuUsageType,
   JvmMemoryMaxType,
   Measurement,
+  ServerLogsType,
 } from "./type";
 
 export {
