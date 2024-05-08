@@ -94,12 +94,12 @@ def insert_location(fulltext, url):
 
     insert_text =f''
 
-    insert_text+=f'location  {endpoint} {{ '
+    insert_text+=f'location  {endpoint} {{ \n'
 
     #insert_text+=f'return 308 {waiting_view_url} ; '
     #insert_text+=f'proxy_pass  {waiting_view_url} ; '
-    insert_text+=f'proxy_pass  {waiting_view_url}$request_uri ; '
-    insert_text+=f'proxy_set_header Target-URL {url};'
+    insert_text+=f'proxy_pass  {waiting_view_url}$request_uri ; \n'
+    insert_text+=f'proxy_set_header Target-URL {url};\n'
 #    insert_text+=f'proxy_set_header    Host                $host:$server_port;'
 #    #insert_text+=f'proxy_set_header    Host                $host:$server_port+"/endpoint";'
 #    #insert_text+=f'proxy_set_header    X-Real-IP           $real_ip;'
@@ -109,7 +109,7 @@ def insert_location(fulltext, url):
 #    insert_text+=f'proxy_set_header    X-Forwarded-Port    $server_port;'
 #    insert_text+=f'proxy_set_header    Connection "";'
 #    insert_text+=f'proxy_http_version  1.1;'
-    insert_text+=f'}}'
+    insert_text+=f'}}\n'
     #insert_text+=f'location  /_next {{ proxy_pass {waiting_view_url}/$request_uri; }}'
     #insert_text+=f'location ~* ^/.next {{ rewrite ^/.next(.*)$ /wating/.next$1 last;}}'
     complete_file = fulltext[:check] + insert_text + fulltext[check:]
