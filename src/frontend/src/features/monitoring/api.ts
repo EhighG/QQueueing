@@ -8,11 +8,19 @@ import {
   JvmMemoryMaxType,
   JvmMemoryUsedType,
   ProcessCpuUsageType,
+  ServerLogsType,
   SystemCpuUsageType,
   VirtualThreadType,
 } from "./type";
+import { ResponseType } from "..";
 
 const instance: AxiosInstance = monitoringInstance();
+
+const getServerLogs = async () => {
+  return await instance
+    .get<ResponseType<ServerLogsType>>("/logs")
+    .then(({ data }) => data.result);
+};
 
 const getVirtualThread = async (): Promise<VirtualThreadType> => {
   return await instance
@@ -70,4 +78,5 @@ export {
   getJvmMemoryUsed,
   getProcessCpuUsage,
   getSystemCpuUsage,
+  getServerLogs,
 };

@@ -7,6 +7,7 @@ import {
   JvmMemoryUsedType,
   Measurement,
   ProcessCpuUsageType,
+  ServerLogsType,
   SystemCpuUsageType,
 } from "./type";
 import {
@@ -15,11 +16,28 @@ import {
   getDiskTotal,
   getJvmMemoryMax,
   getJvmMemoryUsed,
+  getServerLogs,
 } from "./api";
 
 const queryOptions = {
   gcTime: 0,
   refetchInterval: 2000,
+};
+
+const useGetServerLogs = () => {
+  const { data } = useQuery<
+    ServerLogsType,
+    AxiosError,
+    ServerLogsType,
+    [_1: string]
+  >({
+    queryKey: ["serverLogs"],
+    queryFn: getServerLogs,
+    ...queryOptions,
+    refetchInterval: 5000,
+  });
+
+  return { data };
 };
 
 const useGetProcessCpuUsage = () => {
@@ -124,4 +142,5 @@ export {
   useGetDiskFree,
   useGetJvmMemoryMax,
   useGetJvmMemoryUsed,
+  useGetServerLogs,
 };
