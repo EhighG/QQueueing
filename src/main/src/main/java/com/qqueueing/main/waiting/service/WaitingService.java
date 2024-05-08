@@ -248,12 +248,15 @@ public class WaitingService {
      */
     public String forward(String token, HttpServletRequest request) {
         String targetUrl = targetUrlMapper.get(token);
+        log.info("forward target Url = {}", targetUrl);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
 
-        return targetApiConnector.forward(targetUrl, request).getBody();
+        String html = targetApiConnector.forward(targetUrl, request).getBody();
+        log.info("forwording result = \n\n{}", html);
+        return html;
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
