@@ -32,7 +32,7 @@ public class Registration {
     private String serviceName; // 서비스명
     private String queueImageUrl; // 대기열 이미지
     @Setter
-    private Boolean isActive = false; // 활성화 여부
+    private Boolean isActive = true; // 활성화 여부
     @Setter
     private Integer partitionNo;
 
@@ -40,26 +40,6 @@ public class Registration {
         this.topicName = topicName;
         this.targetUrl = targetUrl;
         this.isActive = false;
-    }
-
-    public void uploadImage(MultipartFile file) {
-        try {
-            // 파일 저장
-            String fileUrl = saveFile(file);
-            this.queueImageUrl = fileUrl;
-        } catch (Exception e) {
-            // 파일 저장 실패 시 예외 처리
-            throw new RuntimeException("Error saving image file", e);
-            // 예외 처리 로직 추가
-        }
-    }
-
-    private String saveFile(MultipartFile file) throws IOException {
-        // 파일 저장 로직
-        String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
-        Path filePath = Paths.get("src/main/resources/static/uploads", fileName);
-        Files.write(filePath, file.getBytes());
-        return "/uploads/" + fileName;
     }
 
     public void update(String targetUrl, Integer maxCapacity, Integer processingPerMinute, String serviceName, String queueImageUrl) {
@@ -78,13 +58,5 @@ public class Registration {
         if (queueImageUrl != null) {
             this.queueImageUrl = queueImageUrl;
         }
-    }
-
-    private String getFileExtension(String fileName) {
-        int lastIndexOf = fileName.lastIndexOf(".");
-        if (lastIndexOf == -1) {
-            return ""; // 확장자가 없는 경우
-        }
-        return fileName.substring(lastIndexOf + 1);
     }
 }
