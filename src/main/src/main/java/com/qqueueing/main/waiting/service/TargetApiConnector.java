@@ -2,14 +2,11 @@ package com.qqueueing.main.waiting.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 @Slf4j
@@ -22,8 +19,9 @@ public class TargetApiConnector {
         this.restTemplate = restTemplate;
     }
 
-    public ResponseEntity<String> forwardToTarget(String targetUrl, HttpServletRequest request) {
+    public ResponseEntity<String> forward(String targetUrl, HttpServletRequest request) {
         HttpEntity<String> httpEntity = new HttpEntity<>(getAllHeaders(request));
+        System.out.println("targetUrl = " + targetUrl);
         return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, String.class);
     }
 
@@ -34,10 +32,13 @@ public class TargetApiConnector {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        Collections.list(headerNames)
-                .forEach(key -> {
-                    headers.add(key, request.getHeader(key));
-                });
+//        Collections.list(headerNames)
+//                .forEach(key -> {
+//                    headers.add(key, request.getHeader(key));
+//                    System.out.println("key = " + key);
+//                    System.out.println("request.getHeader(key) = " + request.getHeader(key));
+//                });
+        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
         return headers;
     }
 }

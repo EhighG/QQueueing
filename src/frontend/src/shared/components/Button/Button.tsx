@@ -1,10 +1,10 @@
 import { cls } from "@/shared";
-import React, { ButtonHTMLAttributes } from "react";
+import React, { ButtonHTMLAttributes, ReactNode } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   className?: string;
   type?: "button" | "submit" | "reset";
-  children: string;
+  children: string | ReactNode;
   edgeType?: "square" | "rounded";
   color?:
     | "warning"
