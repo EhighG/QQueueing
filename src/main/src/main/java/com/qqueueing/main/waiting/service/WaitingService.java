@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -247,7 +248,6 @@ public class WaitingService {
         }
         targetUrlMapper.remove(token);
 
-
         String[] urlSplitList = targetUrl.split("p.ssafy.io");
         String endPoint = urlSplitList[1];
 
@@ -299,5 +299,33 @@ public class WaitingService {
                             .toList()
             );
         }
+    }
+
+    public String parsing(String address) {
+
+        log.info("address = " + address);
+
+        String[] addressSplit = address.split("_next");
+        String targetUrl = "/_next" + addressSplit[1];
+
+        String[] endPointSplit = address.split("p.ssafy.io");
+        String[] endPointSplit2 = endPointSplit[1].split("/_next");
+        String endPoint = endPointSplit2[0];
+
+        log.info("endPoint = " + endPoint);
+
+        String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
+
+        log.info("serverURL = " + serverURL);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+        System.out.println("결과 : " + response.getBody());
+        String result = response.getBody().replace("/_next", endPoint + "/_next");
+
+        return result;
+
     }
 }
