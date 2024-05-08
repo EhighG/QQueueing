@@ -31,7 +31,7 @@ public class WaitingController {
 
     // for test
     @GetMapping("/endpoint")
-    public ResponseEntity<?> changeEndPoint(@RequestParam(value = "endpoint") String endPoint) {
+    public ResponseEntity<?> changeEndPoint(@RequestParam(value = "endpoint", required = false) String endPoint) {
         waitingService.setEndPoint(endPoint);
         return ResponseEntity
                 .ok()
