@@ -59,8 +59,8 @@ public class WaitingController {
     }
 
     @GetMapping("/queue-page")
-    public ResponseEntity<?> getQueuePage(HttpServletRequest request) {
-        String targetUrl = request.getHeader("Target-URL");
+    public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,
+                                          HttpServletRequest request) {
         log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
         return ResponseEntity
@@ -71,6 +71,7 @@ public class WaitingController {
     public ResponseEntity<?> enqueue(HttpServletRequest request) {
         String targetUrl = request.getHeader("Target-URL");
         log.info("enqueue api called");
+        log.info("targetUrl = {}", targetUrl);
         Object result = waitingService.enqueue(targetUrl, request);
         return ResponseEntity
                 .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
