@@ -25,43 +25,9 @@ public class KafkaConfig {
         KAFKA_BROKER = kafkaBrokerAddr;
     }
 
-//    // Consumer
-//    @Bean
-//    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Long, String>>
-//    kafkaListenerContainerFactory() {
-//        ConcurrentKafkaListenerContainerFactory<Long, String> factory =
-//                new ConcurrentKafkaListenerContainerFactory<>();
-//        factory.setConsumerFactory(consumerFactory());
-//        factory.setConcurrency(3);
-//        factory.getContainerProperties().setPollTimeout(3000);
-//        return factory;
-//    }
-//
-//    @Bean
-//    public ConsumerFactory<Long, String> consumerFactory() {
-//        return new DefaultKafkaConsumerFactory<>(consumerConfigs());
-//    }
-//
-//    @Bean
-//    public Map<String, Object> consumerConfigs() {
-//        Map<String, Object> props = new HashMap<>();
-//        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-//        props.put("group.id", GROUP_ID);
-//        props.put("key.deserializer", "org.apache.kafka.common.serialization.LongDeserializer");
-//        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-//        props.put("auto.offset.reset", "earliest");
-//
-//        return props;
-//    }
-
     @Bean
     public ProducerFactory<Long, String> longObjectProducerFactory() {
         return new DefaultKafkaProducerFactory<>(longObjectProducerConfig());
-    }
-
-    @Bean
-    public ProducerFactory<Long, Long> longLongProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(longLongProducerConfig());
     }
 
     @Bean
@@ -69,17 +35,7 @@ public class KafkaConfig {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-//        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return props;
-    }
-
-    @Bean
-    public Map<String, Object> longLongProducerConfig() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
         return props;
     }
 
@@ -88,8 +44,4 @@ public class KafkaConfig {
         return new KafkaTemplate<Long, String>(longObjectProducerFactory());
     }
 
-    @Bean
-    public KafkaTemplate<Long, Long> longLongKafkaTemplate() {
-        return new KafkaTemplate<>(longLongProducerFactory());
-    }
 }
