@@ -3,7 +3,6 @@ import { WaitingListType } from "@/entities/waitingList/type";
 import { Button, Input, SelectBox } from "@/shared";
 import Link from "next/link";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useRegistWaiting } from "..";
 
 type InputFormProps = {
   waitingInfo?: WaitingListType;
@@ -40,12 +39,12 @@ const InputForm = ({ waitingInfo, setWaitingInfo }: InputFormProps) => {
       }));
   }, [targetUrl, maxCapacity, processingPerMinute, serviceName]);
 
-  const { mutate: registHandle } = useRegistWaiting({
-    targetUrl,
-    maxCapacity,
-    processingPerMinute,
-    serviceName,
-  });
+  // const { mutate: registHandle } = useRegistWaiting({
+  //   targetUrl,
+  //   maxCapacity,
+  //   processingPerMinute,
+  //   serviceName,
+  // });
 
   return (
     <div className="flex flex-1 flex-col  items-center">
@@ -85,9 +84,7 @@ const InputForm = ({ waitingInfo, setWaitingInfo }: InputFormProps) => {
                 미리 보기
               </Button>
             </Link>
-            <Button edgeType="square" onClick={() => registHandle()}>
-              등록
-            </Button>
+            <Button edgeType="square">등록</Button>
           </div>
         </form>
       </div>
