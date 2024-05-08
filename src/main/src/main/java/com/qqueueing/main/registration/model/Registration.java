@@ -49,8 +49,17 @@ public class Registration {
             this.queueImageUrl = fileUrl;
         } catch (Exception e) {
             // 파일 저장 실패 시 예외 처리
+            throw new RuntimeException("Error saving image file", e);
             // 예외 처리 로직 추가
         }
+    }
+
+    private String saveFile(MultipartFile file) throws IOException {
+        // 파일 저장 로직
+        String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
+        Path filePath = Paths.get("src/main/resources/static/uploads", fileName);
+        Files.write(filePath, file.getBytes());
+        return "/uploads/" + fileName;
     }
 
     public void update(String targetUrl, Integer maxCapacity, Integer processingPerMinute, String serviceName, String queueImageUrl) {
@@ -69,14 +78,6 @@ public class Registration {
         if (queueImageUrl != null) {
             this.queueImageUrl = queueImageUrl;
         }
-    }
-
-    private String saveFile(MultipartFile file) throws IOException {
-        // 파일 저장 로직
-        String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
-        Path filePath = Paths.get("src/main/resources/static/uploads", fileName);
-        Files.write(filePath, file.getBytes());
-        return "/uploads/" + fileName;
     }
 
     private String getFileExtension(String fileName) {
