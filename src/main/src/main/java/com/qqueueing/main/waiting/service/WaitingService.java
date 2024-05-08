@@ -43,6 +43,7 @@ public class WaitingService {
     private final String QUEUE_PAGE_FRONT;
     private final int TOKEN_LEN = 20;
     private final String TOPIC_NAME;
+    private final String REPLACE_URL;
     // for test
     @Setter
     private String endpoint = "/waiting";
@@ -51,7 +52,8 @@ public class WaitingService {
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
                           @Value("${servers.front}") String queuePageFront,
                           @Value("${servers.main}") String serverOrigin,
-                          @Value("${kafka.topic-names.enter}") String topicName){
+                          @Value("${kafka.topic-names.enter}") String topicName,
+                          @Value("${servers.replace-url}") String replaceUrl) {
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
         this.enterProducer = enterProducer; // init every partitions
@@ -60,6 +62,7 @@ public class WaitingService {
         this.QUEUE_PAGE_FRONT = "http://" + queuePageFront;
         this.SERVER_ORIGIN = serverOrigin;
         this.TOPIC_NAME = topicName;
+        this.REPLACE_URL = replaceUrl;
     }
 
     private void checkTopic() {
@@ -253,7 +256,7 @@ public class WaitingService {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
-        targetUrl = "http://localhost" + extractEndpoint(targetUrl);
+        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
         log.info("targetUrl = {}", targetUrl);
 
         String html = targetApiConnector.forward(targetUrl, request).getBody();
