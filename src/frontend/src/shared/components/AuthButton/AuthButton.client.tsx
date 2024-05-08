@@ -13,7 +13,7 @@ const AuthButton = () => {
         await signIn();
       }}
     >
-      {session.data?.user?.name} : Sign Out
+      Sign Out
     </Button>
   ) : (
     <Button onClick={async () => await signIn()}>Sign In</Button>
