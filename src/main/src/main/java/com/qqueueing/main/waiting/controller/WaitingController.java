@@ -28,6 +28,16 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
+
+    // for test
+    @GetMapping("/endpoint")
+    public ResponseEntity<?> changeEndPoint(@RequestParam(value = "endpoint", required = false) String endPoint) {
+        waitingService.setEndPoint(endPoint);
+        return ResponseEntity
+                .ok()
+                .build();
+    }
+
     @GetMapping("/write")
     public Object produceTest(@RequestParam(value = "partitionNo") Integer partitionNo,
                               @RequestParam(value = "key") Long key,
@@ -49,15 +59,17 @@ public class WaitingController {
     }
 
     @GetMapping("/queue-page")
-    public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,
-                                          HttpServletRequest request) {
+    public ResponseEntity<?> getQueuePage(HttpServletRequest request) {
+        String targetUrl = request.getHeader("Target-URL");
+        log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
-        return waitingService.getQueuePage(request);
+        return ResponseEntity
+                .ok(waitingService.getQueuePage(targetUrl, request));
     }
 
     @PostMapping
-    public ResponseEntity<?> enqueue(@RequestParam(value = "Target-URL") String targetUrl,
-                                     HttpServletRequest request) {
+    public ResponseEntity<?> enqueue(HttpServletRequest request) {
+        String targetUrl = request.getHeader("Target-URL");
         log.info("enqueue api called");
         Object result = waitingService.enqueue(targetUrl, request);
         return ResponseEntity
@@ -81,7 +93,8 @@ public class WaitingController {
     public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token,
                                              HttpServletRequest request) {
         log.info("target page 포워딩 api called");
-        return waitingService.forward(token, request);
+        return ResponseEntity
+                .ok(waitingService.forward(token, request));
     }
 
     @GetMapping("/out")
