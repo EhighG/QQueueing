@@ -115,6 +115,15 @@ services:
     networks:
       - qqueueing-network
 
+  test:
+    image: ubuntu:focal
+    ports:
+      - "9093:9092"
+    command: sleep infinity
+    container_name: testing
+    networks:
+      - qqueueing-network
+
 volumes:
   zookeeper_data:
     driver: local
