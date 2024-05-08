@@ -45,7 +45,7 @@ public class WaitingService {
     private final String TOPIC_NAME;
     // for test
     @Setter
-    private String endPoint = "/waiting";
+    private String endpoint = "/waiting";
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
@@ -253,6 +253,8 @@ public class WaitingService {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
+        targetUrl = "http://localhost" + extractEndpoint(targetUrl);
+        log.info("targetUrl = {}", targetUrl);
 
         String html = targetApiConnector.forward(targetUrl, request).getBody();
         log.info("forwording result = \n\n{}", html);
@@ -262,11 +264,27 @@ public class WaitingService {
     private String parseHtmlPage(String targetUrl, String html) {
 //        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
 //        String endPoint = urlSplitList[1];
+        // parse target url(external request -> internal)
         log.info("html : " + html);
 
-        String newHtml = html.replace("/_next", endPoint + "/_next");
+        String newHtml = html.replace("/_next", endpoint + "/_next");
         log.info("newHtml : " + newHtml);
         return newHtml;
+    }
+
+    private String extractEndpoint(String targetUrl) {
+        int startPos = findIndex(targetUrl, '/', 3);
+        return targetUrl.substring(startPos);
+    }
+
+    private int findIndex(String s, char c, int cnt) {
+        int end = s.length();
+        for (int i = 0; i < end; i++) {
+            if (s.charAt(i) == c && --cnt == 0) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Async
