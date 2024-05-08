@@ -52,7 +52,8 @@ public class WaitingController {
     public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,
                                           HttpServletRequest request) {
         log.info("queue-page 포워딩 api called");
-        return waitingService.getQueuePage(request);
+        return ResponseEntity
+                .ok(waitingService.getQueuePage(targetUrl, request));
     }
 
     @PostMapping
@@ -81,7 +82,8 @@ public class WaitingController {
     public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token,
                                              HttpServletRequest request) {
         log.info("target page 포워딩 api called");
-        return waitingService.forward(token, request);
+        return ResponseEntity
+                .ok(waitingService.forward(token, request));
     }
 
     @GetMapping("/out")
