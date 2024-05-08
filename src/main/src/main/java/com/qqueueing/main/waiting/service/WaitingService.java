@@ -265,8 +265,6 @@ public class WaitingService {
 //        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
 //        String endPoint = urlSplitList[1];
         // parse target url(external request -> internal)
-        int startIndex = 0;
-
         log.info("html : " + html);
 
         String newHtml = html.replace("/_next", endpoint + "/_next");
