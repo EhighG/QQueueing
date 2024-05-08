@@ -12,10 +12,12 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -43,15 +45,17 @@ public class WaitingService {
     private final String QUEUE_PAGE_FRONT;
     private final int TOKEN_LEN = 20;
     private final String TOPIC_NAME;
+    private final String REPLACE_URL;
     // for test
     @Setter
-    private String endPoint = "/waiting";
+    private String endpoint = "/waiting";
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
                           @Value("${servers.front}") String queuePageFront,
                           @Value("${servers.main}") String serverOrigin,
-                          @Value("${kafka.topic-names.enter}") String topicName){
+                          @Value("${kafka.topic-names.enter}") String topicName,
+                          @Value("${servers.replace-url}") String replaceUrl) {
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
         this.enterProducer = enterProducer; // init every partitions
@@ -60,6 +64,7 @@ public class WaitingService {
         this.QUEUE_PAGE_FRONT = "http://" + queuePageFront;
         this.SERVER_ORIGIN = serverOrigin;
         this.TOPIC_NAME = topicName;
+        this.REPLACE_URL = replaceUrl;
     }
 
     private void checkTopic() {
@@ -248,22 +253,43 @@ public class WaitingService {
      */
     public String forward(String token, HttpServletRequest request) {
         String targetUrl = targetUrlMapper.get(token);
+        log.info("forward target Url = {}", targetUrl);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
+        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
+        log.info("targetUrl = {}", targetUrl);
 
-        return targetApiConnector.forward(targetUrl, request).getBody();
+        String html = targetApiConnector.forward(targetUrl, request).getBody();
+        log.info("forwording result = \n\n{}", html);
+        return html;
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
 //        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
 //        String endPoint = urlSplitList[1];
+        // parse target url(external request -> internal)
         log.info("html : " + html);
 
-        String newHtml = html.replace("/_next", endPoint + "/_next");
+        String newHtml = html.replace("/_next", endpoint + "/_next");
         log.info("newHtml : " + newHtml);
         return newHtml;
+    }
+
+    private String extractEndpoint(String targetUrl) {
+        int startPos = findIndex(targetUrl, '/', 3);
+        return targetUrl.substring(startPos);
+    }
+
+    private int findIndex(String s, char c, int cnt) {
+        int end = s.length();
+        for (int i = 0; i < end; i++) {
+            if (s.charAt(i) == c && --cnt == 0) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Async
@@ -305,5 +331,33 @@ public class WaitingService {
                             .toList()
             );
         }
+    }
+
+    public String parsing(String address) {
+
+        log.info("address = " + address);
+
+        String[] addressSplit = address.split("_next");
+        String targetUrl = "/_next" + addressSplit[1];
+
+        String[] endPointSplit = address.split("p.ssafy.io");
+        String[] endPointSplit2 = endPointSplit[1].split("/_next");
+        String endPoint = endPointSplit2[0];
+
+        log.info("endPoint = " + endPoint);
+
+        String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
+
+        log.info("serverURL = " + serverURL);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+        System.out.println("결과 : " + response.getBody());
+        String result = response.getBody().replace("/_next", endPoint + "/_next");
+
+        return result;
+
     }
 }
