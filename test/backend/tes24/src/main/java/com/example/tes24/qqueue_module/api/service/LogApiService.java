@@ -1,8 +1,11 @@
 package com.example.tes24.qqueue_module.api.service;
 
+import com.example.tes24.qqueue_module.Q2Context;
 import com.example.tes24.qqueue_module.api.dto.PrometheusData;
 import com.example.tes24.qqueue_module.api.dto.PrometheusResult;
 import com.example.tes24.qqueue_module.api.dto.SearchLogsResDto;
+import com.example.tes24.qqueue_module.http.Q2HttpHeader;
+import com.example.tes24.qqueue_module.http.Q2HttpHeaderProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,8 +17,7 @@ import java.util.Map;
 @Slf4j
 @Service
 public class LogApiService {
-
-    private final String PROMETHEUS_URL = "http://k10a401.p.ssafy.io:3003/api/v1/query?query=";
+    private final String PROMETHEUS_URL = Q2Context.getMonitorHeaderProperties().getUrl() + "/api/v1/query?query=";
     private final String MEMORY_AVAILABLE_QUERY = "node_memory_MemAvailable_bytes";
     private final String DISK_AVAILABLE_QUERY = "node_filesystem_avail_bytes{device=\"/dev/root\",fstype=\"ext4\",mountpoint=\"/etc/hosts\"}";
 
