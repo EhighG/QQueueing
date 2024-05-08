@@ -1,8 +1,8 @@
-import { LineChartPage } from "@/pages-flat";
+import { MonitoringDetailPage } from "@/pages-flat";
 import React from "react";
 
 const Page = () => {
-  return <LineChartPage />;
+  return <MonitoringDetailPage />;
 };
 
 export default Page;

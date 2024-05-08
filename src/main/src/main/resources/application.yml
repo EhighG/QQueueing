@@ -33,7 +33,7 @@ spring:
 servers: # 타 서버들의 정보 기록
   consumer: k10a401.p.ssafy.io:8082
 #  consumer: localhost:8082
-  front: http://k10a401.p.ssafy.io:3001/dashboard
+  front: qqueueing-frontend:3000/waiting
   main: http://k10a401.p.ssafy.io # Nginx 거치도록 포트번호 제거
 
 #  front: http://localhost:8081/waiting/testQueuePage

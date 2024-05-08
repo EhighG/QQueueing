@@ -35,7 +35,7 @@ const LineChartPage = () => {
       {/* 현재 CPU 사용량 */}
       <ResponsiveContainer width="100%" height="100%">
         <LineChart width={500} height={500} data={data}>
-          <YAxis dataKey="cpuUsageRate" />
+          <YAxis dataKey="cpuUsageRate" domain={[0, 100]} />
           <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
           <Tooltip />
           <Legend />
