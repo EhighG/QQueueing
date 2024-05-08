@@ -59,10 +59,6 @@ public class KafkaConfig {
         return new DefaultKafkaProducerFactory<>(longObjectProducerConfig());
     }
 
-    @Bean
-    public ProducerFactory<Long, Long> longLongProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(longLongProducerConfig());
-    }
 
     @Bean
     public Map<String, Object> longObjectProducerConfig() {
@@ -74,22 +70,10 @@ public class KafkaConfig {
         return props;
     }
 
-    @Bean
-    public Map<String, Object> longLongProducerConfig() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-        return props;
-    }
 
     @Bean
     public KafkaTemplate<Long, String> longObjectKafkaTemplate() {
         return new KafkaTemplate<Long, String>(longObjectProducerFactory());
     }
 
-    @Bean
-    public KafkaTemplate<Long, Long> longLongKafkaTemplate() {
-        return new KafkaTemplate<>(longLongProducerFactory());
-    }
 }
