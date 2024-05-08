@@ -58,8 +58,6 @@ public class WaitingController {
                 .build();
     }
 
-    @GetMapping
-
     @GetMapping("/queue-page")
     public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,
                                           HttpServletRequest request) {
