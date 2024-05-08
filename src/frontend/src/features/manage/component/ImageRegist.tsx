@@ -1,23 +1,21 @@
 "use client";
 import { Button, SectionTitle, cats } from "@/shared";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 
 type ImageRegistProps = {
-  setImageData: (data: string) => void;
+  setImageData: Dispatch<SetStateAction<File>>;
 };
 
 const ImageRegist = ({ setImageData }: ImageRegistProps) => {
   const [queueImageUrl, setQueueImageUrl] = useState<string>("");
   const ref = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setImageData(queueImageUrl);
-  }, [queueImageUrl, setImageData]);
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
+
     if (file) {
+      setImageData(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setQueueImageUrl(e.target?.result as string);

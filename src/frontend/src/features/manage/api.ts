@@ -1,4 +1,7 @@
-import { WaitingListType } from "@/entities/waitingList/type";
+import {
+  WaitingListType,
+  waitingRegistType,
+} from "@/entities/waitingList/type";
 import { ResponseType } from "./type";
 import { axiosInstance } from "@/shared";
 import { AxiosInstance } from "axios";
@@ -13,10 +16,20 @@ const getWaitingList = async () => {
 };
 
 // 대기열 등록
-const postWaiting = async (data: Partial<WaitingListType>) => {
+const postWaiting = async (data: waitingRegistType) => {
   return await instance
     .post<ResponseType<WaitingListType>>("/queue", data)
     .then(({ data }) => data.result);
+};
+
+const postWaitingImage = async (data: FormData) => {
+  return await instance
+    .post("/queue/image", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then(({ data }) => data);
 };
 
 const getWaitingDetail = async (id: string) => {
@@ -52,6 +65,7 @@ export {
   getWaitingDetail,
   patchWaiting,
   postWaiting,
+  postWaitingImage,
   postWaitingActivate,
   postWaitingDeActivate,
   deleteWaiting,
