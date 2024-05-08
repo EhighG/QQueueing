@@ -1,10 +1,16 @@
 "defaultHeader":
+  host: localhost
+  port: 8080
+  path: /tes24
   url: http://localhost:8080/tes24
   timeout: 15000
   method: POST
   contentType: application/json
 "monitorHeader":
-  url: http://localhost:8080/tes24
+  host: k10a401.p.ssafy.io
+  port: 3003
+  path: /
+  url: http://k10a401.p.ssafy.io:3003
   timeout: 15000
   method: POST
   contentType: application/json
