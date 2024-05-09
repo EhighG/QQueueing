@@ -29,11 +29,9 @@ public class RegistrationService {
         this.MAX_PARTITION_INDEX = maxPartitionIndex;
     }
 
-    public Registration createRegistration(Registration registration, MultipartFile file) {
+    public Registration createRegistration(Registration registration) {
         // 카프카에 저장할 빈 공간(=파티션) 키를 찾는다.
         registration.setPartitionNo(findEmptyPartitionNo());
-        // 이미지 업로드
-        registration.uploadImage(file);
         // DB 저장
         Registration savedRegistration = registrationRepository.save(registration);
         // 등록 스크립트 실행

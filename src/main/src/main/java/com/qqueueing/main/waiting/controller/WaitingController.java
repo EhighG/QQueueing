@@ -126,6 +126,14 @@ public class WaitingController {
        return "forwarding success!";
     }
 
+    @GetMapping(path = "/next", headers = "address")
+    public String parsingFile(@RequestHeader("address") String address) {
+
+        String result = waitingService.parsing(address);
+
+        return result;
+    }
+
 //    @GetMapping("/testQueuePage")
 //    public String testQueuePage() {
 //        return "<!DOCTYPE html>\n" +

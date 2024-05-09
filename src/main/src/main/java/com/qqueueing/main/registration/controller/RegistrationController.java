@@ -21,8 +21,8 @@ public class RegistrationController {
     private RegistrationService registrationService;
 
     @PostMapping
-    public ResponseEntity<?> createRegistration(@RequestPart Registration registration, @RequestPart(required = false) MultipartFile file) {
-        Registration createdRegistration = registrationService.createRegistration(registration, file);
+    public ResponseEntity<?> createRegistration(@RequestBody Registration registration) {
+        Registration createdRegistration = registrationService.createRegistration(registration);
         String message = "등록되었습니다.";
         SuccessResponse response = new SuccessResponse(HttpStatus.CREATED.value(), message, createdRegistration);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -60,10 +60,10 @@ public class RegistrationController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/image/{id}")
+    @GetMapping("/imageUrl/{id}")
     public ResponseEntity<?> getImage(@PathVariable String id) throws ChangeSetPersister.NotFoundException {
         String imageUrl = registrationService.getImageById(id);
-        String message = "이미지 조회에 성공했습니다.";
+        String message = "이미지 URL 조회에 성공했습니다.";
         SuccessResponse response = new SuccessResponse(HttpStatus.OK.value(), message, imageUrl);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
