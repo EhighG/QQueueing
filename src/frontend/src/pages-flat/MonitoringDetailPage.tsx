@@ -19,15 +19,25 @@ import {
 const LineChartPage = () => {
   const { data: serverLogs } = useGetServerLogs();
   const [data, setData] = useState<ServerLogsType[]>([]);
+  const [memoryMax, setMemoryMax] = useState<number>(0);
+  const [diskMax, setDiskMax] = useState<number>(0);
 
   useEffect(() => {
     // 데이터 패칭 로딩
-    if (serverLogs) setData((prev) => [...prev, serverLogs]);
-    console.log(serverLogs);
+    if (serverLogs) {
+      setData((prev) => [...prev, serverLogs]);
+      if (!memoryMax || !diskMax) {
+        setMemoryMax(parseInt(serverLogs.memoryAllBytes));
+        setDiskMax(parseInt(serverLogs.diskAllBytes));
+      }
+    }
   }, [serverLogs]);
 
   const formatBytesToGB = (bytes: number) =>
-    (bytes / 1024 / 1024 / 1024).toFixed(2) + " GB";
+    (bytes / 1024 / 1024 / 1024).toFixed(2) + "GB";
+
+  const formatPercents = (percent: number) => percent + "%";
+
   const formatTime = (second: number) => `${second}초`;
 
   return (
@@ -35,7 +45,11 @@ const LineChartPage = () => {
       {/* 현재 CPU 사용량 */}
       <ResponsiveContainer width="100%" height="100%">
         <LineChart width={500} height={500} data={data}>
-          <YAxis dataKey="cpuUsageRate" domain={[0, 100]} />
+          <YAxis
+            dataKey="cpuUsageRate"
+            domain={[0, 100]}
+            tickFormatter={formatPercents}
+          />
           <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
           <Tooltip />
           <Legend />
@@ -49,6 +63,7 @@ const LineChartPage = () => {
           <YAxis
             dataKey="nodeMemoryMemAvailableBytes"
             tickFormatter={formatBytesToGB}
+            domain={[0, memoryMax]}
           />
           <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
           <Tooltip />
@@ -60,7 +75,11 @@ const LineChartPage = () => {
       {/* 디스크 사용 가능량 */}
       <ResponsiveContainer width="100%" height="100%">
         <LineChart width={500} height={500} data={data}>
-          <YAxis dataKey="diskAvailableBytes" tickFormatter={formatBytesToGB} />
+          <YAxis
+            dataKey="diskAvailableBytes"
+            tickFormatter={formatBytesToGB}
+            domain={[0, diskMax]}
+          />
           <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
           <Tooltip />
           <Legend />

@@ -47,13 +47,13 @@ const InputForm = ({ waitingInfo, setWaitingInfo }: InputFormProps) => {
   // });
 
   return (
-    <div className="flex flex-1 flex-col  items-center">
+    <div className="flex w-full h-full flex-col  items-center">
       <div className="flex flex-1 flex-col w-full p-10">
         <form className="flex flex-col flex-1  gap-5">
           <Input
             label="대기열 등록 대상 URL"
             title="대기열 등록 대상 URL"
-            value={targetUrl}
+            value={targetUrl ? targetUrl : process.env.NEXT_PUBLIC_TARGET_URL}
             onChange={(e) => setTargetUrl(e.target.value)}
           />
           <div className="flex justify-around gap-2">
@@ -78,14 +78,6 @@ const InputForm = ({ waitingInfo, setWaitingInfo }: InputFormProps) => {
             value={serviceName}
             onChange={(e) => setServiceName(e.target.value)}
           />
-          <div className="flex w-full justify-around">
-            <Link href="/waiting/1">
-              <Button type="button" edgeType="square">
-                미리 보기
-              </Button>
-            </Link>
-            <Button edgeType="square">등록</Button>
-          </div>
         </form>
       </div>
     </div>
