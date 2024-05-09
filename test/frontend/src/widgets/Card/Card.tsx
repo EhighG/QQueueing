@@ -1,16 +1,15 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Image from "next/image";
 import { faker } from "@faker-js/faker";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { enterApi } from "@/features";
 
 type CardProps = {
   waiting?: boolean;
+  productId: number;
 };
 
-const Card = ({ waiting }: CardProps) => {
+const Card = ({ waiting, productId }: CardProps) => {
   const router = useRouter();
   const url = faker.image.url();
 
@@ -31,7 +30,7 @@ const Card = ({ waiting }: CardProps) => {
           <button
             type="button"
             className="bg-blue-300 border p-2 rounded-md"
-            onClick={() => router.push("/product/1")}
+            onClick={() => router.push(`/product/${productId}`)}
           >
             구매하기
           </button>
