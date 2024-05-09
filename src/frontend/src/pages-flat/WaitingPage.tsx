@@ -44,7 +44,6 @@ const WaitingPage = () => {
 
   useEffect(() => {
     if (enqueueInfo) {
-      console.log("enqueueInfo", enqueueInfo);
       setPartitionNo(enqueueInfo?.partitionNo ?? 1);
       setIdx(enqueueInfo.order);
       setIdVal(enqueueInfo.idVal);

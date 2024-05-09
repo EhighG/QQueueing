@@ -125,9 +125,9 @@ public class WaitingController {
     }
 
     @GetMapping(path = "/next", headers = "address")
-    public String parsingFile(@RequestHeader("address") String address) {
+    public ResponseEntity<?> parsingFile(@RequestHeader("address") String address) {
 
-        String result = waitingService.parsing(address);
+        ResponseEntity<?> result = waitingService.parsing(address);
 
         return result;
     }

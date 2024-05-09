@@ -10,13 +10,12 @@ const AuthButton = () => {
     <Button
       onClick={async () => {
         await signOut();
-        await signIn();
       }}
     >
-      Sign Out
+      로그아웃
     </Button>
   ) : (
-    <Button onClick={async () => await signIn()}>Sign In</Button>
+    <Button onClick={async () => await signIn()}>로그인</Button>
   );
 };
 

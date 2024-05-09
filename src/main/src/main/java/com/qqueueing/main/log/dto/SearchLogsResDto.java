@@ -7,7 +7,11 @@ import lombok.Data;
 @Builder
 public class SearchLogsResDto {
 
+    private String memoryAllBytes;
+
     private String nodeMemoryMemAvailableBytes;
+
+    private String diskAllBytes;
 
     private String diskAvailableBytes;
 

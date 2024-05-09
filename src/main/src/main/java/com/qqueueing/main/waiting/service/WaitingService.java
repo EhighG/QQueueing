@@ -12,6 +12,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Async;
@@ -21,7 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -335,9 +343,46 @@ public class WaitingService {
         }
     }
 
-    public String parsing(String address) {
+    public ResponseEntity<?> parsing(String address) {
 
-        log.info("address = " + address);
+        address = "http://" + address;
+        System.out.println("address : " + address);
+
+        if(address.contains("image")) {
+
+            log.info("image 파일 요청됨");
+            String[] imageAddressSplit1 = address.split("p.ssafy.io");
+            String imageAddressSplit1result = imageAddressSplit1[1];
+
+            String[] imageAddressSplit2 = imageAddressSplit1result.split("/_next");
+            String imageAddressSplit2result = imageAddressSplit2[0];
+
+            address = address.replace(imageAddressSplit2result, ":3001");
+
+            String[] imageAddressSplit3 = address.split("url=");
+
+            String[] imageAddressSplit4 = imageAddressSplit3[1].split("%2F_next");
+            String imageAddress = imageAddressSplit4[0];
+
+            address = address.replace(imageAddress, "");
+            log.info("parsing된 address : " + address);
+
+            String imageUrl = address;
+
+            try {
+                log.info("imageUrl : " + imageUrl);
+                byte[] imageBytes = getImageBytes(imageUrl);
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.IMAGE_PNG);
+
+                return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+//                return ResponseEntity.ok().body(imageBytes);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         String[] addressSplit = address.split("_next");
         String targetUrl = "/_next" + addressSplit[1];
@@ -360,10 +405,29 @@ public class WaitingService {
 
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-        System.out.println("결과 : " + response.getBody());
+        log.info("결과 : " + response.getBody());
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
-        return result;
+        return ResponseEntity.ok().body(result);
 
+    }
+
+    public static byte[] getImageBytes(String imageUrl) throws IOException {
+        URL url = new URL(imageUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        try {
+            InputStream inputStream = connection.getInputStream();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            return outputStream.toByteArray();
+        } finally {
+            connection.disconnect();
+        }
     }
 }
