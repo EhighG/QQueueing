@@ -242,13 +242,13 @@ public class WaitingService {
         }
     }
 
-    public GetMyOrderResDto getMyOrder(int partitionNo, Long oldOrder, String ip, HttpServletRequest request) {
+    public GetMyOrderResDto getMyOrder(int partitionNo, Long oldOrder, String ip) {
         WaitingStatusDto waitingStatus = queues.get(partitionNo);
         Set<String> doneSet = waitingStatus.getDoneSet();
         List<Long> outList = waitingStatus.getOutList();
         int lastOffset = waitingStatus.getLastOffset();
         int outCntInFront = - (Collections.binarySearch(outList, oldOrder) + 1);
-        Long myOrder = oldOrder - outCntInFront - lastOffset; // newOrder
+        Long myOrder = Math.max(oldOrder - outCntInFront - lastOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize());
         if (doneSet.contains(ip)) { // waiting done
             log.info("ip addr {} requested, and return tempToken");
