@@ -1,3 +1,11 @@
+type waitingRegistType = {
+  targetUrl: string;
+  maxCapacity: number;
+  processingPerMinute: number;
+  serviceName: string;
+  queueImageUrl: string;
+};
+
 type WaitingListType = {
   id: string;
   targetUrl: string;
@@ -13,4 +21,4 @@ type ResponseType = {
   result: WaitingListType[];
 };
 
-export type { WaitingListType, ResponseType };
+export type { WaitingListType, ResponseType, waitingRegistType };
