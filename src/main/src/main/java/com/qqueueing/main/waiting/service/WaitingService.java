@@ -342,6 +342,7 @@ public class WaitingService {
 
     public ResponseEntity<?> parsing(String address) {
 
+        address = "https://" + address;
         log.info("address = " + address);
 
         if(address.contains("image")) {
