@@ -80,12 +80,10 @@ public class WaitingController {
 
 
     @PostMapping("/order")
-    public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto,
-                                        HttpServletRequest request) {
+    public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto) {
         GetMyOrderResDto myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getPartitionNo(),
                 getMyOrderReqDto.getOrder(),
-                getMyOrderReqDto.getIdVal(),
-                request);
+                getMyOrderReqDto.getIdVal());
         return ResponseEntity
                 .ok(myOrderRes);
     }

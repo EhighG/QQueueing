@@ -86,6 +86,8 @@ type ServerLogsType = {
   nodeMemoryMemAvailableBytes: string;
   diskAvailableBytes: string;
   cpuUsageRate: string;
+  diskAllBytes: string;
+  memoryAllBytes: string;
 };
 
 export type {
