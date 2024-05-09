@@ -12,6 +12,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Async;
@@ -370,7 +373,11 @@ public class WaitingService {
                 log.info("imageUrl : " + imageUrl);
                 byte[] imageBytes = getImageBytes(imageUrl);
 
-                return ResponseEntity.ok().body(imageBytes);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.IMAGE_PNG);
+
+                return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+//                return ResponseEntity.ok().body(imageBytes);
 
             } catch (IOException e) {
                 e.printStackTrace();
