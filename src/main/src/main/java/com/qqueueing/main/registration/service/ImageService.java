@@ -42,7 +42,7 @@ public class ImageService {
 
         // 파일 경로 확인
         File savedFile = filePath.toFile();
-        if (savedFile.exists()) {
+        if (savedFile.isFile()) {
             System.out.println("파일이 정상적으로 저장되었습니다: " + savedFile.getAbsolutePath());
         } else {
             System.out.println("파일 저장에 실패했습니다.");
