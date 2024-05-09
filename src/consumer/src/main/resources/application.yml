@@ -11,6 +11,7 @@ spring:
 #      value-deserializer: com.fasterxml.jackson.databind.JsonDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       topic: test3
+      max-poll-records: 3
 
 logging:
   level:
