@@ -339,6 +339,20 @@ public class WaitingService {
 
         log.info("address = " + address);
 
+        if(address.contains("image")) {
+
+            log.info("image 파일 요청됨");
+            String[] imageAddressSplit1 = address.split("url=");
+            String imageAddressSplit1result = imageAddressSplit1[1];
+            String[] imageAddressSplit2 = imageAddressSplit1result.split("%2F_next");
+            String imageAddress = imageAddressSplit2[0];
+
+            address = address.replace(imageAddress, "");
+            log.info("parsing된 address : " + address);
+
+            return address;
+        }
+
         String[] addressSplit = address.split("_next");
         String targetUrl = "/_next" + addressSplit[1];
 
