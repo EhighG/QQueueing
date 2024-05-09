@@ -126,10 +126,10 @@ public class WaitingController {
        return "forwarding success!";
     }
 
-    @GetMapping(path = "/next", headers = "address")
-    public String parsingFile(@RequestHeader("address") String address) {
+    @GetMapping(path = "/next", headers = "address", produces = "image/png")
+    public ResponseEntity<?> parsingFile(@RequestHeader("address") String address) {
 
-        String result = waitingService.parsing(address);
+        ResponseEntity<?> result = waitingService.parsing(address);
 
         return result;
     }

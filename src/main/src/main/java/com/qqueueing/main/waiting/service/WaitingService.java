@@ -21,7 +21,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -335,7 +340,7 @@ public class WaitingService {
         }
     }
 
-    public String parsing(String address) {
+    public ResponseEntity<?> parsing(String address) {
 
         log.info("address = " + address);
 
@@ -350,7 +355,16 @@ public class WaitingService {
             address = address.replace(imageAddress, "");
             log.info("parsing된 address : " + address);
 
-            return address;
+            String imageUrl = address;
+
+            try {
+                byte[] imageBytes = getImageBytes(imageUrl);
+
+                return ResponseEntity.ok().body(imageBytes);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         String[] addressSplit = address.split("_next");
@@ -374,10 +388,29 @@ public class WaitingService {
 
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-        System.out.println("결과 : " + response.getBody());
+        log.info("결과 : " + response.getBody());
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
-        return result;
+        return ResponseEntity.ok().body(result);
 
+    }
+
+    public static byte[] getImageBytes(String imageUrl) throws IOException {
+        URL url = new URL(imageUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        try {
+            InputStream inputStream = connection.getInputStream();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            return outputStream.toByteArray();
+        } finally {
+            connection.disconnect();
+        }
     }
 }
