@@ -35,6 +35,8 @@ servers: # 타 서버들의 정보 기록
   front: qqueueing-frontend:3000/waiting
   main: http://k10a401.p.ssafy.io
 
+  replace-url: http://host.docker.internal # replace url value for forwarding to target
+
 kafka:
   broker: qqueueing-kafka:9092
   topic-names:
