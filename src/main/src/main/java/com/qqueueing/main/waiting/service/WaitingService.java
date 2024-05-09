@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -351,6 +353,10 @@ public class WaitingService {
         log.info("serverURL = " + serverURL);
 
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().stream()
+                .filter(StringHttpMessageConverter.class::isInstance)
+                .map(StringHttpMessageConverter.class::cast)
+                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
 
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
