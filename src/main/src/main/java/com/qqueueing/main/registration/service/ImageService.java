@@ -26,7 +26,7 @@ public class ImageService {
     private String saveFile(MultipartFile file) throws IOException {
         // 파일 저장 로직
         String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
-        Path filePath = Paths.get("src/main/resources/static/uploads", fileName);
+        Path filePath = Paths.get("home/qqueueing/uploads", fileName);
         Files.write(filePath, file.getBytes());
         return "/uploads/" + fileName;
     }
