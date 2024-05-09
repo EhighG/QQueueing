@@ -27,6 +27,7 @@ public class ImageService {
         // 파일 저장 로직
         String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
         Path filePath = Paths.get("/home/qqueueing/uploads", fileName);
+        Files.createDirectories(filePath.getParent());
         Files.write(filePath, file.getBytes());
         return "/uploads/" + fileName;
     }
