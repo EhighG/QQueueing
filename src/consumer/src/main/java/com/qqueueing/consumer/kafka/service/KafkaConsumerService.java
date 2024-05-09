@@ -210,7 +210,8 @@ public class KafkaConsumerService {
                     partitionInfo.partition());
 
             // Get the current offset for the partition
-            Long currentOffset = consumer.position(topicPartition);
+//            Long currentOffset = consumer.position(topicPartition);
+            Long currentOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
 
 
             ConsumeMessageResDto consumeMessageResDto = new ConsumeMessageResDto();
@@ -231,6 +232,9 @@ public class KafkaConsumerService {
                     consumeMessageResDto.getCurDoneList().add(messageDto.getIp());
                 }
                 Long initialOffset = initialOffsets.get(partitionNumber);
+                System.out.println("partitionNumber = " + partitionNumber);
+                System.out.println("initialOffset = " + initialOffset);
+                System.out.println("currentOffset = " + currentOffset);
                 consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
                 consumeMessageResDto.setLastOffset(currentOffset - initialOffset);
 
