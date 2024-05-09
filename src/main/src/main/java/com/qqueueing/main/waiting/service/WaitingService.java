@@ -344,30 +344,30 @@ public class WaitingService {
 
         log.info("address = " + address);
 
-        if(address.contains("image")) {
-
-            log.info("image 파일 요청됨");
-            String[] imageAddressSplit1 = address.split("url=");
-            String imageAddressSplit1result = imageAddressSplit1[1];
-            String[] imageAddressSplit2 = imageAddressSplit1result.split("%2F_next");
-            String imageAddress = imageAddressSplit2[0];
-
-            address = address.replace(imageAddress, "");
-            log.info("parsing된 address : " + address);
-
-            return ResponseEntity.ok().body(address);
-
-//            String imageUrl = address;
+//        if(address.contains("image")) {
 //
-//            try {
-//                byte[] imageBytes = getImageBytes(imageUrl);
+//            log.info("image 파일 요청됨");
+//            String[] imageAddressSplit1 = address.split("url=");
+//            String imageAddressSplit1result = imageAddressSplit1[1];
+//            String[] imageAddressSplit2 = imageAddressSplit1result.split("%2F_next");
+//            String imageAddress = imageAddressSplit2[0];
 //
-//                return ResponseEntity.ok().body(imageBytes);
+//            address = address.replace(imageAddress, "");
+//            log.info("parsing된 address : " + address);
 //
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-        }
+//            return ResponseEntity.ok().body(address);
+//
+////            String imageUrl = address;
+////
+////            try {
+////                byte[] imageBytes = getImageBytes(imageUrl);
+////
+////                return ResponseEntity.ok().body(imageBytes);
+////
+////            } catch (IOException e) {
+////                e.printStackTrace();
+////            }
+//        }
 
         String[] addressSplit = address.split("_next");
         String targetUrl = "/_next" + addressSplit[1];
