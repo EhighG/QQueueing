@@ -20,7 +20,7 @@ const ResourcePage = () => {
 
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md">
-      <SectionTitle title="리소스" />
+      <SectionTitle title="큐잉 서버" />
       <div className="flex items-center flex-1 justify-around">
         <PerformanceCard title="CPU 사용량">
           <Gauge
@@ -61,7 +61,7 @@ const ResourcePage = () => {
             text={({ value, valueMax }) => `${value} / ${valueMax}GB`}
           />
         </PerformanceCard>
-        <PerformanceCard title="가상 메모리">
+        <PerformanceCard title="JVM">
           <Gauge
             width={240}
             height={240}

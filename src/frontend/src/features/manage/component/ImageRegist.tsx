@@ -1,13 +1,14 @@
 "use client";
-import { Button, SectionTitle, cats } from "@/shared";
+import { Button, SectionTitle, logo } from "@/shared";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 
 type ImageRegistProps = {
   setImageData: Dispatch<SetStateAction<File>>;
+  setThumbnail: Dispatch<SetStateAction<string>>;
 };
 
-const ImageRegist = ({ setImageData }: ImageRegistProps) => {
+const ImageRegist = ({ setImageData, setThumbnail }: ImageRegistProps) => {
   const [queueImageUrl, setQueueImageUrl] = useState<string>("");
   const ref = useRef<HTMLInputElement>(null);
 
@@ -19,21 +20,23 @@ const ImageRegist = ({ setImageData }: ImageRegistProps) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setQueueImageUrl(e.target?.result as string);
+        setThumbnail(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <div className="flex flex-[2] overflow-auto flex-col border rounded-md border-black">
+    <div className="flex w-full h-full overflow-auto flex-col border rounded-md border-black">
       <SectionTitle title="대기열 이미지" />
       <div className="flex flex-1">
-        <div className="flex flex-[1] justify-center">
+        <div className="flex  size-[400px]">
           <Image
-            src={queueImageUrl ? queueImageUrl : cats}
-            alt="sample"
+            src={queueImageUrl ? queueImageUrl : logo}
+            alt="product"
             width={500}
             height={500}
+            className="size-[500px]"
           />
         </div>
         <div className="flex flex-[2] overflow-auto flex-col gap-5 p-2">
@@ -41,14 +44,16 @@ const ImageRegist = ({ setImageData }: ImageRegistProps) => {
             대기열 이미지는 대기열 우측 상단에 표시 됩니다
           </p>
           <Button
-            className="p-2 border rounded-md border-black"
+            edgeType="square"
             onClick={() => {
               ref?.current?.click();
             }}
+            color="primary"
           >
-            등록
+            업로드
           </Button>
           <input
+            hidden
             ref={ref}
             type="file"
             id="file"
