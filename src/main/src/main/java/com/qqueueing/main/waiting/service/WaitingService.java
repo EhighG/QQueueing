@@ -355,16 +355,18 @@ public class WaitingService {
             address = address.replace(imageAddress, "");
             log.info("parsing된 address : " + address);
 
-            String imageUrl = address;
+            return ResponseEntity.ok().body(address);
 
-            try {
-                byte[] imageBytes = getImageBytes(imageUrl);
-
-                return ResponseEntity.ok().body(imageBytes);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            String imageUrl = address;
+//
+//            try {
+//                byte[] imageBytes = getImageBytes(imageUrl);
+//
+//                return ResponseEntity.ok().body(imageBytes);
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
         String[] addressSplit = address.split("_next");
