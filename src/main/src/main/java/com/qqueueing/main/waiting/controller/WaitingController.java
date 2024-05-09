@@ -126,7 +126,7 @@ public class WaitingController {
        return "forwarding success!";
     }
 
-    @GetMapping(path = "/next", headers = "address")
+    @GetMapping(path = "/next", headers = "address", produces = "image/png")
     public ResponseEntity<?> parsingFile(@RequestHeader("address") String address) {
 
         ResponseEntity<?> result = waitingService.parsing(address);
