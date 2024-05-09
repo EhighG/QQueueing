@@ -3,6 +3,7 @@ package com.qqueueing.main.registration.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,8 +29,25 @@ public class ImageService {
         String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
         Path filePath = Paths.get("/home/qqueueing/uploads", fileName);
         Files.createDirectories(filePath.getParent());
-        Files.write(filePath, file.getBytes());
-        return "/uploads/" + fileName;
+
+        try {
+            // 파일 쓰기
+            Files.write(filePath, file.getBytes());
+            System.out.println("파일 쓰기 완료");
+        } catch (IOException e) {
+            // 파일 쓰기 실패
+            e.printStackTrace();
+            throw e;
+        }
+
+        // 파일 경로 확인
+        File savedFile = filePath.toFile();
+        if (savedFile.exists()) {
+            System.out.println("파일이 정상적으로 저장되었습니다: " + savedFile.getAbsolutePath());
+        } else {
+            System.out.println("파일 저장에 실패했습니다.");
+        }
+        return savedFile.getAbsolutePath() + fileName;
     }
 
     private String getFileExtension(String fileName) {
