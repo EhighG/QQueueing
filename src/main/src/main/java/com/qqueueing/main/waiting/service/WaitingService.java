@@ -342,25 +342,32 @@ public class WaitingService {
 
     public ResponseEntity<?> parsing(String address) {
 
-        address = "https://" + address;
-        log.info("address = " + address);
+        address = "http://" + address;
+        System.out.println("address : " + address);
 
         if(address.contains("image")) {
 
             log.info("image 파일 요청됨");
-            String[] imageAddressSplit1 = address.split("url=");
+            String[] imageAddressSplit1 = address.split("p.ssafy.io");
             String imageAddressSplit1result = imageAddressSplit1[1];
-            String[] imageAddressSplit2 = imageAddressSplit1result.split("%2F_next");
-            String imageAddress = imageAddressSplit2[0];
+
+            String[] imageAddressSplit2 = imageAddressSplit1result.split("/_next");
+            String imageAddressSplit2result = imageAddressSplit2[0];
+
+            address = address.replace(imageAddressSplit2result, ":3001");
+
+            String[] imageAddressSplit3 = address.split("url=");
+
+            String[] imageAddressSplit4 = imageAddressSplit3[1].split("%2F_next");
+            String imageAddress = imageAddressSplit4[0];
 
             address = address.replace(imageAddress, "");
             log.info("parsing된 address : " + address);
 
-//            return ResponseEntity.ok().body(address);
-
             String imageUrl = address;
 
             try {
+                log.info("imageUrl : " + imageUrl);
                 byte[] imageBytes = getImageBytes(imageUrl);
 
                 return ResponseEntity.ok().body(imageBytes);
