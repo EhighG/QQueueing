@@ -67,12 +67,12 @@ public class WaitingController {
         log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
 
         String result = waitingService.getQueuePage(targetUrl, request);
 
-        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
 
 //        return ResponseEntity
 //                .ok(waitingService.getQueuePage(targetUrl, request));
