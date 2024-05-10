@@ -69,13 +69,12 @@ public class WaitingController {
 
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
-
-        String result = waitingService.getQueuePage(targetUrl, request);
-
+//
+//        String result = waitingService.getQueuePage(targetUrl, request);
+//
+//        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
+        String result = new String(waitingService.getQueuePage(targetUrl, request).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
         return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
-
-//        return ResponseEntity
-//                .ok(waitingService.getQueuePage(targetUrl, request));
     }
 
     @PostMapping
