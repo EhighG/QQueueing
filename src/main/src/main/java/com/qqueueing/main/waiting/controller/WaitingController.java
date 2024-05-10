@@ -68,8 +68,7 @@ public class WaitingController {
         log.info("queue-page 포워딩 api called");
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_HTML);
-        headers.set("Content-Encoding", "UTF-8");
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
 
         String result = waitingService.getQueuePage(targetUrl, request);
 
