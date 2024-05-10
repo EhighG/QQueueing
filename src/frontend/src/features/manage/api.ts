@@ -24,7 +24,7 @@ const postWaiting = async (data: waitingRegistType) => {
 
 const postWaitingImage = async (data: FormData) => {
   return await instance
-    .post("/queue/image", data, {
+    .post("/image", data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
