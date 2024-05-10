@@ -66,8 +66,17 @@ public class WaitingController {
                                           HttpServletRequest request) {
         log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
-        return ResponseEntity
-                .ok(waitingService.getQueuePage(targetUrl, request));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_HTML);
+        headers.set("Content-Encoding", "UTF-8");
+
+        String result = waitingService.getQueuePage(targetUrl, request);
+
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+
+//        return ResponseEntity
+//                .ok(waitingService.getQueuePage(targetUrl, request));
     }
 
     @PostMapping
