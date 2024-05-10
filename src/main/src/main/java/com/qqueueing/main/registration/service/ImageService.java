@@ -27,7 +27,7 @@ public class ImageService {
     private String saveFile(MultipartFile file) throws IOException {
         // 파일 저장 로직
         String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
-        Path filePath = Paths.get("/home/qqueueing/uploads", fileName);
+        Path filePath = Paths.get("/var/lib/uploads", fileName);
         Files.createDirectories(filePath.getParent());
 
         try {
@@ -47,7 +47,7 @@ public class ImageService {
         } else {
             System.out.println("파일 저장에 실패했습니다.");
         }
-        return savedFile.getAbsolutePath() + fileName;
+        return savedFile.getAbsolutePath();
     }
 
     private String getFileExtension(String fileName) {
