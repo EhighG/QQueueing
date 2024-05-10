@@ -65,14 +65,14 @@ public class RegistrationController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/imageUrl/{id}")
+    @GetMapping("/imageFile/{id}")
     public ResponseEntity<?> getImage(@PathVariable String id) throws ChangeSetPersister.NotFoundException {
         String imageUrl = registrationService.getImageById(id);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);
         byte[] result = imageService.sendImage(imageUrl);
-        String message = "이미지 URL 조회에 성공했습니다.";
+        String message = "이미지 파일 조회에 성공했습니다.";
         SuccessResponse response = new SuccessResponse(HttpStatus.OK.value(), message, result);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 }
