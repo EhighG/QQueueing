@@ -3,8 +3,11 @@ package com.qqueueing.main.registration.controller;
 import com.qqueueing.main.common.SuccessResponse;
 import com.qqueueing.main.registration.model.Registration;
 import com.qqueueing.main.registration.model.RegistrationUpdateRequest;
+import com.qqueueing.main.registration.service.ImageService;
 import com.qqueueing.main.registration.service.RegistrationService;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,8 @@ public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
+    @Autowired
+    private ImageService imageService;
 
     @PostMapping
     public ResponseEntity<?> createRegistration(@RequestBody Registration registration) {
@@ -60,11 +65,14 @@ public class RegistrationController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/imageUrl/{id}")
+    @GetMapping("/imageFile/{id}")
     public ResponseEntity<?> getImage(@PathVariable String id) throws ChangeSetPersister.NotFoundException {
         String imageUrl = registrationService.getImageById(id);
-        String message = "이미지 URL 조회에 성공했습니다.";
-        SuccessResponse response = new SuccessResponse(HttpStatus.OK.value(), message, imageUrl);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_PNG);
+        byte[] result = imageService.sendImage(imageUrl);
+        String message = "이미지 파일 조회에 성공했습니다.";
+        SuccessResponse response = new SuccessResponse(HttpStatus.OK.value(), message, result);
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 }
