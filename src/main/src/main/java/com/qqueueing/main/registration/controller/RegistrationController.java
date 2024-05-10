@@ -22,6 +22,7 @@ public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
+    @Autowired
     private ImageService imageService;
 
     @PostMapping
