@@ -8,11 +8,14 @@ import com.qqueueing.main.waiting.service.WaitingService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 
 @Slf4j
@@ -91,9 +94,16 @@ public class WaitingController {
     @GetMapping("/page-req")
     public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token,
                                              HttpServletRequest request) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "html", StandardCharsets.UTF_8));
+
+        String result = waitingService.forward(token, request);
         log.info("target page 포워딩 api called");
-        return ResponseEntity
-                .ok(waitingService.forward(token, request));
+
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+//        return ResponseEntity
+//                .ok(waitingService.forward(token, request));
     }
 
     @GetMapping("/out")
