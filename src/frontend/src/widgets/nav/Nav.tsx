@@ -64,13 +64,7 @@ const NavMenu = () => {
               title="example"
             ></LinkButton>
           </dd>
-          <dd>
-            <LinkButton
-              icon={<GitHubIcon />}
-              href="/github"
-              title="github"
-            ></LinkButton>
-          </dd>
+
           <dd>
             <LinkButton
               icon={<LoyaltyIcon />}
