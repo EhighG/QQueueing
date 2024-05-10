@@ -51,14 +51,11 @@ const RegistPage = () => {
       <SectionTitle title="등록 페이지" />
       <div className="flex flex-1 flex-col max-2xl:m-5 m-10 p-5 border rounded-md border-slate-300">
         <div className="flex flex-1 gap-5">
-          <div className="flex flex-[1] flex-col gap-4">
-            <div>
-              <InputForm
-                waitingInfo={waitingInfo}
-                setWaitingInfo={setWaitingInfo}
-              />
+          <div className="flex flex-1 flex-col gap-4">
+            <div className="flex flex-1">
+              <InputForm setWaitingInfo={setWaitingInfo} />
             </div>
-            <div>
+            <div className="flex flex-1">
               <ImageRegist
                 setThumbnail={setThumbnail}
                 setImageData={setImageFile}

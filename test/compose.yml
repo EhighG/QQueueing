@@ -9,6 +9,8 @@ services:
       - 80:80
       - 443:443
     container_name: test-nginx
+    volumes:
+      - nginx-volume:/etc/nginx
     networks:
       - test-network
 
@@ -39,7 +41,7 @@ services:
     container_name: test-mysqldb
     volumes:
       - mysqldb-backup:/backup
-      - ./test_dump.sql:/test_dump.sql
+        # - ./test_dump.sql:/test_dump.sql
     networks:
       - test-network
 
@@ -80,6 +82,7 @@ services:
 
 volumes:
   mysqldb-backup: {}
+  nginx-volume: {}
 
 networks:
   test-network: {}
