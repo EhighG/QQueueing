@@ -13,6 +13,8 @@ type WaitingListType = {
   processingPerMinute: number;
   serviceName: string;
   queueImageUrl: string;
+  partitionNo: number;
+  isActive: boolean;
 };
 
 type ResponseType = {
