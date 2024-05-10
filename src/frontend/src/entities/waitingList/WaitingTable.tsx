@@ -32,7 +32,9 @@ const WaitingTable = ({ waitingList }: waitingListType) => {
               <td className="w-[25%]">{item.targetUrl}</td>
               <td className="w-[25%]">{item.maxCapacity}</td>
               <td className="w-[25%]">{item.processingPerMinute}</td>
-              <td className="w-[12.5%]">활성 중</td>
+              <td className="w-[12.5%]">
+                {item.isActive ? "활성 중" : "비 활성"}
+              </td>
             </tr>
           ))
         ) : (
