@@ -280,10 +280,9 @@ public class WaitingService {
 //        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
 //        String endPoint = urlSplitList[1];
         // parse target url(external request -> internal)
-        log.info("html : " + html);
 
         String newHtml = html.replace("/_next", endpoint + "/_next");
-        log.info("newHtml : " + newHtml);
+
         return newHtml;
     }
 
@@ -310,7 +309,6 @@ public class WaitingService {
                 return;
             }
             Map<Integer, BatchResDto> response = consumerConnector.getNext(activePartitions); // 대기 완료된 ip 목록을 가져온다.
-            System.out.println("response = " + response);
             Set<Integer> partitionNos = response.keySet();
 
             for (Integer partitionNo : partitionNos) {
@@ -350,7 +348,6 @@ public class WaitingService {
 
         if(address.contains("image")) {
 
-            log.info("image 파일 요청됨");
             String[] imageAddressSplit1 = address.split("p.ssafy.io");
             String imageAddressSplit1result = imageAddressSplit1[1];
 
@@ -365,12 +362,10 @@ public class WaitingService {
             String imageAddress = imageAddressSplit4[0];
 
             address = address.replace(imageAddress, "");
-            log.info("parsing된 address : " + address);
 
             String imageUrl = address;
 
             try {
-                log.info("imageUrl : " + imageUrl);
                 byte[] imageBytes = getImageBytes(imageUrl);
 
                 HttpHeaders headers = new HttpHeaders();
@@ -391,11 +386,7 @@ public class WaitingService {
         String[] endPointSplit2 = endPointSplit[1].split("/_next");
         String endPoint = endPointSplit2[0];
 
-        log.info("endPoint = " + endPoint);
-
         String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
-
-        log.info("serverURL = " + serverURL);
 
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().stream()
@@ -405,7 +396,6 @@ public class WaitingService {
 
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-        log.info("결과 : " + response.getBody());
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
         return ResponseEntity.ok().body(result);
