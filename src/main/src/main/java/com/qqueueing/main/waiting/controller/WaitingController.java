@@ -96,7 +96,8 @@ public class WaitingController {
                                              HttpServletRequest request) {
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "text", StandardCharsets.UTF_8));
+        MediaType mediaType = new MediaType("text", "plain", StandardCharsets.UTF_8);
+        headers.setContentType(mediaType);
 
         String result = waitingService.forward(token, request);
         log.info("target page 포워딩 api called");
