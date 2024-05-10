@@ -97,6 +97,7 @@ public class WaitingController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_HTML);
+        headers.set("Content-Encoding", "UTF-8");
 
         String result = waitingService.forward(token, request);
         log.info("target page 포워딩 api called");
