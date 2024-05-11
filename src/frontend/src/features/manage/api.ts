@@ -22,14 +22,22 @@ const postWaiting = async (data: waitingRegistType) => {
     .then(({ data }) => data.result);
 };
 
-const postWaitingImage = async (data: FormData) => {
+const postWaitingImage = async (imageFile: File) => {
+  const formData = new FormData();
+  formData.append("file", imageFile);
   return await instance
-    .post("/image", data, {
+    .post("/image", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     })
     .then(({ data }) => data);
+};
+
+const getWaitingImage = async (id: string) => {
+  return await instance
+    .get(`/queue/image-file/${id}`)
+    .then(({ data }) => data.result);
 };
 
 const getWaitingDetail = async (id: string) => {
@@ -69,4 +77,5 @@ export {
   postWaitingActivate,
   postWaitingDeActivate,
   deleteWaiting,
+  getWaitingImage,
 };

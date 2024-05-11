@@ -14,6 +14,7 @@ export {
   usePostWaitingActivate,
   usePostWaitingDeActivate,
   useDeleteWaiting,
+  useGetWaitingImage
 } from "./query";
 
 export type { ResponseType } from "./type";

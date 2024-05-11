@@ -1,14 +1,25 @@
 "use client";
 import { Button, SectionTitle, logo } from "@/shared";
 import Image from "next/image";
-import React, { Dispatch, SetStateAction, useRef, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 type ImageRegistProps = {
+  thumbNail?: string;
   setImageData: Dispatch<SetStateAction<File>>;
   setThumbnail: Dispatch<SetStateAction<string>>;
 };
 
-const ImageRegist = ({ setImageData, setThumbnail }: ImageRegistProps) => {
+const ImageRegist = ({
+  setImageData,
+  setThumbnail,
+  thumbNail,
+}: ImageRegistProps) => {
   const [queueImageUrl, setQueueImageUrl] = useState<string>("");
   const ref = useRef<HTMLInputElement>(null);
 
@@ -25,6 +36,10 @@ const ImageRegist = ({ setImageData, setThumbnail }: ImageRegistProps) => {
       reader.readAsDataURL(file);
     }
   };
+
+  useEffect(() => {
+    if (thumbNail) setQueueImageUrl(thumbNail);
+  }, [thumbNail]);
 
   return (
     <div className="flex w-full h-full overflow-auto flex-col border rounded-md border-black">

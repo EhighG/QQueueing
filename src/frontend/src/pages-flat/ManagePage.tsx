@@ -3,9 +3,11 @@ import { WaitingListType } from "@/entities/waitingList/type";
 import { ImageRegist, InputForm } from "@/features";
 import { useGetWaitingDetail, useDeleteWaiting } from "@/features";
 import {
+  useGetWaitingImage,
   usePatchWaiting,
   usePostWaitingActivate,
   usePostWaitingDeActivate,
+  usePostWaitingImage,
 } from "@/features/manage/query";
 import { Button, SectionTitle, logo } from "@/shared";
 import { LinearProgress } from "@mui/material";
@@ -35,8 +37,42 @@ const ManagePage = ({ id }: ManagePageProps) => {
 
   const { mutate: activate } = usePostWaitingActivate(partitionNo);
   const { mutate: deActivate } = usePostWaitingDeActivate(partitionNo);
+  const { mutate: handlePatch } = usePatchWaiting(id);
+  const { data: imageData } = useGetWaitingImage(id);
+  const {
+    mutate: handlePostImage,
+    isSuccess,
+    data: imageResponse,
+  } = usePostWaitingImage(imageFile);
 
-  const { mutate: handlePatch } = usePatchWaiting(id, waitingInfo);
+  const handleButton = () => {
+    if (imageFile.name) {
+      handlePostImage();
+    } else {
+      handlePatch(waitingInfo);
+    }
+  };
+
+  useEffect(() => {
+    if (isSuccess) {
+      console.log("success", imageResponse.result);
+      setWaitingInfo((prev) => ({
+        ...prev,
+        queueImageUrl: imageResponse.result,
+      }));
+      handlePatch({
+        ...waitingInfo,
+        queueImageUrl: imageResponse.result,
+      });
+    }
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (imageData) {
+      setThumbnail("data:image/png;base64, " + imageData);
+      console.log(imageData);
+    }
+  }, [imageData]);
 
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md border">
@@ -56,6 +92,7 @@ const ManagePage = ({ id }: ManagePageProps) => {
             </div>
             <div>
               <ImageRegist
+                thumbNail={thumbnail}
                 setThumbnail={setThumbnail}
                 setImageData={setImageFile}
               />
@@ -134,7 +171,7 @@ const ManagePage = ({ id }: ManagePageProps) => {
             {waitingDetail?.isActive ? "비 활성" : "활성"}
           </Button>
 
-          <Button edgeType="square" onClick={() => handlePatch()}>
+          <Button edgeType="square" onClick={() => handleButton()}>
             변경
           </Button>
           <Button
