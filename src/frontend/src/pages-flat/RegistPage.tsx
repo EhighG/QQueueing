@@ -19,32 +19,28 @@ const RegistPage = () => {
   );
   const [imageFile, setImageFile] = useState<File>({} as File);
 
-  const [queueImageUrl, setQueueImageUrl] = useState<string>("");
   const [thumbnail, setThumbnail] = useState<string>("");
-  const formData = new FormData();
+
+  const { mutate: handleRegistWaiting } = useRegistWaiting();
+
+  const {
+    mutate: handlePostImage,
+    isSuccess,
+    data: imageResponse,
+  } = usePostWaitingImage(imageFile);
 
   useEffect(() => {
-    if (imageFile) formData.append("image", imageFile);
-  }, [imageFile]);
-
-  const { mutate: handleRegistWaiting } = useRegistWaiting(waitingInfo);
-
-  const { mutate: handlePostImage, data: ImageResponse } =
-    usePostWaitingImage(formData);
-
-  useEffect(() => {
-    if (ImageResponse) {
-      setQueueImageUrl(ImageResponse.queueImageUrl);
+    if (isSuccess) {
       setWaitingInfo((prev) => ({
         ...prev,
-        queueImageUrl,
+        queueImageUrl: imageResponse.result,
       }));
+      handleRegistWaiting({
+        ...waitingInfo,
+        queueImageUrl: imageResponse.result,
+      });
     }
-  }, [ImageResponse]);
-
-  useEffect(() => {
-    if (waitingInfo && waitingInfo.queueImageUrl) handleRegistWaiting();
-  }, [waitingInfo]);
+  }, [isSuccess]);
 
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md border">
@@ -125,7 +121,9 @@ const RegistPage = () => {
           </div>
         </div>
         <div className="flex w-full justify-end mt-2 gap-4">
-          <Button edgeType="square">등록</Button>
+          <Button edgeType="square" onClick={() => handlePostImage()}>
+            등록
+          </Button>
         </div>
       </div>
     </div>
