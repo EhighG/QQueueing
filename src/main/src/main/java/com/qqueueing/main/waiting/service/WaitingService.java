@@ -61,14 +61,15 @@ public class WaitingService {
     private String endpoint = "/waiting";
     private final String TEST_IP = "ipStringValueForTest";
     private final String TEST_TOKEN = "testTokenStringValue";
-    private final String TEST_TARGET_URL = "http://k10a401.p.ssafy.io/product/1";
+    private final String TEST_TARGET_URL;
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
                           @Value("${servers.front}") String queuePageFront,
                           @Value("${servers.main}") String serverOrigin,
                           @Value("${kafka.topic-names.enter}") String topicName,
-                          @Value("${servers.replace-url}") String replaceUrl) {
+                          @Value("${servers.replace-url}") String replaceUrl,
+                          @Value("${testing.target-url}") String testTargetUrl) {
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
         this.enterProducer = enterProducer; // init every partitions
@@ -78,6 +79,7 @@ public class WaitingService {
         this.SERVER_ORIGIN = serverOrigin;
         this.TOPIC_NAME = topicName;
         this.REPLACE_URL = replaceUrl;
+        this.TEST_TARGET_URL = testTargetUrl;
     }
 
     private void checkTopic() {
@@ -267,6 +269,7 @@ public class WaitingService {
      */
     public String forward(String token, HttpServletRequest request) {
         String targetUrl = targetUrlMapper.get(token);
+        // for test
         if (token.equals(TEST_TOKEN)) {
             targetUrl = TEST_TARGET_URL;
         }
