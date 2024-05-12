@@ -76,8 +76,8 @@ public class RegistrationController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/image-file/by-target-url/{targetUrl}")
-    public ResponseEntity<?> getImageByTargetUrl(@PathVariable String targetUrl) throws ChangeSetPersister.NotFoundException {
+    @GetMapping("/image-file/by-target-url")
+    public ResponseEntity<?> getImageByTargetUrl(@RequestParam("targetUrl") String targetUrl) throws ChangeSetPersister.NotFoundException {
         String imageUrl = registrationService.getImageByTargetUrl(targetUrl);
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(MediaType.IMAGE_PNG);
