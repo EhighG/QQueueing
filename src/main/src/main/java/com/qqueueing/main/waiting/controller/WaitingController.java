@@ -8,11 +8,14 @@ import com.qqueueing.main.waiting.service.WaitingService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 
 @Slf4j
@@ -63,8 +66,15 @@ public class WaitingController {
                                           HttpServletRequest request) {
         log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
-        return ResponseEntity
-                .ok(waitingService.getQueuePage(targetUrl, request));
+
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+//
+//        String result = waitingService.getQueuePage(targetUrl, request);
+//
+//        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
+        String result = new String(waitingService.getQueuePage(targetUrl, request).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
     }
 
     @PostMapping
@@ -91,9 +101,17 @@ public class WaitingController {
     @GetMapping("/page-req")
     public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token,
                                              HttpServletRequest request) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_HTML);
+        headers.set("Content-Encoding", "UTF-8");
+
+        String result = waitingService.forward(token, request);
         log.info("target page 포워딩 api called");
-        return ResponseEntity
-                .ok(waitingService.forward(token, request));
+
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+//        return ResponseEntity
+//                .ok(waitingService.forward(token, request));
     }
 
     @GetMapping("/out")

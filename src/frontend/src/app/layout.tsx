@@ -4,11 +4,11 @@ import "./globals.css";
 import { RQProvider } from "@/shared";
 
 //pretendard font 설정
-const pretendard = localFont({
-  src: "./PretendardVariable.woff2",
-  display: "swap",
-  weight: "45 920",
-});
+// const pretendard = localFont({
+//   src: "./PretendardVariable.woff2",
+//   display: "swap",
+//   weight: "45 920",
+// });
 
 export const metadata: Metadata = {
   title: {
@@ -27,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={pretendard.className}>
+    <html lang="ko">
+      <body>
         <RQProvider>
           <>{children}</>
         </RQProvider>

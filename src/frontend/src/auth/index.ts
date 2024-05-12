@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 export const BASE_PATH = "/api/auth";
 
 const authOptions: NextAuthConfig = {
+  trustHost: true,
   providers: [
     Credentials({
       name: "Credentials",
@@ -43,7 +44,6 @@ const authOptions: NextAuthConfig = {
     }),
   ],
   basePath: BASE_PATH,
-  secret: process.env.NEXT_AUTH_SECRET,
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);

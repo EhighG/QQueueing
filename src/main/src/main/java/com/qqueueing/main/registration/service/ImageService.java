@@ -57,4 +57,20 @@ public class ImageService {
         }
         return fileName.substring(lastIndexOf + 1);
     }
+
+    public byte[] sendImage(String filePath) {
+//        String filePath = "사진 경로";
+        try {
+            byte[] imageBytes = imageToByteArray(filePath);
+            return imageBytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static byte[] imageToByteArray(String filePath) throws IOException {
+        File imageFile = new File(filePath);
+        return Files.readAllBytes(imageFile.toPath());
+    }
 }

@@ -2,7 +2,11 @@
 import { WaitingListType } from "@/entities/waitingList/type";
 import { ImageRegist, InputForm } from "@/features";
 import { useGetWaitingDetail, useDeleteWaiting } from "@/features";
-import { usePatchWaiting } from "@/features/manage/query";
+import {
+  usePatchWaiting,
+  usePostWaitingActivate,
+  usePostWaitingDeActivate,
+} from "@/features/manage/query";
 import { Button, SectionTitle, logo } from "@/shared";
 import { LinearProgress } from "@mui/material";
 import Image from "next/image";
@@ -17,25 +21,38 @@ const ManagePage = ({ id }: ManagePageProps) => {
   const [imageFile, setImageFile] = useState<File>({} as File);
   const [thumbnail, setThumbnail] = useState<string>("");
   const { mutate: handleDelete } = useDeleteWaiting(id);
-  const { data } = useGetWaitingDetail(id);
+  const { data: waitingDetail } = useGetWaitingDetail(id);
   const [waitingInfo, setWaitingInfo] = useState<WaitingListType>(
     {} as WaitingListType
   );
+  const [partitionNo, setPartitionNo] = useState<number>(0);
 
   useEffect(() => {
-    if (data) setWaitingInfo(data);
-  }, [data]);
+    if (waitingDetail) {
+      setPartitionNo(waitingDetail.partitionNo);
+    }
+  }, [waitingDetail]);
+
+  const { mutate: activate } = usePostWaitingActivate(partitionNo);
+  const { mutate: deActivate } = usePostWaitingDeActivate(partitionNo);
 
   const { mutate: handlePatch } = usePatchWaiting(id, waitingInfo);
 
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md border">
-      <SectionTitle title={`대기열 ID ${id} 상태 관리`} />
+      <SectionTitle
+        title={`대기열 ID ${id} ${
+          waitingDetail?.isActive ? "활성 중" : "비 활성"
+        }`}
+      />
       <div className="flex flex-1 flex-col max-2xl:m-5 m-10 p-5 border rounded-md border-slate-300">
         <div className="flex flex-1 gap-5">
           <div className="flex flex-1 flex-col gap-4">
-            <div>
-              <InputForm waitingInfo={data} setWaitingInfo={setWaitingInfo} />
+            <div className="flex flex-1">
+              <InputForm
+                waitingDetail={waitingDetail}
+                setWaitingInfo={setWaitingInfo}
+              />
             </div>
             <div>
               <ImageRegist
@@ -108,6 +125,15 @@ const ManagePage = ({ id }: ManagePageProps) => {
           </div>
         </div>
         <div className="flex w-full justify-end mt-2 gap-4">
+          <Button
+            edgeType="square"
+            onClick={() => {
+              waitingDetail?.isActive ? deActivate() : activate();
+            }}
+          >
+            {waitingDetail?.isActive ? "비 활성" : "활성"}
+          </Button>
+
           <Button edgeType="square" onClick={() => handlePatch()}>
             변경
           </Button>
