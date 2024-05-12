@@ -13,6 +13,7 @@ import { AxiosError } from "axios";
 import { getWaitingDetail } from ".";
 import {
   deleteWaiting,
+  getServiceImage,
   getWaitingImage,
   patchWaiting,
   postWaitingImage,
@@ -71,6 +72,16 @@ const useGetWaitingImage = (imageId: string) => {
     queryKey: ["getImage", imageId],
     queryFn: () => getWaitingImage(imageId),
     enabled: !!imageId,
+  });
+
+  return { data };
+};
+
+const useGetServiceImage = (targetUrl: string) => {
+  const { data } = useQuery({
+    queryKey: ["getImage", targetUrl],
+    queryFn: () => getServiceImage(targetUrl),
+    enabled: !!targetUrl,
   });
 
   return { data };
@@ -200,4 +211,5 @@ export {
   useDeleteWaiting,
   usePatchWaiting,
   useGetWaitingImage,
+  useGetServiceImage,
 };

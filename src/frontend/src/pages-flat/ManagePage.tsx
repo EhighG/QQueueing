@@ -55,7 +55,6 @@ const ManagePage = ({ id }: ManagePageProps) => {
 
   useEffect(() => {
     if (isSuccess) {
-      console.log("success", imageResponse.result);
       setWaitingInfo((prev) => ({
         ...prev,
         queueImageUrl: imageResponse.result,
@@ -70,7 +69,6 @@ const ManagePage = ({ id }: ManagePageProps) => {
   useEffect(() => {
     if (imageData) {
       setThumbnail("data:image/png;base64, " + imageData);
-      console.log(imageData);
     }
   }, [imageData]);
 

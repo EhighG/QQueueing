@@ -40,6 +40,12 @@ const getWaitingImage = async (id: string) => {
     .then(({ data }) => data.result);
 };
 
+const getServiceImage = async (targetUrl: string) => {
+  return await instance
+    .get(`/queue/image-file/by-target-url?targetUrl=${targetUrl}`)
+    .then(({ data }) => data.result);
+};
+
 const getWaitingDetail = async (id: string) => {
   return await instance.get(`/queue/${id}`).then(({ data }) => data.result);
 };
@@ -78,4 +84,5 @@ export {
   postWaitingDeActivate,
   deleteWaiting,
   getWaitingImage,
+  getServiceImage,
 };
