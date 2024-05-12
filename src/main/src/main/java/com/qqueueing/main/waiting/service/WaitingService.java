@@ -59,6 +59,9 @@ public class WaitingService {
     // for test
     @Setter
     private String endpoint = "/waiting";
+    private final String TEST_IP = "ipStringValueForTest";
+    private final String TEST_TOKEN = "testTokenStringValue";
+    private final String TEST_TARGET_URL = "http://k10a401.p.ssafy.io/product/1";
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
@@ -250,7 +253,8 @@ public class WaitingService {
         int outCntInFront = - (Collections.binarySearch(outList, oldOrder) + 1);
         Long myOrder = Math.max(oldOrder - outCntInFront - lastOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize());
-        if (doneSet.contains(ip)) { // waiting done
+//        if (doneSet.contains(ip)) { // waiting done
+        if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
             log.info("ip addr {} requested, and return tempToken");
             doneSet.remove(ip);
             result.setToken(createTempToken(waitingStatus.getTargetUrl()));
@@ -263,6 +267,9 @@ public class WaitingService {
      */
     public String forward(String token, HttpServletRequest request) {
         String targetUrl = targetUrlMapper.get(token);
+        if (token.equals(TEST_TOKEN)) {
+            targetUrl = TEST_TARGET_URL;
+        }
         log.info("forward target Url = {}", targetUrl);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");

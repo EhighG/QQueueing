@@ -85,7 +85,6 @@ public class WaitingController {
         Object result = waitingService.enqueue(targetUrl, request);
         return ResponseEntity
                 .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
-
     }
 
 
