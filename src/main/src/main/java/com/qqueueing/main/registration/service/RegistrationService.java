@@ -73,6 +73,12 @@ public class RegistrationService {
         return registration.getQueueImageUrl();
     }
 
+    public String getImageByTargetUrl(String targetUrl) {
+        Registration registration = registrationRepository.findByTargetUrl(targetUrl);
+//                .orElseThrow(() -> new DocumentNotFoundException("Registration not found with targetUrl: " + targetUrl));
+        return registration.getQueueImageUrl();
+    }
+
 //    public Registration createRegistration(Registration registration) {
 //        return registrationRepository.save(registration);
 //    }
