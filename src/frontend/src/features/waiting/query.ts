@@ -12,7 +12,7 @@ const useEnqueue = (target: string) => {
   >({
     queryKey: ["enqueue"],
     queryFn: () => postEnqueue(target),
-    enabled: target.length > 0,
+    enabled: target.length > 0 && typeof window !== "undefined",
   });
 
   return {
@@ -31,7 +31,7 @@ const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
     queryKey: ["waitingInfo"],
     queryFn: () => getWaitingInfo(partitionNo, idx, idVal),
     refetchInterval: 3000,
-    enabled: idx > 0,
+    enabled: idx > 0 && typeof window !== "undefined",
   });
 
   return {
@@ -42,13 +42,13 @@ const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
 };
 
 const useGetWaitingOut = (partitionNo: number, order: number) => {
-  const { data, refetch } = useQuery({
+  const { data, refetch, isSuccess } = useQuery({
     queryKey: ["waitingOut"],
     queryFn: () => getWaitingOut(partitionNo, order),
-    enabled: false,
+    enabled: false && typeof window !== "undefined",
   });
 
-  return { data, refetch };
+  return { data, refetch, isSuccess };
 };
 
 export { useEnqueue, useGetWaitingInfo, useGetWaitingOut };
