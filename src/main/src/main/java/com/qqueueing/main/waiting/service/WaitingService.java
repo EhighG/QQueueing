@@ -418,7 +418,7 @@ public class WaitingService {
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "html", StandardCharsets.UTF_8));
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
 
         return ResponseEntity.ok().headers(headers).body(result);
 
