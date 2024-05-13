@@ -12,10 +12,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -388,17 +386,45 @@ public class WaitingService {
 
         String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
 
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getMessageConverters().stream()
-                .filter(StringHttpMessageConverter.class::isInstance)
-                .map(StringHttpMessageConverter.class::cast)
-                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
+//        RestTemplate restTemplate = new RestTemplate();
+//        restTemplate.getMessageConverters().stream()
+//                .filter(StringHttpMessageConverter.class::isInstance)
+//                .map(StringHttpMessageConverter.class::cast)
+//                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
+//
+//        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
+        RestTemplate restTemplate = new RestTemplate();
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+        messageConverters.add(stringHttpMessageConverter);
+        restTemplate.setMessageConverters(messageConverters);
+        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+        System.out.println("response : " + response.getBody());
+
+//        /////
+//        RestTemplate restTemplate = new RestTemplate();
+//        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+//        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+//        messageConverters.add(stringHttpMessageConverter);
+//        restTemplate.setMessageConverters(messageConverters);
+//        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+//
+//        HttpEntity<String> httpEntity = new HttpEntity<>(getAllHeaders(request));
+//        String requestUrl = queuePageUrl + "?Target-URL=" + targetUrl;
+//        System.out.println("main server -> next.js request url = " + requestUrl);
+//        ResponseEntity<String> result = restTemplate.exchange(requestUrl, HttpMethod.GET, httpEntity, String.class);
+//        log.info("waitingPage result : " + result);
+//        /////
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
-        return ResponseEntity.ok().body(result);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "html", StandardCharsets.UTF_8));
+
+        return ResponseEntity.ok().headers(headers).body(result);
 
     }
 
