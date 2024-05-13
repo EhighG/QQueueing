@@ -312,7 +312,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/5 * * * * *") // 매 분 0초부터, 5초마다
+    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 5초마다
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
