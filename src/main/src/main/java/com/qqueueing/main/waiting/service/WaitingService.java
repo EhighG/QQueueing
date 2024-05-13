@@ -501,7 +501,7 @@ public class WaitingService {
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-            String result = response.getBody().replace("favicon", "_next/favicon");
+            String result = response.getBody().replace("favicon", "waiting/favicon");
 
             headers.setContentType(new MediaType("image", "x-icon", StandardCharsets.UTF_8));
             return ResponseEntity.ok().headers(headers).body(result);
