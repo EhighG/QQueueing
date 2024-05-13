@@ -114,8 +114,8 @@ public class WaitingController {
     }
 
     @GetMapping("/out")
-    public ResponseEntity<Void> out(@RequestParam int partitionNo,
-                                    @RequestParam Long order) {
+    public ResponseEntity<Void> out(@RequestParam(value = "partitionNo") int partitionNo,
+                                    @RequestParam(value = "order") Long order) {
         waitingService.out(partitionNo, order);
         return ResponseEntity
                 .ok()
