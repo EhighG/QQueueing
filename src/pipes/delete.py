@@ -24,7 +24,6 @@ def save_conf_file(path, complete_file):
     save_path = path+'/del.conf'
     if os.path.exists(save_path):
         os.remove(save_path)
-    os.chmod(path, 664)
     with open(save_path, 'w') as f:
         f.write(complete_file)
 
@@ -35,8 +34,8 @@ def main(url):
         exit(1)
     # assume that register py execute
     full_text = ''
-    #with open('/etc/nginx/nginx.conf', 'r')as f:
-    with open('/etc/nginx/complete.conf', 'r')as f:
+    with open('/etc/nginx/nginx.conf', 'r')as f:
+    #with open('/etc/nginx/complete.conf', 'r')as f:
         full_text = f.read()
 
     host, endpoint = find_host_end(url)
