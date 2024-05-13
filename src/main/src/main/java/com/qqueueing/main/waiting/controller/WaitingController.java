@@ -147,6 +147,7 @@ public class WaitingController {
         ResponseEntity<?> result = waitingService.parsing(address);
 
         return result;
+
     }
 
 //    @GetMapping("/testQueuePage")
