@@ -425,6 +425,13 @@ public class WaitingService {
             return ResponseEntity.ok().headers(headers).body(result);
         }
 
+        if(address.contains("favicon")) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(new MediaType("image", "x-icon", StandardCharsets.UTF_8));
+
+            return ResponseEntity.ok().headers(headers).body(result);
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
 
