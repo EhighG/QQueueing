@@ -406,29 +406,14 @@ public class WaitingService {
 //        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
         RestTemplate restTemplate = new RestTemplate();
-        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
-        messageConverters.add(stringHttpMessageConverter);
-        restTemplate.setMessageConverters(messageConverters);
-        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
-
-        System.out.println("response : " + response.getBody());
-
-//        /////
-//        RestTemplate restTemplate = new RestTemplate();
 //        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 //        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
 //        messageConverters.add(stringHttpMessageConverter);
 //        restTemplate.setMessageConverters(messageConverters);
 //        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-//
-//        HttpEntity<String> httpEntity = new HttpEntity<>(getAllHeaders(request));
-//        String requestUrl = queuePageUrl + "?Target-URL=" + targetUrl;
-//        System.out.println("main server -> next.js request url = " + requestUrl);
-//        ResponseEntity<String> result = restTemplate.exchange(requestUrl, HttpMethod.GET, httpEntity, String.class);
-//        log.info("waitingPage result : " + result);
-//        /////
+        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+        log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
