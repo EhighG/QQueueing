@@ -12,9 +12,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,16 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -180,11 +185,9 @@ public class WaitingService {
         }
         log.info("partitionNo = {}", partitionNo);
         UriComponentsBuilder uriBuilder;
+
         if (activePartitions.contains(partitionNo)) { // 대기 필요
             log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
-//            uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + QUEUE_PAGE_API)
-//                    .queryParam("Target-URL", targetUrl);
-//            return uriBuilder.build().toUri();
             return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + targetUrl);
         } else { // 대기 불필요
             log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
@@ -195,8 +198,84 @@ public class WaitingService {
         }
     }
 
-    public String getQueuePage(String targetUrl, HttpServletRequest request) {
-        String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl, request).getBody();
+    @Async
+    @Scheduled(cron = "0/10 * * * * *")
+    public void cacheQueuePages() {
+        for (int partitionNo : activePartitions.stream().toList()) {
+            WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+            String targetUrl = waitingStatusDto.getTargetUrl();
+
+            String html = getQueuePage(targetUrl); // parsed
+            try {
+                waitingStatusDto.setCachedQueuePagePath(
+                        savePageAsFile(html)
+                );
+            } catch (IOException e) {
+                log.error("error occurred while caching file, targetUrl = {}", targetUrl);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Async
+    @Scheduled(cron = "1/3 * * * * *")
+    public void cacheTargetPage() {
+        log.info("target page caching --- start");
+        for (int partitionNo : activePartitions.stream().toList()) {
+            WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+            String targetUrl = waitingStatusDto.getTargetUrl();
+
+            String html = targetApiConnector.forward(targetUrl).getBody();
+            try {
+                waitingStatusDto.setCachedTargetPagePath(
+                        savePageAsFile(html)
+                );
+            } catch (IOException e) {
+                log.error("error occurred while caching file, targetUrl = {}", targetUrl);
+                e.printStackTrace();
+            }
+        }
+        log.info("target page caching --- end");
+    }
+
+    private String savePageAsFile(String pageContent) throws IOException {
+        String fileName = UUID.randomUUID().toString();
+        String path = "/var/lib/cacheFiles";
+        Path filePath = Paths.get(path, fileName);
+        Files.createDirectories(filePath.getParent());
+
+        Files.writeString(filePath, pageContent); // write value in UTF-8
+        log.info("파일 쓰기 완료");
+        return path + "/" + fileName;
+    }
+
+    private String loadFileAsPage(String filePath) {
+        File pageFile = new File(filePath);
+        if (!pageFile.canRead()) {
+            log.error("error! filePath exist, but cannot read file");
+            throw new RuntimeException("Can't read file");
+        }
+        try {
+            return Files.readString(pageFile.toPath()); // UTF-8
+        } catch (IOException e) {
+            log.error("error file read file content");
+            e.printStackTrace();
+            throw new RuntimeException("error file read file content");
+        }
+    }
+
+    public String getQueuePage(String targetUrl) {
+        Integer partitionNo = partitionNoMapper.get(targetUrl);
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        if (waitingStatusDto == null) {
+            throw new RuntimeException("wrong targetUrl");
+        }
+        String cacheFilePath = waitingStatusDto.getCachedQueuePagePath();
+        if (cacheFilePath != null) {
+            return loadFileAsPage(cacheFilePath);
+        }
+        // not cached
+        String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl).getBody();
 
         return parseHtmlPage(QUEUE_PAGE_FRONT, html);
     }
@@ -266,33 +345,38 @@ public class WaitingService {
     /**
      * 타겟 프론트 페이지 포워딩 메소드
      */
-    public String forward(String token, HttpServletRequest request) {
+    public String forward(String token) {
         String targetUrl = targetUrlMapper.get(token);
         // for test
         if (token.equals(TEST_TOKEN)) {
             targetUrl = TEST_TARGET_URL;
         }
+        // check and remove temp token
         log.info("forward target Url = {}", targetUrl);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
+
+        // make internal request url
         targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
         log.info("targetUrl = {}", targetUrl);
 
-        String html = targetApiConnector.forward(targetUrl, request).getBody();
-        log.info("forwording result = \n\n{}", html);
-        return html;
+        // get target page; cached or origin
+        Integer partitionNo = partitionNoMapper.get(targetUrl);
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        if (waitingStatusDto == null) {
+            throw new RuntimeException("wrong targetUrl");
+        }
+        String targetPagePath = waitingStatusDto.getCachedTargetPagePath();
+
+        return targetPagePath != null ?
+                loadFileAsPage(targetPagePath) :
+                targetApiConnector.forward(targetUrl).getBody();
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
-//        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
-//        String endPoint = urlSplitList[1];
-        // parse target url(external request -> internal)
-
-        String newHtml = html.replace("/_next", endpoint + "/_next");
-
-        return newHtml;
+        return html.replace("/_next", endpoint + "/_next");
     }
 
     private String extractEndpoint(String targetUrl) {
