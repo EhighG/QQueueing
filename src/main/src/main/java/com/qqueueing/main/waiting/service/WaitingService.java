@@ -211,7 +211,6 @@ public class WaitingService {
             log.info("[debug - on cacheQueuePage] targetUrl = {}", targetUrl);
 
             String html = getQueuePage(targetUrl); // parsed
-            log.info("[debug - on cacheQueuePage] html = {}", html);
             try {
                 waitingStatusDto.setCachedQueuePagePath(
                         savePageAsFile(html)
@@ -235,7 +234,6 @@ public class WaitingService {
             log.info("[debug] targetUrl = {}", targetUrl);
 
             String html = targetApiConnector.forward(targetUrl).getBody();
-            log.info("[debug] html = {}", html);
             try {
                 waitingStatusDto.setCachedTargetPagePath(
                         savePageAsFile(html)
@@ -270,10 +268,7 @@ public class WaitingService {
         }
         try {
             log.info("[debug] pageFile.toPath() = {}", pageFile.toPath());
-            String result = Files.readString(pageFile.toPath()); // UTF-8
-            log.info("[debug] loadFileResult = {}", result);
-
-            return result;
+            return Files.readString(pageFile.toPath());
         } catch (IOException e) {
             log.error("error file read file content");
             e.printStackTrace();
