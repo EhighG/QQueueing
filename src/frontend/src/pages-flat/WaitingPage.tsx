@@ -78,12 +78,12 @@ const WaitingPage = () => {
             />
           </div>
           <div className="flex w-full justify-between items-center">
-            <p className="font-bold">대기한 시간 : {waitingTime} 초</p>
-            <p className="font-bold">
+            <h1 className="font-bold">대기한 시간 : {waitingTime} 초</h1>
+            <h1 className="font-bold">
               나의 대기 순번 :
               <span className="text-[2rem]">{waitingInfo?.myOrder ?? 0}</span>
-            </p>
-            <p className="font-bold">예상 시간: 약 {estimateTime} 초</p>
+            </h1>
+            <h1 className="font-bold">예상 시간: 약 {estimateTime} 초</h1>
           </div>
           <LinearProgress
             className="h-[20px] rounded-full"
@@ -91,14 +91,14 @@ const WaitingPage = () => {
             value={75}
           />
           <div className="w-full p-2 h-[120px] rounded-md border border-black">
-            <p className="text-[1.5rem] font-bold">
+            <h1 className="text-[1.5rem] font-bold">
               현재 접속자가 많아 대기 중입니다!
-            </p>
-            <p className="font-bold">
+            </h1>
+            <h1 className="font-bold">
               대기 순서에 따라 자동 접속되니 조금만 기다려주세요.
-            </p>
+            </h1>
             <div className="flex items-center gap-20">
-              <p className="font-bold">
+              <h1 className="font-bold">
                 앞에
                 <span className="text-q-blue animate-blink">
                   {waitingInfo?.totalQueueSize ?? 0}
@@ -109,7 +109,7 @@ const WaitingPage = () => {
                     (waitingInfo?.myOrder ?? 0)}
                 </span>
                 명의 대기자가 있습니다.
-              </p>
+              </h1>
               <Button
                 onClick={() => {
                   handleButton();
@@ -120,7 +120,7 @@ const WaitingPage = () => {
               </Button>
             </div>
           </div>
-          <p className="font-bold text-center">powered by QQueueing</p>
+          <h1 className="font-bold text-center">powered by QQueueing</h1>
         </div>
       </div>
     </div>
