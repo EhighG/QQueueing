@@ -356,6 +356,8 @@ public class WaitingService {
         address = "http://" + address;
         System.out.println("address : " + address);
 
+        HttpHeaders headers = new HttpHeaders();
+
         if(address.contains("image")) {
 
             String[] imageAddressSplit1 = address.split("p.ssafy.io");
@@ -378,7 +380,6 @@ public class WaitingService {
             try {
                 byte[] imageBytes = getImageBytes(imageUrl);
 
-                HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.IMAGE_PNG);
 
                 return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
@@ -420,22 +421,17 @@ public class WaitingService {
 
         if(address.contains("css")) {
 
-            HttpHeaders headers = new HttpHeaders();
             headers.setContentType(new MediaType("text", "css", StandardCharsets.UTF_8));
-
             return ResponseEntity.ok().headers(headers).body(result);
         }
 
         if(address.contains("favicon")) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(new MediaType("image", "png", StandardCharsets.UTF_8));
 
+            headers.setContentType(new MediaType("image", "apng", StandardCharsets.UTF_8));
             return ResponseEntity.ok().headers(headers).body(result);
         }
 
-        HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
-
         return ResponseEntity.ok().headers(headers).body(result);
 
     }
