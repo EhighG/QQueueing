@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useGetServiceImage } from "@/features/manage";
 
 const WaitingPage = () => {
   const router = useRouter();
@@ -23,6 +24,7 @@ const WaitingPage = () => {
     partitionNo,
     idx
   );
+  const { data: imageData } = useGetServiceImage(targetUrl);
 
   // 대기 순번을 받은 순간 부터 timer 시작
   useEffect(() => {
@@ -68,9 +70,11 @@ const WaitingPage = () => {
             />
             <h1 className="text-[2rem] font-bold">접속 대기 중</h1>
             <Image
-              src={cats}
+              src={imageData ? "data:image/png;base64, " + imageData : logo}
               alt="product"
-              className="size-[80px] object-contain"
+              width={500}
+              height={500}
+              className="size-[80px]"
             />
           </div>
           <div className="flex w-full justify-between items-center">
@@ -112,7 +116,7 @@ const WaitingPage = () => {
                 }}
                 className="h-[30px] border rounded-md border-black bg-red-600 px-4 text-white text-center"
               >
-                중지
+                Exit
               </Button>
             </div>
           </div>
