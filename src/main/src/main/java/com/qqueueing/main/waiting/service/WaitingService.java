@@ -249,7 +249,6 @@ public class WaitingService {
     }
 
     private String savePageAsFile(String pageContent) throws IOException {
-        log.info("[debug] in savePageAsFile(), pageContent = {}", pageContent);
         String fileName = UUID.randomUUID().toString();
         String path = "/var/lib/cacheFiles";
         Path filePath = Paths.get(path, fileName);
@@ -378,10 +377,6 @@ public class WaitingService {
         }
         targetUrlMapper.remove(token);
 
-        // make internal request url
-        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
-        log.info("targetUrl = {}", targetUrl);
-
         // get target page; cached or origin
         Integer partitionNo = partitionNoMapper.get(targetUrl);
         WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
@@ -391,9 +386,14 @@ public class WaitingService {
         String targetPagePath = waitingStatusDto.getCachedTargetPagePath();
         log.info("targetPagePath = {} // blank if null", targetPagePath);
 
-        return targetPagePath != null ?
-                loadFileAsPage(targetPagePath) :
-                targetApiConnector.forward(targetUrl).getBody();
+        if (targetPagePath != null) {
+            return loadFileAsPage(targetPagePath);
+        } else {
+            // make internal request url
+            targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
+            log.info("no cached page. targetPage request url = {}", targetUrl);
+            return targetApiConnector.forward(targetUrl).getBody();
+        }
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
