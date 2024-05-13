@@ -10,6 +10,7 @@ import {
   useGetJvmMemoryMax,
 } from "@/features/monitoring/query";
 import { useGetJvmMemoryUsed } from "../features/monitoring/query";
+import { useRouter } from "next/navigation";
 
 const ResourcePage = () => {
   const { data: cpuUsage } = useGetSystemCpuUsage();
@@ -17,7 +18,7 @@ const ResourcePage = () => {
   const { data: diskFree } = useGetDiskFree();
   const { data: jvmMemoryMax } = useGetJvmMemoryMax();
   const { data: jvmMemoryUsed } = useGetJvmMemoryUsed();
-
+  const router = useRouter();
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md">
       <SectionTitle title="큐잉 서버" />
@@ -26,7 +27,7 @@ const ResourcePage = () => {
           <Gauge
             width={240}
             height={240}
-            value={cpuUsage ? Math.ceil(cpuUsage[0].value * 100) : 0}
+            value={cpuUsage ? Math.ceil(cpuUsage.value * 100) : 0}
             sx={{
               [`& .${gaugeClasses.valueText}`]: {
                 fontSize: 40,
@@ -43,14 +44,12 @@ const ResourcePage = () => {
             height={240}
             value={
               diskFree && diskTotal
-                ? Math.ceil(diskTotal[0].value / 1024 / 1024 / 1024) -
-                  Math.ceil(diskFree[0].value / 1024 / 1024 / 1024)
+                ? Math.ceil(diskTotal.value / 1024 / 1024 / 1024) -
+                  Math.ceil(diskFree.value / 1024 / 1024 / 1024)
                 : 0
             }
             valueMax={
-              diskTotal
-                ? Math.floor(diskTotal[0].value / 1024 / 1024 / 1024)
-                : 0
+              diskTotal ? Math.floor(diskTotal.value / 1024 / 1024 / 1024) : 0
             }
             sx={{
               [`& .${gaugeClasses.valueText}`]: {
@@ -67,16 +66,14 @@ const ResourcePage = () => {
             height={240}
             value={
               jvmMemoryUsed
-                ? Math.round(
-                    (jvmMemoryUsed[0].value / 1024 / 1024 / 1024) * 100
-                  ) / 100
+                ? Math.round((jvmMemoryUsed.value / 1024 / 1024 / 1024) * 100) /
+                  100
                 : 0
             }
             valueMax={
               jvmMemoryMax
-                ? Math.round(
-                    (jvmMemoryMax[0].value / 1024 / 1024 / 1024) * 100
-                  ) / 100
+                ? Math.round((jvmMemoryMax.value / 1024 / 1024 / 1024) * 100) /
+                  100
                 : 0
             }
             sx={{
@@ -90,7 +87,13 @@ const ResourcePage = () => {
         </PerformanceCard>
       </div>
       <div className="flex w-full justify-center items-center h-[60px]">
-        <Button>자세히 보기</Button>
+        <Button
+          onClick={() => {
+            router.push("/resource");
+          }}
+        >
+          자세히 보기
+        </Button>
       </div>
     </div>
   );

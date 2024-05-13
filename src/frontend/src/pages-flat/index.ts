@@ -10,3 +10,4 @@ export { default as LicensePage } from "./LicensePage";
 export { default as ContributingPage } from "./ContributingPage";
 export { default as Login } from "./Login";
 export { default as MonitoringDetailPage } from "./MonitoringDetailPage";
+export { default as ResourceDetailPage } from "./ResourceDetailPage";
