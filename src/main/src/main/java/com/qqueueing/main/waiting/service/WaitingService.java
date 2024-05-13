@@ -12,10 +12,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,6 +30,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -240,7 +239,7 @@ public class WaitingService {
         // outList는 '내 앞에 나간 사람 수' 를 알기 위해 쓰이므로, 정렬된 채로 유지
         try {
             List<Long> outList = queues.get(partitionNo).getOutList();
-            int insertIdx = -(Collections.binarySearch(outList, order) + 1);
+            int insertIdx = !outList.isEmpty() ? -(Collections.binarySearch(outList, order) + 1) : 0;
             outList.add(insertIdx, order);
         } catch (Exception e) {
             e.printStackTrace();
@@ -312,7 +311,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/5 * * * * *") // 매 분 0초부터, 5초마다
+    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 5초마다
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
@@ -327,8 +326,9 @@ public class WaitingService {
                 BatchResDto batchRes = response.get(partitionNo);
                 waitingStatus.getDoneSet()
                         .addAll(batchRes.getCurDoneList());
+                // '너 뒤에 몇명이 있다' 를 표시하는 데 사용될 값(totalQueueSize - myOrder)
+                waitingStatus.setTotalQueueSize(enterProducer.getLastEnteredIdx(partitionNo));
                 waitingStatus.setLastOffset(batchRes.getLastOffset());
-                waitingStatus.setTotalQueueSize(batchRes.getTotalQueueSize());
             }
             cleanUpOutList();
         } catch (Exception e) {
@@ -346,7 +346,7 @@ public class WaitingService {
             waigtingStatus.setOutList(
                     waigtingStatus.getOutList().stream()
                             .filter(i -> i > lastOffset)
-                            .toList()
+                            .collect(Collectors.toList()) // modifiable list
             );
         }
     }
@@ -398,17 +398,45 @@ public class WaitingService {
 
         String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
 
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getMessageConverters().stream()
-                .filter(StringHttpMessageConverter.class::isInstance)
-                .map(StringHttpMessageConverter.class::cast)
-                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
+//        RestTemplate restTemplate = new RestTemplate();
+//        restTemplate.getMessageConverters().stream()
+//                .filter(StringHttpMessageConverter.class::isInstance)
+//                .map(StringHttpMessageConverter.class::cast)
+//                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
+//
+//        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
+        RestTemplate restTemplate = new RestTemplate();
+//        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+//        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+//        messageConverters.add(stringHttpMessageConverter);
+//        restTemplate.setMessageConverters(messageConverters);
+//        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+        log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
-        return ResponseEntity.ok().body(result);
+        if(address.contains("css")) {
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(new MediaType("text", "css", StandardCharsets.UTF_8));
+
+            return ResponseEntity.ok().headers(headers).body(result);
+        }
+
+        if(address.contains("favicon")) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(new MediaType("image", "png", StandardCharsets.UTF_8));
+
+            return ResponseEntity.ok().headers(headers).body(result);
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+
+        return ResponseEntity.ok().headers(headers).body(result);
 
     }
 
