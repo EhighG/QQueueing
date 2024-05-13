@@ -43,7 +43,7 @@ class Block:
         params: ind, val
         return: none
         '''
-        print(type(val), val.type, '::', val)
+        #print(type(val), val.type, '::', val)
         if not isinstance(val, Block): raise Exception("input Block")
         if ind == -1:
             self.bodies.append(val)
@@ -56,7 +56,7 @@ class Block:
         return: none
         '''
         del self.bodies[ind]
-        print('this is pop')
+        #print('this is pop')
 
     def find_by_type(self, type):
         '''
@@ -185,12 +185,12 @@ class Block:
                     directive_type = check_str[0]
                     cond = ' '.join(check_str[1:])
                 new_block = Block(type=directive_type, cond=cond)
-                print(check_str[0], '||',cond)
+                #print(check_str[0], '||',cond)
                 stack.append(new_block)
                 start = -1
             elif text == '}':
                 close_block = stack.pop()
-                print('close_block', close_block)
+                #print('close_block', close_block)
                 stack[-1].push(ind=-1, val=close_block)
                 start = -1
             elif text == ';':
