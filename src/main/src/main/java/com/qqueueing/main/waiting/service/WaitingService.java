@@ -30,6 +30,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -238,7 +239,7 @@ public class WaitingService {
         // outList는 '내 앞에 나간 사람 수' 를 알기 위해 쓰이므로, 정렬된 채로 유지
         try {
             List<Long> outList = queues.get(partitionNo).getOutList();
-            int insertIdx = -(Collections.binarySearch(outList, order) + 1);
+            int insertIdx = !outList.isEmpty() ? -(Collections.binarySearch(outList, order) + 1) : 0;
             outList.add(insertIdx, order);
         } catch (Exception e) {
             e.printStackTrace();
@@ -345,7 +346,7 @@ public class WaitingService {
             waigtingStatus.setOutList(
                     waigtingStatus.getOutList().stream()
                             .filter(i -> i > lastOffset)
-                            .toList()
+                            .collect(Collectors.toList()) // modifiable list
             );
         }
     }
