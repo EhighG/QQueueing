@@ -296,7 +296,17 @@ public class WaitingService {
         log.info("cacheFile not exist, request to target page...targetUrl = {}", targetUrl);
         String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl).getBody();
 
-        return parseHtmlPage(QUEUE_PAGE_FRONT, html);
+        String parsedHtml = parseHtmlPage(QUEUE_PAGE_FRONT, html);
+        // cache and return
+        try {
+            waitingStatusDto.setCachedQueuePagePath(
+                    savePageAsFile(parsedHtml)
+            );
+        } catch (IOException e) {
+            log.error("error on save html as file! targetUrl = {}", targetUrl);
+            e.printStackTrace();
+        }
+        return parsedHtml;
     }
 
     /**
@@ -388,12 +398,21 @@ public class WaitingService {
 
         if (targetPagePath != null) {
             return loadFileAsPage(targetPagePath);
-        } else {
-            // make internal request url
-            targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
-            log.info("no cached page. targetPage request url = {}", targetUrl);
-            return targetApiConnector.forward(targetUrl).getBody();
         }
+        // make internal request url
+        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
+        log.info("no cached page. targetPage request url = {}", targetUrl);
+        // send request, and cache&return response(=target page)
+        String html = targetApiConnector.forward(targetUrl).getBody();
+        try {
+            waitingStatusDto.setCachedTargetPagePath(
+                    savePageAsFile(html)
+            );
+        } catch (IOException e) {
+            log.error("error on save html as file! targetUrl = {}", targetUrl);
+            e.printStackTrace();
+        }
+        return html;
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
