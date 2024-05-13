@@ -7,12 +7,12 @@ import lombok.Setter;
 @Setter
 public class GetMyOrderResDto {
     private Long myOrder;
-    private Integer totalQueueSize;
+    private Long totalQueueSize;
     @Setter
     private String token;
 
     // on waiting
-    public GetMyOrderResDto(Long myOrder, Integer totalQueueSize) {
+    public GetMyOrderResDto(Long myOrder, Long totalQueueSize) {
         this.myOrder = myOrder;
         this.totalQueueSize = totalQueueSize;
     }
