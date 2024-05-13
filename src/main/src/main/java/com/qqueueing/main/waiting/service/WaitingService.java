@@ -208,8 +208,10 @@ public class WaitingService {
         for (int partitionNo : activePartitions.stream().toList()) {
             WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
             String targetUrl = waitingStatusDto.getTargetUrl();
+            log.info("[debug - on cacheQueuePage] targetUrl = {}", targetUrl);
 
             String html = getQueuePage(targetUrl); // parsed
+            log.info("[debug - on cacheQueuePage] html = {}", html);
             try {
                 waitingStatusDto.setCachedQueuePagePath(
                         savePageAsFile(html)
@@ -226,10 +228,13 @@ public class WaitingService {
     public void cacheTargetPage() {
         log.info("target page caching --- start");
         for (int partitionNo : activePartitions.stream().toList()) {
+            log.info("[debug] partitionNo = {}", partitionNo);
             WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
             String targetUrl = waitingStatusDto.getTargetUrl();
+            log.info("[debug] targetUrl = {}", targetUrl);
 
             String html = targetApiConnector.forward(targetUrl).getBody();
+            log.info("[debug] html = {}", html);
             try {
                 waitingStatusDto.setCachedTargetPagePath(
                         savePageAsFile(html)
@@ -243,10 +248,14 @@ public class WaitingService {
     }
 
     private String savePageAsFile(String pageContent) throws IOException {
+        log.info("[debug] in savePageAsFile(), pageContent.substr(0, 200) = {}", pageContent.substring(0, 200));
         String fileName = UUID.randomUUID().toString();
         String path = "/var/lib/cacheFiles";
         Path filePath = Paths.get(path, fileName);
+        log.info("[debug] filePath.toAbsolutePath() = {}", filePath.toAbsolutePath());
+        log.info("[debug] filePath.toString() = {}", filePath);
         Files.createDirectories(filePath.getParent());
+        log.info("[debug] filePath.getParent() = {}", filePath.getParent());
 
         Files.writeString(filePath, pageContent); // write value in UTF-8
         log.info("파일 쓰기 완료");
@@ -260,7 +269,11 @@ public class WaitingService {
             throw new RuntimeException("Can't read file");
         }
         try {
-            return Files.readString(pageFile.toPath()); // UTF-8
+            log.info("[debug] pageFile.toPath() = {}", pageFile.toPath());
+            String result = Files.readString(pageFile.toPath()); // UTF-8
+            log.info("[debug] loadFileResult = {}", result);
+
+            return result;
         } catch (IOException e) {
             log.error("error file read file content");
             e.printStackTrace();
@@ -276,9 +289,11 @@ public class WaitingService {
         }
         String cacheFilePath = waitingStatusDto.getCachedQueuePagePath();
         if (cacheFilePath != null) {
+            log.info("cacheFile exist, cacheFilePath = {}", cacheFilePath);
             return loadFileAsPage(cacheFilePath);
         }
         // not cached
+        log.info("cacheFile not exist, request to target page...targetUrl = {}", targetUrl);
         String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl).getBody();
 
         return parseHtmlPage(QUEUE_PAGE_FRONT, html);
@@ -373,6 +388,7 @@ public class WaitingService {
             throw new RuntimeException("wrong targetUrl");
         }
         String targetPagePath = waitingStatusDto.getCachedTargetPagePath();
+        log.info("targetPagePath = {} // blank if null", targetPagePath);
 
         return targetPagePath != null ?
                 loadFileAsPage(targetPagePath) :
