@@ -74,5 +74,12 @@ public class EnterProducer {
 
         return new EnterQueueResDto(partitionNo, curIdx, sampleIp);
     }
+
+    public long getLastEnteredIdx(int partitionNo) {
+//        if (id == null) {
+//            throw new RuntimeException("오류: 활성화되지 않은 대기열 값 호출됨");
+//        }
+        return ids.get(partitionNo).get();
+    }
 }
 

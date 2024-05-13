@@ -327,8 +327,9 @@ public class WaitingService {
                 BatchResDto batchRes = response.get(partitionNo);
                 waitingStatus.getDoneSet()
                         .addAll(batchRes.getCurDoneList());
+                // '너 뒤에 몇명이 있다' 를 표시하는 데 사용될 값(totalQueueSize - myOrder)
+                waitingStatus.setTotalQueueSize(enterProducer.getLastEnteredIdx(partitionNo));
                 waitingStatus.setLastOffset(batchRes.getLastOffset());
-                waitingStatus.setTotalQueueSize(batchRes.getTotalQueueSize());
             }
             cleanUpOutList();
         } catch (Exception e) {
