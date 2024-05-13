@@ -231,6 +231,7 @@ public class WaitingService {
             log.info("[debug] partitionNo = {}", partitionNo);
             WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
             String targetUrl = waitingStatusDto.getTargetUrl();
+            targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
             log.info("[debug] targetUrl = {}", targetUrl);
 
             String html = targetApiConnector.forward(targetUrl).getBody();
@@ -248,7 +249,7 @@ public class WaitingService {
     }
 
     private String savePageAsFile(String pageContent) throws IOException {
-        log.info("[debug] in savePageAsFile(), pageContent.substr(0, 200) = {}", pageContent.substring(0, 200));
+        log.info("[debug] in savePageAsFile(), pageContent = {}", pageContent);
         String fileName = UUID.randomUUID().toString();
         String path = "/var/lib/cacheFiles";
         Path filePath = Paths.get(path, fileName);
