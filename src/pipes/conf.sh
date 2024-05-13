@@ -109,6 +109,48 @@ case $1 in
 	modify)
 		echo "modify"
 		;;
+	test)
+		echo "test for delete"
+		if [[ -d $NGINX_PATH ]];then
+			sudo rm -rf $NGINX_PATH
+		fi
+		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
+
+
+		#2 execute python script
+		echo "DELETING $URL_PATH"
+		sudo python3 delete.py $URL_PATH
+		sudo chmod 664 $NGINX_PATH$DETETE_FILE
+		sudo cat $NGINX_PATH$DETETE_FILE 
+
+		#3 copy completed file to contianer 
+		sudo docker cp $NGINX_PATH$DETETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
+
+		sudo rm -rf $NGINX_PATH
+
+		sudo docker exec $CONTAINER_NAME nginx -t 
+
+
+		echo "test for register"
+		if [[ -d $NGINX_PATH ]];then
+			sudo rm -rf $NGINX_PATH
+		fi
+		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
+
+
+		#2 execute python script
+		echo "REGITSTERING $URL_PATH"
+		sudo python3 register.py $URL_PATH
+		sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
+		sudo cat $NGINX_PATH$COMPLETE_FILE 
+
+		#3 copy completed file to contianer 
+		sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
+
+		sudo rm -rf $NGINX_PATH
+
+		sudo docker exec $CONTAINER_NAME nginx -t 
+		;;
 	*)
 		echo "Not valid arguement"
 		exit 1
