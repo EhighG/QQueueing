@@ -390,6 +390,19 @@ public class WaitingService {
             }
         }
 
+        // favicon 일 경우
+        if(address.contains("favicon")) {
+
+            String serverURL = "http://k10a401.p.ssafy.io:3001/favicon.ico";
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+            String result = response.getBody().replace("favicon", "_next/favicon");
+
+            headers.setContentType(new MediaType("image", "x-icon", StandardCharsets.UTF_8));
+            return ResponseEntity.ok().headers(headers).body(result);
+        }
+
         String[] addressSplit = address.split("_next");
         String targetUrl = "/_next" + addressSplit[1];
 
@@ -399,35 +412,17 @@ public class WaitingService {
 
         String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
 
-//        RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.getMessageConverters().stream()
-//                .filter(StringHttpMessageConverter.class::isInstance)
-//                .map(StringHttpMessageConverter.class::cast)
-//                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
-//
-//        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
-
         RestTemplate restTemplate = new RestTemplate();
-//        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-//        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
-//        messageConverters.add(stringHttpMessageConverter);
-//        restTemplate.setMessageConverters(messageConverters);
-//        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
         log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
+        // css 일 경우
         if(address.contains("css")) {
 
             headers.setContentType(new MediaType("text", "css", StandardCharsets.UTF_8));
-            return ResponseEntity.ok().headers(headers).body(result);
-        }
-
-        if(address.contains("favicon")) {
-
-            headers.setContentType(new MediaType("image", "apng", StandardCharsets.UTF_8));
             return ResponseEntity.ok().headers(headers).body(result);
         }
 
