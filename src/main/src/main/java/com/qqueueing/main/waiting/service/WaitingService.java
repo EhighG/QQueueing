@@ -361,6 +361,8 @@ public class WaitingService {
         address = "http://" + address;
         System.out.println("address : " + address);
 
+        HttpHeaders headers = new HttpHeaders();
+
         if(address.contains("image")) {
 
             String[] imageAddressSplit1 = address.split("p.ssafy.io");
@@ -383,7 +385,6 @@ public class WaitingService {
             try {
                 byte[] imageBytes = getImageBytes(imageUrl);
 
-                HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.IMAGE_PNG);
 
                 return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
@@ -392,6 +393,19 @@ public class WaitingService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        // favicon 일 경우
+        if(address.contains("favicon")) {
+
+            String serverURL = "http://k10a401.p.ssafy.io:3001/favicon.ico";
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+            String result = response.getBody().replace("favicon", "_next/favicon");
+
+            headers.setContentType(new MediaType("image", "x-icon", StandardCharsets.UTF_8));
+            return ResponseEntity.ok().headers(headers).body(result);
         }
 
         String[] addressSplit = address.split("_next");
@@ -403,44 +417,21 @@ public class WaitingService {
 
         String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
 
-//        RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.getMessageConverters().stream()
-//                .filter(StringHttpMessageConverter.class::isInstance)
-//                .map(StringHttpMessageConverter.class::cast)
-//                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
-//
-//        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
-
         RestTemplate restTemplate = new RestTemplate();
-//        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-//        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
-//        messageConverters.add(stringHttpMessageConverter);
-//        restTemplate.setMessageConverters(messageConverters);
-//        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
         log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
+        // css 일 경우
         if(address.contains("css")) {
 
-            HttpHeaders headers = new HttpHeaders();
             headers.setContentType(new MediaType("text", "css", StandardCharsets.UTF_8));
-
             return ResponseEntity.ok().headers(headers).body(result);
         }
 
-        if(address.contains("favicon")) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(new MediaType("image", "png", StandardCharsets.UTF_8));
-
-            return ResponseEntity.ok().headers(headers).body(result);
-        }
-
-        HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
-
         return ResponseEntity.ok().headers(headers).body(result);
 
     }
