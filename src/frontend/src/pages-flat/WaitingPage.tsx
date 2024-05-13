@@ -20,10 +20,11 @@ const WaitingPage = () => {
   const [waitingTime, setWaitingTime] = useState<number>(0);
   const { data: enqueueInfo } = useEnqueue(targetUrl);
   const { data: waitingInfo } = useGetWaitingInfo(partitionNo, idx, idVal);
-  const { data: waitingOut, refetch: handleButton } = useGetWaitingOut(
+  const { refetch: handleButton, isSuccess } = useGetWaitingOut(
     partitionNo,
     idx
   );
+
   const { data: imageData } = useGetServiceImage(targetUrl);
 
   // 대기 순번을 받은 순간 부터 timer 시작
@@ -39,12 +40,6 @@ const WaitingPage = () => {
   }, [enqueueInfo]);
 
   useEffect(() => {
-    if (waitingOut) {
-      router.back();
-    }
-  }, [waitingOut, router]);
-
-  useEffect(() => {
     if (enqueueInfo) {
       setPartitionNo(enqueueInfo?.partitionNo ?? 1);
       setIdx(enqueueInfo.order);
@@ -57,6 +52,12 @@ const WaitingPage = () => {
       window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}waiting/page-req?token=${waitingInfo.token}`;
     }
   }, [waitingInfo]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      router.back();
+    }
+  }, [isSuccess]);
 
   return (
     <div className="absolute z-0 flex inset-0 w-full h-full min-w-[700px] bg-black bg-opacity-70 items-center justify-center">
@@ -78,12 +79,12 @@ const WaitingPage = () => {
             />
           </div>
           <div className="flex w-full justify-between items-center">
-            <h1 className="font-bold">대기한 시간 : {waitingTime} 초</h1>
-            <h1 className="font-bold">
+            <p className="font-bold">대기한 시간 : {waitingTime} 초</p>
+            <p className="font-bold">
               나의 대기 순번 :
               <span className="text-[2rem]">{waitingInfo?.myOrder ?? 0}</span>
-            </h1>
-            <h1 className="font-bold">예상 시간: 약 {estimateTime} 초</h1>
+            </p>
+            <p className="font-bold">예상 시간: 약 {estimateTime} 초</p>
           </div>
           <LinearProgress
             className="h-[20px] rounded-full"
@@ -91,36 +92,37 @@ const WaitingPage = () => {
             value={75}
           />
           <div className="w-full p-2 h-[120px] rounded-md border border-black">
-            <h1 className="text-[1.5rem] font-bold">
+            <p className="text-[1.5rem] font-bold">
               현재 접속자가 많아 대기 중입니다!
-            </h1>
-            <h1 className="font-bold">
+            </p>
+            <p className="font-bold">
               대기 순서에 따라 자동 접속되니 조금만 기다려주세요.
-            </h1>
+            </p>
             <div className="flex items-center gap-20">
-              <h1 className="font-bold">
+              <p className="font-bold">
                 앞에
                 <span className="text-q-blue animate-blink">
-                  {waitingInfo?.totalQueueSize ?? 0}
+                  {waitingInfo?.myOrder ? waitingInfo.myOrder - 1 : 0}
                 </span>
                 명, 뒤에
                 <span className="text-q-blue animate-blink">
-                  {(waitingInfo?.totalQueueSize ?? 0) -
-                    (waitingInfo?.myOrder ?? 0)}
+                  {waitingInfo?.totalQueueSize && enqueueInfo?.order
+                    ? waitingInfo.totalQueueSize - enqueueInfo.order >= 0
+                      ? waitingInfo.totalQueueSize - enqueueInfo.order
+                      : 0
+                    : 0}
                 </span>
                 명의 대기자가 있습니다.
-              </h1>
+              </p>
               <Button
-                onClick={() => {
-                  handleButton();
-                }}
+                onClick={() => handleButton()}
                 className="h-[30px] border rounded-md border-black bg-red-600 px-4 text-white text-center"
               >
                 Exit
               </Button>
             </div>
           </div>
-          <h1 className="font-bold text-center">powered by QQueueing</h1>
+          <p className="font-bold text-center">powered by QQueueing</p>
         </div>
       </div>
     </div>
