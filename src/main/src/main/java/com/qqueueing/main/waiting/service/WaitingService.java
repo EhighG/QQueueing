@@ -203,7 +203,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/10 * * * * *")
+    @Scheduled(cron = "0 0/10 * * * *")
     public void cacheQueuePages() {
         for (int partitionNo : activePartitions.stream().toList()) {
             WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
@@ -224,7 +224,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "1/3 * * * * *")
+    @Scheduled(cron = "0 0/3 * * * *")
     public void cacheTargetPage() {
         log.info("target page caching --- start");
         for (int partitionNo : activePartitions.stream().toList()) {
@@ -416,7 +416,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 5초마다
+    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 3초마다
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
