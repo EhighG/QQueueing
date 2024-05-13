@@ -417,6 +417,14 @@ public class WaitingService {
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
+        if(address.contains("css")) {
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(new MediaType("text", "css", StandardCharsets.UTF_8));
+
+            return ResponseEntity.ok().headers(headers).body(result);
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
 
