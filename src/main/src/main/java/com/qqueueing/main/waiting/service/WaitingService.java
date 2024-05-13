@@ -12,9 +12,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -158,12 +159,16 @@ public class WaitingService {
         }
         Registration registration = registrationRepository.findByPartitionNo(partitionNo);
 
-        activePartitions.remove(partitionNo);
-        queues.remove(partitionNo);
+        removeInMemoryQueueInfo(partitionNo);
 
         // update mongodb data
         registration.setIsActive(false);
         registrationRepository.save(registration);
+    }
+
+    public void removeInMemoryQueueInfo(int partitionNo) {
+        activePartitions.remove(partitionNo);
+        queues.remove(partitionNo);
     }
 
     /**
