@@ -129,20 +129,19 @@ def main(url):
     waiting_location = Block(type='location')
     waiting_location.cond = '/waiting'
 
-    tmp_block = Block(type='statement', bodies=['set $qqu_address "none" ;'])
+    tmp_block = Block(type='statement', bodies=['proxy_set_header address $host$request_uri ;'])
     waiting_location.push(ind=-1, val=tmp_block)
 
     if_block = Block(type='if')
     if_block.cond = '($uri ~ ^(.*)_next/)'
-    tmp_block = Block(type='statement', bodies=['set $qqu_address $host$request_uri ;'])
+    tmp_block = Block(type='statement', bodies=['rewrite ^(.*)$ /waiting/next break ;'])
+    if_block.push(ind=-1, val=tmp_block)
+    tmp_block = Block(type='statement', bodies=['proxy_pass http://qqueueing-main:8081 ;'])
     if_block.push(ind=-1, val=tmp_block)
     waiting_location.push(ind=-1, val=if_block)
 
-    tmp_block = Block(type='statement', bodies=['proxy_set_header address $qqu_address ;'])
-    waiting_location.push(ind=-1, val=tmp_block)
-
     if_block = Block(type='if')
-    if_block.cond = '($uri ~ ^(.*)_next/)'
+    if_block.cond = '($uri ~ ^(.*)png )'
     tmp_block = Block(type='statement', bodies=['rewrite ^(.*)$ /waiting/next break ;'])
     if_block.push(ind=-1, val=tmp_block)
     tmp_block = Block(type='statement', bodies=['proxy_pass http://qqueueing-main:8081 ;'])
