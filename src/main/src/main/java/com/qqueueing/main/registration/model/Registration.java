@@ -59,4 +59,5 @@ public class Registration {
             this.queueImageUrl = queueImageUrl;
         }
     }
+
 }

@@ -86,3 +86,6 @@ shell:
   path:
     C:/Users/SSAFY/Desktop/qqueueing/tmp
   fileNm: test.bat
+
+testing:
+  target-url: http://k10a401.p.ssafy.io/product/1

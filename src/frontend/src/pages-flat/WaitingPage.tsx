@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useGetServiceImage } from "@/features/manage";
 
 const WaitingPage = () => {
   const router = useRouter();
@@ -23,6 +24,7 @@ const WaitingPage = () => {
     partitionNo,
     idx
   );
+  const { data: imageData } = useGetServiceImage(targetUrl);
 
   // 대기 순번을 받은 순간 부터 timer 시작
   useEffect(() => {
@@ -68,18 +70,20 @@ const WaitingPage = () => {
             />
             <h1 className="text-[2rem] font-bold">접속 대기 중</h1>
             <Image
-              src={cats}
+              src={imageData ? "data:image/png;base64, " + imageData : logo}
               alt="product"
-              className="size-[80px] object-contain"
+              width={500}
+              height={500}
+              className="size-[80px]"
             />
           </div>
           <div className="flex w-full justify-between items-center">
-            <p className="font-bold">대기한 시간 : {waitingTime} 초</p>
-            <p className="font-bold">
+            <h1 className="font-bold">대기한 시간 : {waitingTime} 초</h1>
+            <h1 className="font-bold">
               나의 대기 순번 :
               <span className="text-[2rem]">{waitingInfo?.myOrder ?? 0}</span>
-            </p>
-            <p className="font-bold">예상 시간: 약 {estimateTime} 초</p>
+            </h1>
+            <h1 className="font-bold">예상 시간: 약 {estimateTime} 초</h1>
           </div>
           <LinearProgress
             className="h-[20px] rounded-full"
@@ -87,14 +91,14 @@ const WaitingPage = () => {
             value={75}
           />
           <div className="w-full p-2 h-[120px] rounded-md border border-black">
-            <p className="text-[1.5rem] font-bold">
+            <h1 className="text-[1.5rem] font-bold">
               현재 접속자가 많아 대기 중입니다!
-            </p>
-            <p className="font-bold">
+            </h1>
+            <h1 className="font-bold">
               대기 순서에 따라 자동 접속되니 조금만 기다려주세요.
-            </p>
+            </h1>
             <div className="flex items-center gap-20">
-              <p className="font-bold">
+              <h1 className="font-bold">
                 앞에
                 <span className="text-q-blue animate-blink">
                   {waitingInfo?.totalQueueSize ?? 0}
@@ -105,18 +109,18 @@ const WaitingPage = () => {
                     (waitingInfo?.myOrder ?? 0)}
                 </span>
                 명의 대기자가 있습니다.
-              </p>
+              </h1>
               <Button
                 onClick={() => {
                   handleButton();
                 }}
                 className="h-[30px] border rounded-md border-black bg-red-600 px-4 text-white text-center"
               >
-                중지
+                Exit
               </Button>
             </div>
           </div>
-          <p className="font-bold text-center">powered by QQueueing</p>
+          <h1 className="font-bold text-center">powered by QQueueing</h1>
         </div>
       </div>
     </div>

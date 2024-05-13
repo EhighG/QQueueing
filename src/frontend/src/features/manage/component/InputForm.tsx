@@ -9,7 +9,9 @@ type InputFormProps = {
   setWaitingInfo: Dispatch<SetStateAction<WaitingListType>>;
 };
 const InputForm = ({ waitingDetail, setWaitingInfo }: InputFormProps) => {
-  const [targetUrl, setTargetUrl] = useState<string>("");
+  const [targetUrl, setTargetUrl] = useState<string>(
+    process.env.NEXT_PUBLIC_TARGET_URL ?? ""
+  );
   const [maxCapacity, setMaxCapacity] = useState<number>(0);
   const [processingPerMinute, setProcessingPerMinute] = useState<number>(0);
   const [serviceName, setServiceName] = useState("");
@@ -40,7 +42,7 @@ const InputForm = ({ waitingDetail, setWaitingInfo }: InputFormProps) => {
           <Input
             label="대기열 등록 대상 URL"
             title="대기열 등록 대상 URL"
-            value={targetUrl ? targetUrl : process.env.NEXT_PUBLIC_TARGET_URL}
+            value={targetUrl}
             onChange={(e) => setTargetUrl(e.target.value)}
           />
           <div className="flex justify-around gap-2">

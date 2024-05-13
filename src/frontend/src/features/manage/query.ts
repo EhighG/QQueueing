@@ -11,13 +11,19 @@ import {
 } from "@/entities/waitingList/type";
 import { AxiosError } from "axios";
 import { getWaitingDetail } from ".";
-import { deleteWaiting, patchWaiting, postWaitingImage } from "./api";
+import {
+  deleteWaiting,
+  getServiceImage,
+  getWaitingImage,
+  patchWaiting,
+  postWaitingImage,
+} from "./api";
 import Swal from "sweetalert2";
 
 // 대기열 등록
-const useRegistWaiting = (waitingInfo: waitingRegistType) => {
-  const { mutate } = useMutation({
-    mutationFn: () => postWaiting(waitingInfo),
+const useRegistWaiting = () => {
+  const { mutate, isSuccess } = useMutation({
+    mutationFn: (waitingInfo: waitingRegistType) => postWaiting(waitingInfo),
     onSuccess: () => {
       Swal.fire({
         title: "등록이 완료되었습니다.",
@@ -34,7 +40,7 @@ const useRegistWaiting = (waitingInfo: waitingRegistType) => {
     },
   });
 
-  return { mutate };
+  return { mutate, isSuccess };
 };
 
 // 대기열 상세 조회
@@ -53,17 +59,37 @@ const useGetWaitingDetail = (id: string) => {
   return { data };
 };
 
-const usePostWaitingImage = (formData: FormData) => {
-  const { mutate, data } = useMutation({
-    mutationFn: () => postWaitingImage(formData),
+const usePostWaitingImage = (imageFile: File) => {
+  const { mutate, isSuccess, data } = useMutation({
+    mutationFn: () => postWaitingImage(imageFile),
   });
 
-  return { mutate, data };
+  return { mutate, data, isSuccess };
 };
 
-const usePatchWaiting = (id: string, data: WaitingListType) => {
+const useGetWaitingImage = (imageId: string) => {
+  const { data } = useQuery({
+    queryKey: ["getImage", imageId],
+    queryFn: () => getWaitingImage(imageId),
+    enabled: !!imageId,
+  });
+
+  return { data };
+};
+
+const useGetServiceImage = (targetUrl: string) => {
+  const { data } = useQuery({
+    queryKey: ["getImage", targetUrl],
+    queryFn: () => getServiceImage(targetUrl),
+    enabled: !!targetUrl,
+  });
+
+  return { data };
+};
+
+const usePatchWaiting = (id: string) => {
   const { mutate } = useMutation({
-    mutationFn: () => patchWaiting(id, data),
+    mutationFn: (data: WaitingListType) => patchWaiting(id, data),
     onSuccess: () => {
       Swal.fire({
         title: "수정 성공",
@@ -184,4 +210,6 @@ export {
   usePostWaitingImage,
   useDeleteWaiting,
   usePatchWaiting,
+  useGetWaitingImage,
+  useGetServiceImage,
 };

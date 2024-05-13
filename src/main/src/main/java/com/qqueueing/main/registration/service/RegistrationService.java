@@ -53,7 +53,7 @@ public class RegistrationService {
     public Registration updateRegistrationById(String id, RegistrationUpdateRequest request) throws ChangeSetPersister.NotFoundException {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
-        registration.update(request.getTargetUrl(), request.getMaxCapacity(), request.getProcessingPerMinute(), request.getServiceName(), registration.getQueueImageUrl());
+        registration.update(request.getTargetUrl(), request.getMaxCapacity(), request.getProcessingPerMinute(), request.getServiceName(), request.getQueueImageUrl());
         return registrationRepository.save(registration);
     }
 
@@ -70,6 +70,12 @@ public class RegistrationService {
     public String getImageById(String id) throws ChangeSetPersister.NotFoundException {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
+        return registration.getQueueImageUrl();
+    }
+
+    public String getImageByTargetUrl(String targetUrl) {
+        Registration registration = registrationRepository.findByTargetUrl(targetUrl);
+//                .orElseThrow(() -> new DocumentNotFoundException("Registration not found with targetUrl: " + targetUrl));
         return registration.getQueueImageUrl();
     }
 
