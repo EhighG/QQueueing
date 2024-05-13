@@ -24,9 +24,9 @@ const WaitingPage = () => {
           <Image src={cats} alt="상품이미지" className="w-[300px] h-[400px]" />
         </div>
         <h1 className="text-[1.5rem]">나의 대기 순서</h1>
-        <p className="font-bold text-center">
+        <h1 className="font-bold text-center">
           전체 {data?.totalQueueSize ?? 0}명 중
-        </p>
+        </h1>
         <h1 className="text-[4rem] font-bold">{data?.myOrder ?? 0}번</h1>
         <input
           type="range"
@@ -38,8 +38,8 @@ const WaitingPage = () => {
           readOnly={true}
         />
         <div className="text-center">
-          <p>현재 접속 인원이 많아 대기중 입니다.</p>
-          <p>잠시 기다려주시면 예매 페이지로 이동합니다.</p>
+          <h1>현재 접속 인원이 많아 대기중 입니다.</h1>
+          <h1>잠시 기다려주시면 예매 페이지로 이동합니다.</h1>
         </div>
         <button
           className="font-bold border rounded-lg p-2 border-black"
