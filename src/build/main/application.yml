@@ -83,3 +83,7 @@ info:
 shell:
   path: /pipes
   fileNm: conf.sh
+
+
+testing:
+  target-url: http://k10a401.p.ssafy.io/product/1

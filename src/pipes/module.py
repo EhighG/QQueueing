@@ -128,6 +128,9 @@ class Block:
         elif self.type == 'types':
             start += 'types {\n'
             end += '}\n'
+        elif self.type == 'events':
+            start += 'events {\n'
+            end += '}\n'
         elif self.type == 'http':
             start += 'http {\n'
             end += '}\n'
