@@ -163,12 +163,16 @@ public class WaitingService {
         }
         Registration registration = registrationRepository.findByPartitionNo(partitionNo);
 
-        activePartitions.remove(partitionNo);
-        queues.remove(partitionNo);
+        removeInMemoryQueueInfo(partitionNo);
 
         // update mongodb data
         registration.setIsActive(false);
         registrationRepository.save(registration);
+    }
+
+    public void removeInMemoryQueueInfo(int partitionNo) {
+        activePartitions.remove(partitionNo);
+        queues.remove(partitionNo);
     }
 
     /**

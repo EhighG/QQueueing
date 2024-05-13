@@ -7,7 +7,6 @@ import com.qqueueing.main.waiting.service.WaitingService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -64,6 +63,8 @@ public class RegistrationService {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
         scriptExecService.execShell(registration.getTargetUrl(), "delete");
+        // needed when remove/deactivate queue
+        waitingService.removeInMemoryQueueInfo(registration.getPartitionNo());
         registrationRepository.deleteById(id);
     }
 
