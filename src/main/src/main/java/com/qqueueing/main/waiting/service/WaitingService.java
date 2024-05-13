@@ -428,7 +428,7 @@ public class WaitingService {
 
         if(address.contains("favicon")) {
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_PNG);
+            headers.setContentType(new MediaType("image", "png", StandardCharsets.UTF_8));
 
             return ResponseEntity.ok().headers(headers).body(result);
         }
