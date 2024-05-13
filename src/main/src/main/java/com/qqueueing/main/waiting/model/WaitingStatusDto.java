@@ -15,11 +15,11 @@ public class WaitingStatusDto {
     private Set<String> doneSet = new HashSet<>();
     private List<Long> outList = new LinkedList<>();
     private int lastOffset;
-    private int totalQueueSize;
+    private long totalQueueSize;
     private String targetUrl;
 
     @Builder
-    public WaitingStatusDto(int partitionNo, String targetUrl, int lastOffset, int totalQueueSize) {
+    public WaitingStatusDto(int partitionNo, String targetUrl, int lastOffset, long totalQueueSize) {
         this.partitionNo = partitionNo;
         this.lastOffset = lastOffset;
         this.totalQueueSize = totalQueueSize;

@@ -74,5 +74,9 @@ public class EnterProducer {
 
         return new EnterQueueResDto(partitionNo, curIdx, sampleIp);
     }
+
+    public long getLastEnteredIdx(int partitionNo) {
+        return ids.get(partitionNo).get() - 1;
+    }
 }
 
