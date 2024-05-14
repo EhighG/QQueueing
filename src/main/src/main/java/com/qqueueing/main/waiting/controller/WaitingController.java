@@ -66,14 +66,14 @@ public class WaitingController {
         log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
 
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
 //
-//        String result = waitingService.getQueuePage(targetUrl, request);
+        String result = waitingService.getQueuePage(targetUrl);
 //
 //        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
-        String result = new String(waitingService.getQueuePage(targetUrl).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
+//        String result = new String(waitingService.getQueuePage(targetUrl).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+        return ResponseEntity.ok().headers(headers).body(result);
     }
 
     @PostMapping
