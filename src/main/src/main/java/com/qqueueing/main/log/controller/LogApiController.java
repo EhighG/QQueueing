@@ -2,6 +2,7 @@ package com.qqueueing.main.log.controller;
 
 import com.qqueueing.main.common.SuccessResponse;
 import com.qqueueing.main.log.dto.SearchLogsResDto;
+import com.qqueueing.main.log.dto.SearchRequestCountResDto;
 import com.qqueueing.main.log.service.LogApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,5 +24,13 @@ public class LogApiController {
         SearchLogsResDto result = logApiService.searchLogs();
 
         return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "사용자 서버의 로그들을 조회하였습니다.", result));
+    }
+
+    @GetMapping("/request-count")
+    public ResponseEntity<?> searchRequestCount() {
+
+        SearchRequestCountResDto result = logApiService.searchRequestCount();
+
+        return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "톰캣 요청 횟수를 조회하였습니다.", result));
     }
 }
