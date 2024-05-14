@@ -52,15 +52,17 @@ public class LogApiService {
         log.info("diskAvailableBytes : " + diskAvailableBytes);
 
         // 현재 cpu 사용량
-        String cpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
-        log.info("cpuUsageRate : " + cpuUsageRate);
+        String sumCpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
+        Double avgCpuUsageRate = Double.parseDouble(sumCpuUsageRate);
+        avgCpuUsageRate /= 4;
+        log.info("avgCpuUsageRate : " + avgCpuUsageRate);
 
         SearchLogsResDto searchLogsResDto = SearchLogsResDto.builder()
                 .memoryAllBytes(memoryAllBytes)
                 .nodeMemoryMemAvailableBytes(nodeMemoryMemAvailableBytes)
                 .diskAllBytes(diskAllBytes)
                 .diskAvailableBytes(diskAvailableBytes)
-                .cpuUsageRate(cpuUsageRate)
+                .cpuUsageRate(String.valueOf(avgCpuUsageRate))
                 .build();
 
         return searchLogsResDto;
@@ -88,10 +90,7 @@ public class LogApiService {
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");
         List<String> result = (List<String>) prometheusResult.get(0).get("value");
 
-        Double avgCpuUsage = Double.parseDouble(result.get(1));
-        avgCpuUsage /= 4;
-
-        return String.valueOf(avgCpuUsage);
+        return result.get(1);
     }
 
     public SearchRequestCountResDto searchRequestCount() {
