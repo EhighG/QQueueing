@@ -411,7 +411,11 @@ public class WaitingService {
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
-        return html.replace("/_next", endpoint + "/_next");
+
+        html = html.replace("/_next", endpoint + "/_next");
+        html = html.replace("favicon", "waiting/favicon");
+
+        return html;
     }
 
     private String extractEndpoint(String targetUrl) {
