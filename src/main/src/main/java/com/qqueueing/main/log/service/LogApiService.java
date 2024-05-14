@@ -84,6 +84,9 @@ public class LogApiService {
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");
         List<String> result = (List<String>) prometheusResult.get(0).get("value");
 
-        return result.get(1);
+        Double avgCpuUsage = Double.parseDouble(result.get(1));
+        avgCpuUsage /= 4;
+
+        return String.valueOf(avgCpuUsage);
     }
 }
