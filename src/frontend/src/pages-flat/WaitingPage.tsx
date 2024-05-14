@@ -1,13 +1,15 @@
 "use client";
-import { useEnqueue, useGetWaitingInfo } from "@/features";
-import { useGetWaitingOut } from "@/features/waiting";
-import { Button, cats, logo } from "@/shared";
+import {
+  useEnqueue,
+  useGetWaitingInfo,
+  useGetWaitingOut,
+  useGetServiceImage,
+} from "@/features";
+import { Button, logo } from "@/shared";
 import { LinearProgress } from "@mui/material";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useGetServiceImage } from "@/features/manage";
 
 const WaitingPage = () => {
   const router = useRouter();
@@ -24,6 +26,7 @@ const WaitingPage = () => {
     partitionNo,
     idx
   );
+  // estimate 시간 추정 쿼리
 
   const { data: imageData } = useGetServiceImage(targetUrl);
 
@@ -48,6 +51,7 @@ const WaitingPage = () => {
   }, [enqueueInfo]);
 
   useEffect(() => {
+    console.log(waitingInfo);
     if (waitingInfo?.token) {
       window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}waiting/page-req?token=${waitingInfo.token}`;
     }
@@ -59,8 +63,13 @@ const WaitingPage = () => {
     }
   }, [isSuccess]);
 
+  //  estimate 추정 로직
+  useEffect(() => {
+    // ((myOrder // enterCount) + 1) * 3
+  }, []);
+
   return (
-    <div className="absolute z-0 flex inset-0 w-full h-full min-w-[700px] bg-black bg-opacity-70 items-center justify-center">
+    <div className="fixed z-0 flex inset-0 w-full h-full min-w-[700px] bg-black bg-opacity-70 items-center justify-center">
       <div className="w-[800px] h-[400px] bg-white rounded-md">
         <div className="flex flex-col justify-between h-full  p-4">
           <div className="flex w-full justify-between  items-center">
@@ -89,7 +98,13 @@ const WaitingPage = () => {
           <LinearProgress
             className="h-[20px] rounded-full"
             variant="determinate"
-            value={75}
+            value={
+              (waitingInfo?.totalQueueSize && waitingInfo?.myOrder
+                ? 1 -
+                  (waitingInfo.myOrder - 1) / (waitingInfo.totalQueueSize + 1)
+                : 0) * 100
+            }
+            color="primary"
           />
           <div className="w-full p-2 h-[120px] rounded-md border border-black">
             <p className="text-[1.5rem] font-bold">
@@ -98,7 +113,7 @@ const WaitingPage = () => {
             <p className="font-bold">
               대기 순서에 따라 자동 접속되니 조금만 기다려주세요.
             </p>
-            <div className="flex items-center gap-20">
+            <div className="flex items-center gap-2">
               <p className="font-bold">
                 앞에
                 <span className="text-q-blue animate-blink">
@@ -106,9 +121,9 @@ const WaitingPage = () => {
                 </span>
                 명, 뒤에
                 <span className="text-q-blue animate-blink">
-                  {waitingInfo?.totalQueueSize && enqueueInfo?.order
-                    ? waitingInfo.totalQueueSize - enqueueInfo.order >= 0
-                      ? waitingInfo.totalQueueSize - enqueueInfo.order
+                  {waitingInfo?.totalQueueSize && waitingInfo?.myOrder
+                    ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder >= 0
+                      ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder
                       : 0
                     : 0}
                 </span>
@@ -118,7 +133,7 @@ const WaitingPage = () => {
                 onClick={() => handleButton()}
                 className="h-[30px] border rounded-md border-black bg-red-600 px-4 text-white text-center"
               >
-                Exit
+                나가기
               </Button>
             </div>
           </div>

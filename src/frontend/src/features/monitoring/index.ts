@@ -30,4 +30,5 @@ export {
   useGetDiskFree,
   useGetJvmMemoryMax,
   useGetJvmMemoryUsed,
+  useGetRequestCount,
 } from "./query";
