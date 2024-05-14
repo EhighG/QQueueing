@@ -100,13 +100,16 @@ public class WaitingController {
     public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token) {
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_HTML);
-        headers.set("Content-Encoding", "UTF-8");
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+//        headers.setContentType(MediaType.TEXT_HTML);
+//        headers.set("Content-Encoding", "UTF-8");
 
         String result = waitingService.forward(token);
         log.info("target page 포워딩 api called");
 
-        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+        return ResponseEntity.ok().headers(headers).body(result);
+
+//        return new ResponseEntity<>(result, headers, HttpStatus.OK);
 //        return ResponseEntity
 //                .ok(waitingService.forward(token, request));
     }
