@@ -77,6 +77,7 @@ case $1 in
 				sudo rm -rf $NGINX_PATH
 			fi
 			sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
+			sudo touch $NGINX_PATH$DETETE_FILE
 
 
 			#2 execute python script

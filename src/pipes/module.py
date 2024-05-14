@@ -61,7 +61,7 @@ class Block:
         return: none
         '''
         del self.bodies[ind]
-        print('this is pop')
+        #print('this is pop')
 
     def find_by_type(self, type):
         '''

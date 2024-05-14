@@ -38,7 +38,7 @@ def merge_files(path):
 
         if not comment_flag:
             del_cmt_str += text
-    print(del_cmt_str)
+    #print(del_cmt_str)
     return del_cmt_str
 
 def find_host_end(url):
@@ -126,40 +126,46 @@ def main(url):
 
 
     # this val should be changeable, because this can be already in use
-    waiting_location = Block(type='location')
-    waiting_location.cond = '/waiting'
-
-    tmp_block = Block(type='statement', bodies=['proxy_set_header address $host$request_uri ;'])
-    waiting_location.push(ind=-1, val=tmp_block)
-
-    if_block = Block(type='if')
-    if_block.cond = '($uri ~ ^(.*)_next/)'
-    tmp_block = Block(type='statement', bodies=['rewrite ^(.*)$ /waiting/next break ;'])
-    if_block.push(ind=-1, val=tmp_block)
-    tmp_block = Block(type='statement', bodies=['proxy_pass http://qqueueing-main:8081 ;'])
-    if_block.push(ind=-1, val=tmp_block)
-    waiting_location.push(ind=-1, val=if_block)
-
-    if_block = Block(type='if')
-    if_block.cond = '($uri ~ ^(.*)png )'
-    tmp_block = Block(type='statement', bodies=['rewrite ^(.*)$ /waiting/next break ;'])
-    if_block.push(ind=-1, val=tmp_block)
-    tmp_block = Block(type='statement', bodies=['proxy_pass http://qqueueing-main:8081 ;'])
-    if_block.push(ind=-1, val=tmp_block)
-    waiting_location.push(ind=-1, val=if_block)
-
-    tmp_block = Block(type='statement', bodies=['proxy_pass http://qqueueing-main:8081$request_uri ;'])
-    waiting_location.push(ind=-1, val=tmp_block)
-
-    ssl_server.push(ind=location_index, val=waiting_location)
+#    waiting_location = Block(type='location')
+#    waiting_location.cond = '/waiting'
+#
+#    tmp_block = Block(type='statement', bodies=['proxy_set_header address $host$request_uri ;'])
+#    waiting_location.push(ind=-1, val=tmp_block)
+#
+#    if_block = Block(type='if')
+#    if_block.cond = '($uri ~ ^(.*)_next/)'
+#    tmp_block = Block(type='statement', bodies=['rewrite ^(.*)$ /waiting/next break ;'])
+#    if_block.push(ind=-1, val=tmp_block)
+#    tmp_block = Block(type='statement', bodies=['proxy_pass http://qqueueing-main:8081 ;'])
+#    if_block.push(ind=-1, val=tmp_block)
+#    waiting_location.push(ind=-1, val=if_block)
+#
+#    if_block = Block(type='if')
+#    if_block.cond = '($uri ~ ^(.*)png )'
+#    tmp_block = Block(type='statement', bodies=['rewrite ^(.*)$ /waiting/next break ;'])
+#    if_block.push(ind=-1, val=tmp_block)
+#    tmp_block = Block(type='statement', bodies=['proxy_pass http://qqueueing-main:8081 ;'])
+#    if_block.push(ind=-1, val=tmp_block)
+#    waiting_location.push(ind=-1, val=if_block)
+#
+#    tmp_block = Block(type='statement', bodies=['proxy_pass http://qqueueing-main:8081$request_uri ;'])
+#    waiting_location.push(ind=-1, val=tmp_block)
+#
+#    ssl_server.push(ind=location_index, val=waiting_location)
 
     
 
 
     # add one server
-    if http_block.get(servers[-1]).host == 'host.docker.internal':
-        internal_server = http_block.get(servers[-1])
+    for i in http_block.get(servers[-1]).bodies:
+        if i.type == 'statement' and 'host.docker.internal' in i.bodies[0]:
+            break
     else:
+#
+#            
+#    if http_block.get(servers[-1]).host == 'host.docker.internal':
+#        internal_server = http_block.get(servers[-1])
+#    else:
         internal_server = Block(type='server')
         internal_server.host = 'host.docker.internal'
         internal_server.port = '80'
@@ -170,6 +176,7 @@ def main(url):
         internal_server.push(ind=-1, val=statement_block)
         statement_block = Block(type='statement', bodies=['server_name host.docker.internal ;'])
         internal_server.push(ind=-1, val=statement_block)
+        internal_server.push(ind=-1, val=real_location)
 
     # need to get user's front url
 #    direct_location = Block(type='location')
@@ -178,10 +185,9 @@ def main(url):
 #    direct_location_server.push(ind=-1, val=statement_block)
 #    internal_server.push(ind=-1, val=direct_location)
 
-    internal_server.push(ind=-1, val=real_location)
 
 
-    print(nginx_block.export(indent=-1))
+    #print(nginx_block.export(indent=-1))
 
 #    complete_file = insert_location(full_text, url)
 #

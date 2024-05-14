@@ -38,17 +38,20 @@ const LineChartPage = () => {
 
   const formatPercents = (percent: number) => percent + "%";
 
-  const formatTime = (second: number) => `${second}초`;
-
   return (
     <>
       {/* 현재 CPU 사용량 */}
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+        className="bg-white p-2 shadow-md rounded-md"
+      >
         <LineChart width={500} height={500} data={data}>
           <YAxis
             dataKey="cpuUsageRate"
             domain={[0, 100]}
             tickFormatter={formatPercents}
+            width={80}
           />
           <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
           <Tooltip />
@@ -58,12 +61,17 @@ const LineChartPage = () => {
         </LineChart>
       </ResponsiveContainer>
       {/* 메모리 사용 가능량 */}
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+        className="bg-white p-4 shadow-md rounded-md"
+      >
         <LineChart width={500} height={500} data={data}>
           <YAxis
             dataKey="nodeMemoryMemAvailableBytes"
             tickFormatter={formatBytesToGB}
             domain={[0, memoryMax]}
+            width={80}
           />
           <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
           <Tooltip />
@@ -73,12 +81,17 @@ const LineChartPage = () => {
         </LineChart>
       </ResponsiveContainer>
       {/* 디스크 사용 가능량 */}
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+        className="bg-white p-4 shadow-md rounded-md"
+      >
         <LineChart width={500} height={500} data={data}>
           <YAxis
             dataKey="diskAvailableBytes"
             tickFormatter={formatBytesToGB}
             domain={[0, diskMax]}
+            width={80}
           />
           <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
           <Tooltip />
