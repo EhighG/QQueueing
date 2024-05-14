@@ -267,7 +267,7 @@ public class WaitingService {
         Set<String> doneSet = waitingStatus.getDoneSet();
         List<Long> outList = waitingStatus.getOutList();
         int lastOffset = waitingStatus.getLastOffset();
-        int outCntInFront = - (Collections.binarySearch(outList, oldOrder) + 1);
+        int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
         Long myOrder = Math.max(oldOrder - outCntInFront - lastOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
                 waitingStatus.getEnterCntCapture());
@@ -352,14 +352,15 @@ public class WaitingService {
                 BatchResDto batchRes = response.get(partitionNo);
                 waitingStatus.getDoneSet()
                         .addAll(batchRes.getCurDoneList());
-                waitingStatus.setTotalQueueSize((int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset()));
                 waitingStatus.setLastOffset(batchRes.getLastOffset());
+                cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
+                waitingStatus.setTotalQueueSize(
+                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset() - waitingStatus.getOutList().size()));
 
                 // capture and reset enter count
                 AtomicInteger enterCnt = waitingStatus.getEnterCnt();
                 waitingStatus.setEnterCntCapture(enterCnt.getAndSet(0));
             }
-            cleanUpOutList();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -368,16 +369,13 @@ public class WaitingService {
     /**
      * 대기 끝난 사람들 삭제
      */
-    private void cleanUpOutList() {
-        for (int partitionNo : queues.keySet()) {
-            WaitingStatusDto waigtingStatus = queues.get(partitionNo);
-            int lastOffset = waigtingStatus.getLastOffset();
-            waigtingStatus.setOutList(
-                    waigtingStatus.getOutList().stream()
-                            .filter(i -> i > lastOffset)
-                            .collect(Collectors.toList()) // modifiable list
-            );
-        }
+    private void cleanUpOutList(WaitingStatusDto waitingStatus) {
+        int lastOffset = waitingStatus.getLastOffset();
+        waitingStatus.setOutList(
+                waitingStatus.getOutList().stream()
+                        .filter(i -> i > lastOffset)
+                        .collect(Collectors.toList()) // modifiable list
+        );
     }
 
     public ResponseEntity<?> parsing(String address) {
