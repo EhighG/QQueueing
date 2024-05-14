@@ -30,7 +30,7 @@ public class LogApiService {
     private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{CPU_USAGE_MODE}";
     private final String CPU_USAGE_MODE = "{mode=\"user\"}[5s]))*100";
 
-    private final String TOMCAT_REQUEST_COUNT = "rate(tomcat_servlet_request_seconds_count{}";
+    private final String TOMCAT_REQUEST_COUNT = "rate(tomcat_servlet_request_seconds_count{TOMCAT_REQUEST_MODE}";
     private final String TOMCAT_REQUEST_MODE = "{name=\"dispatcherServlet\"}[5s])*100";
 
     public SearchLogsResDto searchLogs() {
