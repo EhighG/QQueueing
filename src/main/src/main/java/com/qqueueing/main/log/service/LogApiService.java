@@ -29,9 +29,6 @@ public class LogApiService {
     private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{CPU_USAGE_MODE}";
     private final String CPU_USAGE_MODE = "{mode=\"user\"}[5s]))*100";
 
-    private final String TOMCAT_REQUEST_COUNT = "rate(tomcat_servlet_request_seconds_count{}";
-    private final String TOMCAT_REQUEST_MODE = "{name=\"dispatcherServlet\"}[5s])*100";
-
     public SearchLogsResDto searchLogs() {
 
         // 메모리 전체 용량
@@ -54,16 +51,12 @@ public class LogApiService {
         String cpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
         log.info("cpuUsageRate : " + cpuUsageRate);
 
-        String tomcatRequestCount = getRateWithMode(TOMCAT_REQUEST_COUNT, TOMCAT_REQUEST_MODE);
-        log.info("tomcatRequestCount : " + tomcatRequestCount);
-
         SearchLogsResDto searchLogsResDto = SearchLogsResDto.builder()
                 .memoryAllBytes(memoryAllBytes)
                 .nodeMemoryMemAvailableBytes(nodeMemoryMemAvailableBytes)
                 .diskAllBytes(diskAllBytes)
                 .diskAvailableBytes(diskAvailableBytes)
                 .cpuUsageRate(cpuUsageRate)
-                .tomcatRequestCount(tomcatRequestCount)
                 .build();
 
         return searchLogsResDto;
