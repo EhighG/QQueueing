@@ -17,6 +17,9 @@ public class WaitingStatusDto {
     private int lastOffset;
     private long totalQueueSize;
     private String targetUrl;
+//    private String cachedQueuePagePath;
+//    private String cachedTargetPagePath;
+
 
     @Builder
     public WaitingStatusDto(int partitionNo, String targetUrl, int lastOffset, long totalQueueSize) {

@@ -62,19 +62,18 @@ public class WaitingController {
     }
 
     @GetMapping("/queue-page")
-    public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,
-                                          HttpServletRequest request) {
+    public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl) {
         log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
 
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
 //
-//        String result = waitingService.getQueuePage(targetUrl, request);
+        String result = waitingService.getQueuePage(targetUrl);
 //
 //        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
-        String result = new String(waitingService.getQueuePage(targetUrl, request).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
+//        String result = new String(waitingService.getQueuePage(targetUrl).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+        return ResponseEntity.ok().headers(headers).body(result);
     }
 
     @PostMapping
@@ -98,17 +97,19 @@ public class WaitingController {
     }
 
     @GetMapping("/page-req")
-    public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token,
-                                             HttpServletRequest request) {
+    public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token) {
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_HTML);
-        headers.set("Content-Encoding", "UTF-8");
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+//        headers.setContentType(MediaType.TEXT_HTML);
+//        headers.set("Content-Encoding", "UTF-8");
 
-        String result = waitingService.forward(token, request);
+        String result = waitingService.forward(token);
         log.info("target page 포워딩 api called");
 
-        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+        return ResponseEntity.ok().headers(headers).body(result);
+
+//        return new ResponseEntity<>(result, headers, HttpStatus.OK);
 //        return ResponseEntity
 //                .ok(waitingService.forward(token, request));
     }

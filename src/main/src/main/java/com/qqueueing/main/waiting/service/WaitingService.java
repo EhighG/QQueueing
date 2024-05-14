@@ -12,9 +12,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -158,12 +159,16 @@ public class WaitingService {
         }
         Registration registration = registrationRepository.findByPartitionNo(partitionNo);
 
-        activePartitions.remove(partitionNo);
-        queues.remove(partitionNo);
+        removeInMemoryQueueInfo(partitionNo);
 
         // update mongodb data
         registration.setIsActive(false);
         registrationRepository.save(registration);
+    }
+
+    public void removeInMemoryQueueInfo(int partitionNo) {
+        activePartitions.remove(partitionNo);
+        queues.remove(partitionNo);
     }
 
     /**
@@ -180,11 +185,9 @@ public class WaitingService {
         }
         log.info("partitionNo = {}", partitionNo);
         UriComponentsBuilder uriBuilder;
+
         if (activePartitions.contains(partitionNo)) { // 대기 필요
             log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
-//            uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + QUEUE_PAGE_API)
-//                    .queryParam("Target-URL", targetUrl);
-//            return uriBuilder.build().toUri();
             return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + targetUrl);
         } else { // 대기 불필요
             log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
@@ -195,9 +198,15 @@ public class WaitingService {
         }
     }
 
-    public String getQueuePage(String targetUrl, HttpServletRequest request) {
-        String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl, request).getBody();
+    public String getQueuePage(String targetUrl) {
+        Integer partitionNo = partitionNoMapper.get(targetUrl);
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        if (waitingStatusDto == null) {
+            throw new RuntimeException("wrong targetUrl");
+        }
 
+        log.info("targetUrl = {}", targetUrl);
+        String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl).getBody();
         return parseHtmlPage(QUEUE_PAGE_FRONT, html);
     }
 
@@ -266,33 +275,39 @@ public class WaitingService {
     /**
      * 타겟 프론트 페이지 포워딩 메소드
      */
-    public String forward(String token, HttpServletRequest request) {
+    public String forward(String token) {
         String targetUrl = targetUrlMapper.get(token);
         // for test
         if (token.equals(TEST_TOKEN)) {
             targetUrl = TEST_TARGET_URL;
         }
+        // check and remove temp token
         log.info("forward target Url = {}", targetUrl);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
-        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
-        log.info("targetUrl = {}", targetUrl);
 
-        String html = targetApiConnector.forward(targetUrl, request).getBody();
-        log.info("forwording result = \n\n{}", html);
-        return html;
+        // get target page
+        Integer partitionNo = partitionNoMapper.get(targetUrl);
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        if (waitingStatusDto == null) {
+            throw new RuntimeException("wrong targetUrl");
+        }
+
+        // make internal request url
+        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
+        log.info("targetPage request url = {}", targetUrl);
+
+        return targetApiConnector.forward(targetUrl).getBody();
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
-//        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
-//        String endPoint = urlSplitList[1];
-        // parse target url(external request -> internal)
 
-        String newHtml = html.replace("/_next", endpoint + "/_next");
+        html = html.replace("/_next", endpoint + "/_next");
+        html = html.replace("favicon", "waiting/favicon");
 
-        return newHtml;
+        return html;
     }
 
     private String extractEndpoint(String targetUrl) {
@@ -311,7 +326,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 5초마다
+    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 3초마다
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
@@ -356,6 +371,8 @@ public class WaitingService {
         address = "http://" + address;
         System.out.println("address : " + address);
 
+        HttpHeaders headers = new HttpHeaders();
+
         if(address.contains("image")) {
 
             String[] imageAddressSplit1 = address.split("p.ssafy.io");
@@ -378,7 +395,6 @@ public class WaitingService {
             try {
                 byte[] imageBytes = getImageBytes(imageUrl);
 
-                HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.IMAGE_PNG);
 
                 return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
@@ -387,6 +403,19 @@ public class WaitingService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        // favicon 일 경우
+        if(address.contains("favicon")) {
+
+            String serverURL = "http://k10a401.p.ssafy.io:3001/favicon.ico";
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+            String result = response.getBody().replace("favicon", "waiting/favicon");
+
+            headers.setContentType(new MediaType("image", "x-icon", StandardCharsets.UTF_8));
+            return ResponseEntity.ok().headers(headers).body(result);
         }
 
         String[] addressSplit = address.split("_next");
@@ -398,44 +427,21 @@ public class WaitingService {
 
         String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
 
-//        RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.getMessageConverters().stream()
-//                .filter(StringHttpMessageConverter.class::isInstance)
-//                .map(StringHttpMessageConverter.class::cast)
-//                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
-//
-//        ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
-
         RestTemplate restTemplate = new RestTemplate();
-//        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-//        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
-//        messageConverters.add(stringHttpMessageConverter);
-//        restTemplate.setMessageConverters(messageConverters);
-//        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
         log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
+        // css 일 경우
         if(address.contains("css")) {
 
-            HttpHeaders headers = new HttpHeaders();
             headers.setContentType(new MediaType("text", "css", StandardCharsets.UTF_8));
-
             return ResponseEntity.ok().headers(headers).body(result);
         }
 
-        if(address.contains("favicon")) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(new MediaType("image", "png", StandardCharsets.UTF_8));
-
-            return ResponseEntity.ok().headers(headers).body(result);
-        }
-
-        HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
-
         return ResponseEntity.ok().headers(headers).body(result);
 
     }
