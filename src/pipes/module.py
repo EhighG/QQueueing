@@ -1,6 +1,11 @@
+import re
+import os
+import glob
+import copy
+
 class Block:
 
-    def __init__(self, type, index=0, bodies=None, port=0, host='', cond=''):
+    def __init__(self, type, index=0, bodies=None, ports=None, hosts=None, cond=''):
         '''
         params: type,
         return: none
@@ -12,8 +17,8 @@ class Block:
         # this can be list of string(statement), block
         self.bodies = [] if bodies is None else bodies
 
-        self.port = port
-        self.host = host
+        self.ports = [] if ports is None else ports
+        self.hosts = [] if hosts is None else hosts
         self.cond = cond
 
         # this differs type by type
@@ -43,7 +48,7 @@ class Block:
         params: ind, val
         return: none
         '''
-        print(type(val), val.type, '::', val)
+        #print(type(val), val.type, '::', val)
         if not isinstance(val, Block): raise Exception("input Block")
         if ind == -1:
             self.bodies.append(val)
@@ -149,14 +154,79 @@ class Block:
     def __repr__(self):
         return f'{self.type}'
 
+    # this name should be changed. like parse_file
     @staticmethod
     def file_import(conf_file):
+        start = -1
+        directive_type = ''
+
+        nginx_block = Block(type='nginx')
+        stack = [nginx_block]
+        for i, text in enumerate(conf_file):
+            if text == '{':
+                check_str = conf_file[start:i].split()
+                cond = ''
+                if check_str[0] in ['http', 'types', 'server', 'events', 'mail', 'upstream']:
+                    directive_type = check_str[0]
+                elif check_str[0] in ['location', 'if']:
+                    directive_type = check_str[0]
+                    cond = ' '.join(check_str[1:])
+                new_block = Block(type=directive_type, cond=cond)
+                #print(check_str[0], '||',cond)
+                stack.append(new_block)
+                start = -1
+            elif text == '}':
+                close_block = stack.pop()
+                #print('close_block', close_block)
+                stack[-1].push(ind=-1, val=close_block)
+                start = -1
+            elif text == ';':
+                statement_block = Block(type='statement', bodies=[conf_file[start:i+1]])
+                stack[-1].push(ind=-1, val=statement_block)
+                start = -1
+            elif start < 0 and text.isalnum():
+                start = i  # server, location, types, http, if
+        return nginx_block
+
+    def pkl_save(self):
+        '''
+        file save
+
+        '''
+        print('save')
+
+    @staticmethod
+    def merge_files(path):
+        '''
+        merge nginx.conf file.
+        remove comments.
+        params : path
+        return : string
+        '''
+        # merge files
+        conf_dir = os.path.dirname(path)
+        if len(conf_dir) != 0: os.chdir(conf_dir)
+
+        include_directives = '^\s*include\s*(.*);'
+        tmptext=''
+        with open(path+'/nginx.conf', 'r') as f:
+            for line in f.readlines():
+                included = re.findall(include_directives, line)
+                if len(included) > 0:
+                    include_files = glob.glob(included[0])
+                    for file in include_files:
+                        if os.path.exists(file):
+                            with open(file, 'r') as ff:
+                                include_con = ff.read()
+                                tmptext += include_con
+                else:
+                    tmptext += line
 
         # remove comments
         del_cmt_str = ''
         quote_flag = False
         comment_flag = False
-        for i, text in enumerate(conf_file):
+        for i, text in enumerate(tmptext):
             if text in ['\'', '\"'] and not comment_flag:
                 quote_flag = not quote_flag
             elif text == '#' and not quote_flag:
@@ -166,40 +236,24 @@ class Block:
 
             if not comment_flag:
                 del_cmt_str += text
+        return del_cmt_str
 
+    @staticmethod
+    def find_host_end(url):
+        url = url.strip()
+        start_index = 0
+        host = endpoint = 0
+        if url.startswith("http"):
+            start_index = 8 if url[4] == 's' else 7
 
-        start = -1
-        std = -1
-        directive_type = ''
-        length = len(del_cmt_str)
+        for i, val in enumerate(url):
+            if i < start_index: continue
+            if val == '/':
+                host = url[start_index:i]
+                endpoint = url[i:]
+                break
+        return [host, endpoint]
 
-        nginx_block = Block(type='nginx')
-        stack = [nginx_block]
-        for i, text in enumerate(del_cmt_str):
-            if text == '{':
-                check_str = del_cmt_str[start:i].split()
-                cond = ''
-                if check_str[0] in ['http', 'types', 'server', 'events', 'mail']:
-                    directive_type = check_str[0]
-                elif check_str[0] in ['location', 'if']:
-                    directive_type = check_str[0]
-                    cond = ' '.join(check_str[1:])
-                new_block = Block(type=directive_type, cond=cond)
-                print(check_str[0], '||',cond)
-                stack.append(new_block)
-                start = -1
-            elif text == '}':
-                close_block = stack.pop()
-                print('close_block', close_block)
-                stack[-1].push(ind=-1, val=close_block)
-                start = -1
-            elif text == ';':
-                statement_block = Block(type='statement', bodies=[del_cmt_str[start:i+1]])
-                stack[-1].push(ind=-1, val=statement_block)
-                start = -1
-            elif start < 0 and text.isalnum():
-                start = i  # server, location, types, http, if
-        return nginx_block
 
 if __name__ == '__main__':
     lst = [1, 2]

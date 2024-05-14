@@ -109,7 +109,7 @@ case $1 in
 	modify)
 		echo "modify"
 		;;
-	test)
+	dr-test)
 		echo "test for delete"
 		if [[ -d $NGINX_PATH ]];then
 			sudo rm -rf $NGINX_PATH
@@ -146,6 +146,87 @@ case $1 in
 
 		#3 copy completed file to contianer 
 		sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
+
+		sudo rm -rf $NGINX_PATH
+
+		sudo docker exec $CONTAINER_NAME nginx -t 
+		;;
+
+	rd-test)
+		if [[ -n $IS_NGNIX_CTNR ]];then
+			#1 copy nginx files from container
+			# todo: if user have nginx in host, need to handle that
+			if [[ -d $NGINX_PATH ]];then
+				sudo rm -rf $NGINX_PATH
+			fi
+			sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
+			sudo touch $NGINX_PATH$COMPLETE_FILE
+
+
+			#2 execute python script
+			echo "REGITSTERING $URL_PATH"
+			sudo python3 register.py $URL_PATH
+			sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
+			sudo cat $NGINX_PATH$COMPLETE_FILE | grep $URL_PATH
+
+			#3 copy completed file to contianer 
+			sudo docker exec $CONTAINER_NAME mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.save
+			sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
+
+			sudo rm -rf $NGINX_PATH
+
+			sudo docker exec $CONTAINER_NAME nginx -t 
+			#exit 1
+
+			#4 restart nginx
+			sudo docker exec $CONTAINER_NAME nginx -s reload
+		else
+			sudo rm -rf $NGINX_PATH$COMPLETE_FILE 2> /dev/null
+			sudo touch $NGINX_PATH$COMPLETE_FILE
+			sudo python3 register.py $URL_PATH
+			sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
+			sudo cat $NGINX_PATH$COMPLETE_FILE | grep $URL_PATH
+
+			sudo mv $NGINX_PATH/nginx.conf $NGINX_PATH/nginx.conf.save
+			sudo mv $NGINX_PATH$COMPLETE_FILE $NGINX_PATH/nginx.conf
+
+			sudo nginx -s reload
+		fi
+		echo "test for register"
+		if [[ -d $NGINX_PATH ]];then
+			sudo rm -rf $NGINX_PATH
+		fi
+		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
+
+
+		#2 execute python script
+		echo "REGITSTERING $URL_PATH"
+		sudo python3 register.py $URL_PATH
+		sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
+		sudo cat $NGINX_PATH$COMPLETE_FILE 
+
+		#3 copy completed file to contianer 
+		sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
+
+		sudo rm -rf $NGINX_PATH
+
+		sudo docker exec $CONTAINER_NAME nginx -t 
+
+		echo "test for delete"
+		if [[ -d $NGINX_PATH ]];then
+			sudo rm -rf $NGINX_PATH
+		fi
+		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
+
+
+		#2 execute python script
+		echo "DELETING $URL_PATH"
+		sudo python3 delete.py $URL_PATH
+		sudo chmod 664 $NGINX_PATH$DETETE_FILE
+		sudo cat $NGINX_PATH$DETETE_FILE 
+
+		#3 copy completed file to contianer 
+		sudo docker cp $NGINX_PATH$DETETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
 
 		sudo rm -rf $NGINX_PATH
 
