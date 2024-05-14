@@ -2,6 +2,7 @@ package com.qqueueing.main.registration.service;
 
 import com.qqueueing.main.registration.model.Registration;
 import com.qqueueing.main.registration.model.RegistrationUpdateRequest;
+import com.qqueueing.main.registration.model.GetWaitingInfoResDto;
 import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.waiting.service.WaitingService;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,6 +67,12 @@ public class RegistrationService {
         // needed when remove/deactivate queue
         waitingService.removeInMemoryQueueInfo(registration.getPartitionNo());
         registrationRepository.deleteById(id);
+    }
+
+    public GetWaitingInfoResDto getWaitingInfo(String id) throws ChangeSetPersister.NotFoundException {
+        Registration registration = registrationRepository.findById(id)
+                .orElseThrow(ChangeSetPersister.NotFoundException::new);
+        return waitingService.getWaitingInfo(registration.getPartitionNo());
     }
 
     public String getImageById(String id) throws ChangeSetPersister.NotFoundException {

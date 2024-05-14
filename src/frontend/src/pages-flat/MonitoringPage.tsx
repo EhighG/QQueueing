@@ -20,7 +20,7 @@ const MonitoringPage = () => {
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md">
       <SectionTitle title="사용자 서버" />
       <div className="flex items-center flex-1 justify-around">
-        <PerformanceCard title="CPU사용량">
+        <PerformanceCard title="CPU 사용량">
           <Gauge
             width={240}
             height={240}
@@ -32,7 +32,7 @@ const MonitoringPage = () => {
                 transform: "translate(0px, 0px)",
               },
             }}
-            text={({ value, valueMax }) => `${value} / ${valueMax}`}
+            text={({ value, valueMax }) => `${value} / ${valueMax}%`}
           />
         </PerformanceCard>
 
@@ -50,7 +50,11 @@ const MonitoringPage = () => {
             value={
               serverLogs
                 ? Math.round(
-                    parseInt(serverLogs.diskAvailableBytes) / 1024 / 1024 / 1024
+                    (parseInt(serverLogs.diskAllBytes) -
+                      parseInt(serverLogs.diskAvailableBytes)) /
+                      1024 /
+                      1024 /
+                      1024
                   )
                 : 0
             }
@@ -78,7 +82,8 @@ const MonitoringPage = () => {
             value={
               serverLogs
                 ? Math.round(
-                    (parseInt(serverLogs.nodeMemoryMemAvailableBytes) /
+                    ((parseInt(serverLogs.memoryAllBytes) -
+                      parseInt(serverLogs.nodeMemoryMemAvailableBytes)) /
                       1024 /
                       1024 /
                       1024) *

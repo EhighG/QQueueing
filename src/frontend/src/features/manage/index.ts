@@ -16,8 +16,9 @@ export {
   useDeleteWaiting,
   useGetWaitingImage,
   useGetServiceImage,
+  usePostWaitingImage,
 } from "./query";
 
 export type { ResponseType } from "./type";
 
-export { ImageRegist, InputForm, Performance } from "./component";
+export { ImageRegist, InputForm, TargetPage } from "./component";

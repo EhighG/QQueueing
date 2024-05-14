@@ -3,6 +3,7 @@ package com.qqueueing.main.log.service;
 import com.qqueueing.main.log.dto.PrometheusData;
 import com.qqueueing.main.log.dto.PrometheusResult;
 import com.qqueueing.main.log.dto.SearchLogsResDto;
+import com.qqueueing.main.log.dto.SearchRequestCountResDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,10 @@ public class LogApiService {
 
     //    private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{mode=\"user\"}[5m]))*100";
     private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{CPU_USAGE_MODE}";
-    private final String CPU_USAGE_MODE = "{mode=\"user\"}[5s]))*100";
+    private final String CPU_USAGE_MODE = "{mode=\"user\"}[1m]))*100";
+
+    private final String TOMCAT_REQUEST_COUNT = "rate(tomcat_servlet_request_seconds_count{TOMCAT_REQUEST_MODE}";
+    private final String TOMCAT_REQUEST_MODE = "{name=\"dispatcherServlet\"}[5s])*100";
 
     public SearchLogsResDto searchLogs() {
 
@@ -48,15 +52,17 @@ public class LogApiService {
         log.info("diskAvailableBytes : " + diskAvailableBytes);
 
         // 현재 cpu 사용량
-        String cpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
-        log.info("cpuUsageRate : " + cpuUsageRate);
+        String sumCpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
+        Double avgCpuUsageRate = Double.parseDouble(sumCpuUsageRate);
+        avgCpuUsageRate /= 4;
+        log.info("avgCpuUsageRate : " + avgCpuUsageRate);
 
         SearchLogsResDto searchLogsResDto = SearchLogsResDto.builder()
                 .memoryAllBytes(memoryAllBytes)
                 .nodeMemoryMemAvailableBytes(nodeMemoryMemAvailableBytes)
                 .diskAllBytes(diskAllBytes)
                 .diskAvailableBytes(diskAvailableBytes)
-                .cpuUsageRate(cpuUsageRate)
+                .cpuUsageRate(String.valueOf(avgCpuUsageRate))
                 .build();
 
         return searchLogsResDto;
@@ -84,9 +90,18 @@ public class LogApiService {
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");
         List<String> result = (List<String>) prometheusResult.get(0).get("value");
 
-        Double avgCpuUsage = Double.parseDouble(result.get(1));
-        avgCpuUsage /= 4;
+        return result.get(1);
+    }
 
-        return String.valueOf(avgCpuUsage);
+    public SearchRequestCountResDto searchRequestCount() {
+
+        // 톰캣 http request 횟수 (5초 이내)
+        String tomcatRequestCount = getRateWithMode(TOMCAT_REQUEST_COUNT, TOMCAT_REQUEST_MODE);
+        log.info("tomcatRequestCount : " + tomcatRequestCount);
+
+        SearchRequestCountResDto result = SearchRequestCountResDto.builder()
+                .tomcatRequestCount(tomcatRequestCount).build();
+
+        return result;
     }
 }
