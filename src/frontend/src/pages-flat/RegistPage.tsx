@@ -1,18 +1,14 @@
 "use client";
-import { WaitingListType } from "@/entities/waitingList/type";
-import {
-  ImageRegist,
-  Performance,
-  postWaiting,
-  useRegistWaiting,
-} from "@/features";
+import { ImageRegist, useRegistWaiting } from "@/features";
 import { InputForm } from "@/features";
-import { usePostWaitingImage } from "@/features/manage/query";
-import { Button, SectionTitle, logo } from "@/shared";
+import { usePostWaitingImage } from "@/features";
+import { Button, SectionTitle, logo, useDebounce } from "@/shared";
 import { LinearProgress } from "@mui/material";
 import Image from "next/image";
 
 import React, { useEffect, useState } from "react";
+import TargetPage from "@/features/manage/component/TargetPage";
+import { WaitingListType } from "@/entities/waitingList/type";
 const RegistPage = () => {
   const [waitingInfo, setWaitingInfo] = useState<WaitingListType>(
     {} as WaitingListType
@@ -42,31 +38,53 @@ const RegistPage = () => {
     }
   }, [isSuccess]);
 
+  const pageUrl = useDebounce(waitingInfo.targetUrl, 1000);
+
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md border">
       <SectionTitle title="등록 페이지" />
+      {/* Section Container*/}
       <div className="flex flex-1 flex-col max-2xl:m-5 m-10 p-5 border rounded-md border-slate-300">
+        {/* Section */}
         <div className="flex flex-1 gap-5">
-          <div className="flex flex-1 flex-col gap-4">
-            <div className="flex flex-1">
+          {/* Left Section */}
+          <div className="flex flex-1 flex-col gap-10">
+            {/*Left Top*/}
+            <div className="flex flex-col">
               <InputForm setWaitingInfo={setWaitingInfo} />
             </div>
-            <div className="flex flex-1">
+            {/*Left Middle*/}
+            <div className="flex border border-md shadow-sm border-black rounded-md p-4">
+              <ol className="font-bold text-[1.5rem]">
+                <li>1. 대기열을 등록할 URL을 입력해주세요</li>
+                <li>2. 타겟 페이지가 적용할 페이지가 맞는지 확인하세요</li>
+                <li>3. 상품(서비스) 명을 입력해주세요</li>
+                <li>4. 대표 이미지가 있다면 업로드 해주세요</li>
+                <li>5. 등록 버튼을 누르면 대기열이 적용됩니다.</li>
+              </ol>
+            </div>
+            {/*Left Bottom*/}
+            <div className="flex flex-1 flex-col gap-4">
               <ImageRegist
                 setThumbnail={setThumbnail}
                 setImageData={setImageFile}
               />
             </div>
           </div>
+
+          {/* Right Section */}
           <div className="flex flex-1 flex-col gap-4">
-            <div className="flex flex-1  flex-col  gap-10">
-              <div className="flex flex-col flex-[1] border rounded-md border-black">
-                <SectionTitle title="시스템 성능 대비 예상치" />
-                <Performance />
+            {/* Right Top*/}
+            <div className="flex flex-1 min-h-[600px]  flex-col  gap-10">
+              <div className="flex flex-col flex-1 border rounded-md border-black">
+                <SectionTitle title="타겟 페이지" />
+                <TargetPage targetUrl={pageUrl} />
               </div>
             </div>
-            <div className="flex flex-1  flex-col  gap-10">
-              <div className="flex flex-col flex-[1] border rounded-md border-black">
+
+            {/* Right Bottom */}
+            <div className="flex flex-col gap-10">
+              <div className="flex flex-col  border rounded-md border-black">
                 <SectionTitle title="미리보기" />
                 <div className="flex flex-col justify-between h-full  p-4">
                   <div className="flex w-full justify-between  items-center">

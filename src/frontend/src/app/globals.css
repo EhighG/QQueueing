@@ -18,18 +18,21 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #f8f8f8;
+  background: white;
   display: flex;
   flex-direction: column;
   width: 100dvw;
   height: 100dvh;
   min-width: 1440px;
   min-height: 720px;
+  max-width : 2560px;
+  max-height: 1440px;
 }
 
 main {
   display: flex;
   flex: 1;
+  background: #f8f8f8;
 }
 
 @layer utilities {

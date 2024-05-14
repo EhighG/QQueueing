@@ -45,21 +45,6 @@ const InputForm = ({ waitingDetail, setWaitingInfo }: InputFormProps) => {
             value={targetUrl}
             onChange={(e) => setTargetUrl(e.target.value)}
           />
-          <div className="flex justify-around gap-2">
-            <SelectBox
-              label="최대 수용 인원"
-              step={100}
-              onChange={setMaxCapacity}
-              value={maxCapacity}
-            />
-
-            <SelectBox
-              label="1분 당 처리 가능 인원"
-              step={10}
-              onChange={setProcessingPerMinute}
-              value={processingPerMinute}
-            />
-          </div>
           <Input
             label="서비스 명"
             title="서비스 명"
