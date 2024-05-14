@@ -20,7 +20,7 @@ public class LogApiService {
     private final String MEMORY_ALL_QUERY = "node_memory_MemTotal_bytes";
     private final String MEMORY_AVAILABLE_QUERY = "node_memory_MemAvailable_bytes";
 
-    private final String DISK_ALL_QUERY = "sum(node_filesystem_size_bytes)";
+    private final String DISK_ALL_QUERY = "node_filesystem_size_bytes";
 
     private final String DISK_AVAILABLE_QUERY = "node_filesystem_avail_bytes";
 //    private final String DISK_AVAILABLE_QUERY = "node_filesystem_avail_bytes{device=\"/dev/root\",fstype=\"ext4\",mountpoint=\"/etc/hosts\"}";
