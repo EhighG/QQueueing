@@ -20,14 +20,14 @@ public class LogApiService {
     private final String MEMORY_ALL_QUERY = "node_memory_MemTotal_bytes";
     private final String MEMORY_AVAILABLE_QUERY = "node_memory_MemAvailable_bytes";
 
-    private final String DISK_ALL_QUERY = "sum(node_filesystem_size_bytes)";
+    private final String DISK_ALL_QUERY = "node_filesystem_size_bytes";
 
     private final String DISK_AVAILABLE_QUERY = "node_filesystem_avail_bytes";
 //    private final String DISK_AVAILABLE_QUERY = "node_filesystem_avail_bytes{device=\"/dev/root\",fstype=\"ext4\",mountpoint=\"/etc/hosts\"}";
 
     //    private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{mode=\"user\"}[5m]))*100";
     private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{CPU_USAGE_MODE}";
-    private final String CPU_USAGE_MODE = "{mode=\"user\"}[5m]))*100";
+    private final String CPU_USAGE_MODE = "{mode=\"user\"}[5s]))*100";
 
     public SearchLogsResDto searchLogs() {
 
@@ -48,7 +48,7 @@ public class LogApiService {
         log.info("diskAvailableBytes : " + diskAvailableBytes);
 
         // 현재 cpu 사용량
-        String cpuUsageRate = getCpuUsageRate();
+        String cpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
         log.info("cpuUsageRate : " + cpuUsageRate);
 
         SearchLogsResDto searchLogsResDto = SearchLogsResDto.builder()
@@ -74,16 +74,19 @@ public class LogApiService {
         return result.get(1);
     }
 
-    public String getCpuUsageRate() {
+    public String getRateWithMode(String query, String mode) {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<Map> response = restTemplate.getForEntity(PROMETHEUS_URL + CPU_USAGE_QUERY, Map.class, CPU_USAGE_MODE);
+        ResponseEntity<Map> response = restTemplate.getForEntity(PROMETHEUS_URL + query, Map.class, mode);
 
         Map<String, PrometheusData> data = (Map<String, PrometheusData>) response.getBody().get("data");
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");
         List<String> result = (List<String>) prometheusResult.get(0).get("value");
 
-        return result.get(1);
+        Double avgCpuUsage = Double.parseDouble(result.get(1));
+        avgCpuUsage /= 4;
+
+        return String.valueOf(avgCpuUsage);
     }
 }
