@@ -203,11 +203,12 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/10 * * * * *")
+    @Scheduled(cron = "0 0/10 * * * *")
     public void cacheQueuePages() {
         for (int partitionNo : activePartitions.stream().toList()) {
             WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
             String targetUrl = waitingStatusDto.getTargetUrl();
+            log.info("[debug - on cacheQueuePage] targetUrl = {}", targetUrl);
 
             String html = getQueuePage(targetUrl); // parsed
             try {
@@ -222,12 +223,15 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "1/3 * * * * *")
+    @Scheduled(cron = "0 0/3 * * * *")
     public void cacheTargetPage() {
         log.info("target page caching --- start");
         for (int partitionNo : activePartitions.stream().toList()) {
+            log.info("[debug] partitionNo = {}", partitionNo);
             WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
             String targetUrl = waitingStatusDto.getTargetUrl();
+            targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
+            log.info("[debug] targetUrl = {}", targetUrl);
 
             String html = targetApiConnector.forward(targetUrl).getBody();
             try {
@@ -246,7 +250,10 @@ public class WaitingService {
         String fileName = UUID.randomUUID().toString();
         String path = "/var/lib/cacheFiles";
         Path filePath = Paths.get(path, fileName);
+        log.info("[debug] filePath.toAbsolutePath() = {}", filePath.toAbsolutePath());
+        log.info("[debug] filePath.toString() = {}", filePath);
         Files.createDirectories(filePath.getParent());
+        log.info("[debug] filePath.getParent() = {}", filePath.getParent());
 
         Files.writeString(filePath, pageContent); // write value in UTF-8
         log.info("파일 쓰기 완료");
@@ -260,7 +267,8 @@ public class WaitingService {
             throw new RuntimeException("Can't read file");
         }
         try {
-            return Files.readString(pageFile.toPath()); // UTF-8
+            log.info("[debug] pageFile.toPath() = {}", pageFile.toPath());
+            return Files.readString(pageFile.toPath());
         } catch (IOException e) {
             log.error("error file read file content");
             e.printStackTrace();
@@ -276,12 +284,24 @@ public class WaitingService {
         }
         String cacheFilePath = waitingStatusDto.getCachedQueuePagePath();
         if (cacheFilePath != null) {
+            log.info("cacheFile exist, cacheFilePath = {}", cacheFilePath);
             return loadFileAsPage(cacheFilePath);
         }
         // not cached
+        log.info("cacheFile not exist, request to target page...targetUrl = {}", targetUrl);
         String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl).getBody();
 
-        return parseHtmlPage(QUEUE_PAGE_FRONT, html);
+        String parsedHtml = parseHtmlPage(QUEUE_PAGE_FRONT, html);
+        // cache and return
+        try {
+            waitingStatusDto.setCachedQueuePagePath(
+                    savePageAsFile(parsedHtml)
+            );
+        } catch (IOException e) {
+            log.error("error on save html as file! targetUrl = {}", targetUrl);
+            e.printStackTrace();
+        }
+        return parsedHtml;
     }
 
     /**
@@ -362,10 +382,6 @@ public class WaitingService {
         }
         targetUrlMapper.remove(token);
 
-        // make internal request url
-        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
-        log.info("targetUrl = {}", targetUrl);
-
         // get target page; cached or origin
         Integer partitionNo = partitionNoMapper.get(targetUrl);
         WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
@@ -373,10 +389,25 @@ public class WaitingService {
             throw new RuntimeException("wrong targetUrl");
         }
         String targetPagePath = waitingStatusDto.getCachedTargetPagePath();
+        log.info("targetPagePath = {} // blank if null", targetPagePath);
 
-        return targetPagePath != null ?
-                loadFileAsPage(targetPagePath) :
-                targetApiConnector.forward(targetUrl).getBody();
+        if (targetPagePath != null) {
+            return loadFileAsPage(targetPagePath);
+        }
+        // make internal request url
+        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
+        log.info("no cached page. targetPage request url = {}", targetUrl);
+        // send request, and cache&return response(=target page)
+        String html = targetApiConnector.forward(targetUrl).getBody();
+        try {
+            waitingStatusDto.setCachedTargetPagePath(
+                    savePageAsFile(html)
+            );
+        } catch (IOException e) {
+            log.error("error on save html as file! targetUrl = {}", targetUrl);
+            e.printStackTrace();
+        }
+        return html;
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
@@ -403,7 +434,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 5초마다
+    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 3초마다
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
