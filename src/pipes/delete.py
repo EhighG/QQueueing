@@ -59,21 +59,23 @@ def main(url):
             if port and domain: 
                 ssl_server = http_block.get(i)
                 break
-    real_location = None
 
     locations = ssl_server.find_by_type(type='location')
-    del_loc_ind = []
     for i in locations:
         if ssl_server.get(i).cond == endpoint:
-            del_loc_ind.append(i)
-        elif ssl_server.get(i).cond == '/waiting':
-            del_loc_ind.append(i)
-    del_loc_ind.sort(reverse=True)
-    for i in del_loc_ind:
-        ssl_server.pop(ind=i)
-    http_block.pop(ind=servers[-1])
+            ssl_server.pop(ind=i)
+            break
+#    print('is it over?')
+#    print(ssl_server.export())
+    
+#    last_server = http_block.get(-1)
+#    delete_default = last_server.find(type='location', cond=endpoint)
+#    for i in last_server.find_by_type(type='location'):
+#        if last_server.get(i).cond == endpoint
+#    if delete_default > 0:
+#        last_server.pop(ind=delete_default)
 
-    print(nginx_block.export())
+    #print(nginx_block.export())
     path = '/etc/nginx'
     save_conf_file(path, nginx_block.export())
 
