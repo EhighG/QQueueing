@@ -1,6 +1,7 @@
 package com.qqueueing.main.waiting.service;
 
 
+import com.qqueueing.main.registration.model.GetWaitingInfoResDto;
 import com.qqueueing.main.registration.model.Registration;
 import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.waiting.model.BatchResDto;
@@ -31,6 +32,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -80,6 +82,11 @@ public class WaitingService {
         this.TOPIC_NAME = topicName;
         this.REPLACE_URL = replaceUrl;
         this.TEST_TARGET_URL = testTargetUrl;
+    }
+
+    public GetWaitingInfoResDto getWaitingInfo(int partitionNo) {
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(), waitingStatusDto.getTotalQueueSize());
     }
 
     private void checkTopic() {
@@ -260,9 +267,10 @@ public class WaitingService {
         Set<String> doneSet = waitingStatus.getDoneSet();
         List<Long> outList = waitingStatus.getOutList();
         int lastOffset = waitingStatus.getLastOffset();
-        int outCntInFront = - (Collections.binarySearch(outList, oldOrder) + 1);
+        int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
         Long myOrder = Math.max(oldOrder - outCntInFront - lastOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
-        GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize());
+        GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
+                waitingStatus.getEnterCntCapture());
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
             log.info("ip addr {} requested, and return tempToken");
@@ -299,7 +307,10 @@ public class WaitingService {
         targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
         log.info("targetPage request url = {}", targetUrl);
 
-        return targetApiConnector.forward(targetUrl).getBody();
+        String targetPage = targetApiConnector.forward(targetUrl).getBody();
+        // increase enter count
+        waitingStatusDto.getEnterCnt().incrementAndGet(); // add just before return considering possible error in forwarding
+        return targetPage;
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
@@ -341,11 +352,15 @@ public class WaitingService {
                 BatchResDto batchRes = response.get(partitionNo);
                 waitingStatus.getDoneSet()
                         .addAll(batchRes.getCurDoneList());
-                // '너 뒤에 몇명이 있다' 를 표시하는 데 사용될 값(totalQueueSize - myOrder)
-                waitingStatus.setTotalQueueSize(enterProducer.getLastEnteredIdx(partitionNo));
                 waitingStatus.setLastOffset(batchRes.getLastOffset());
+                cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
+                waitingStatus.setTotalQueueSize(
+                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset() - waitingStatus.getOutList().size()));
+
+                // capture and reset enter count
+                AtomicInteger enterCnt = waitingStatus.getEnterCnt();
+                waitingStatus.setEnterCntCapture(enterCnt.getAndSet(0));
             }
-            cleanUpOutList();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -354,16 +369,13 @@ public class WaitingService {
     /**
      * 대기 끝난 사람들 삭제
      */
-    private void cleanUpOutList() {
-        for (int partitionNo : queues.keySet()) {
-            WaitingStatusDto waigtingStatus = queues.get(partitionNo);
-            int lastOffset = waigtingStatus.getLastOffset();
-            waigtingStatus.setOutList(
-                    waigtingStatus.getOutList().stream()
-                            .filter(i -> i > lastOffset)
-                            .collect(Collectors.toList()) // modifiable list
-            );
-        }
+    private void cleanUpOutList(WaitingStatusDto waitingStatus) {
+        int lastOffset = waitingStatus.getLastOffset();
+        waitingStatus.setOutList(
+                waitingStatus.getOutList().stream()
+                        .filter(i -> i > lastOffset)
+                        .collect(Collectors.toList()) // modifiable list
+        );
     }
 
     public ResponseEntity<?> parsing(String address) {
