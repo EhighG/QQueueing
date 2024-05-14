@@ -3,6 +3,7 @@ package com.qqueueing.main.log.service;
 import com.qqueueing.main.log.dto.PrometheusData;
 import com.qqueueing.main.log.dto.PrometheusResult;
 import com.qqueueing.main.log.dto.SearchLogsResDto;
+import com.qqueueing.main.log.dto.SearchRequestCountResDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,9 @@ public class LogApiService {
     //    private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{mode=\"user\"}[5m]))*100";
     private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{CPU_USAGE_MODE}";
     private final String CPU_USAGE_MODE = "{mode=\"user\"}[5s]))*100";
+
+    private final String TOMCAT_REQUEST_COUNT = "rate(tomcat_servlet_request_seconds_count{TOMCAT_REQUEST_MODE}";
+    private final String TOMCAT_REQUEST_MODE = "{name=\"dispatcherServlet\"}[5s])*100";
 
     public SearchLogsResDto searchLogs() {
 
@@ -88,5 +92,17 @@ public class LogApiService {
         avgCpuUsage /= 4;
 
         return String.valueOf(avgCpuUsage);
+    }
+
+    public SearchRequestCountResDto searchRequestCount() {
+
+        // 톰캣 http request 횟수 (5초 이내)
+        String tomcatRequestCount = getRateWithMode(TOMCAT_REQUEST_COUNT, TOMCAT_REQUEST_MODE);
+        log.info("tomcatRequestCount : " + tomcatRequestCount);
+
+        SearchRequestCountResDto result = SearchRequestCountResDto.builder()
+                .tomcatRequestCount(tomcatRequestCount).build();
+
+        return result;
     }
 }
