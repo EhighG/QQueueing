@@ -16,4 +16,6 @@ public class SearchLogsResDto {
     private String diskAvailableBytes;
 
     private String cpuUsageRate;
+
+    private String tomcatRequestCount;
 }

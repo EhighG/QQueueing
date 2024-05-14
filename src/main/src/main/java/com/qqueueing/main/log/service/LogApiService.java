@@ -27,7 +27,10 @@ public class LogApiService {
 
     //    private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{mode=\"user\"}[5m]))*100";
     private final String CPU_USAGE_QUERY = "sum(rate(node_cpu_seconds_total{CPU_USAGE_MODE}";
-    private final String CPU_USAGE_MODE = "{mode=\"user\"}[5m]))*100";
+    private final String CPU_USAGE_MODE = "{mode=\"user\"}[5s]))*100";
+
+    private final String TOMCAT_REQUEST_COUNT = "rate(tomcat_servlet_request_seconds_count{}";
+    private final String TOMCAT_REQUEST_MODE = "{name=\"dispatcherServlet\"}[5s])*100";
 
     public SearchLogsResDto searchLogs() {
 
@@ -48,8 +51,11 @@ public class LogApiService {
         log.info("diskAvailableBytes : " + diskAvailableBytes);
 
         // 현재 cpu 사용량
-        String cpuUsageRate = getCpuUsageRate();
+        String cpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
         log.info("cpuUsageRate : " + cpuUsageRate);
+
+        String tomcatRequestCount = getRateWithMode(TOMCAT_REQUEST_COUNT, TOMCAT_REQUEST_MODE);
+        log.info("tomcatRequestCount : " + tomcatRequestCount);
 
         SearchLogsResDto searchLogsResDto = SearchLogsResDto.builder()
                 .memoryAllBytes(memoryAllBytes)
@@ -57,6 +63,7 @@ public class LogApiService {
                 .diskAllBytes(diskAllBytes)
                 .diskAvailableBytes(diskAvailableBytes)
                 .cpuUsageRate(cpuUsageRate)
+                .tomcatRequestCount(tomcatRequestCount)
                 .build();
 
         return searchLogsResDto;
@@ -74,11 +81,11 @@ public class LogApiService {
         return result.get(1);
     }
 
-    public String getCpuUsageRate() {
+    public String getRateWithMode(String query, String mode) {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<Map> response = restTemplate.getForEntity(PROMETHEUS_URL + CPU_USAGE_QUERY, Map.class, CPU_USAGE_MODE);
+        ResponseEntity<Map> response = restTemplate.getForEntity(PROMETHEUS_URL + query, Map.class, mode);
 
         Map<String, PrometheusData> data = (Map<String, PrometheusData>) response.getBody().get("data");
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");
