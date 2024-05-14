@@ -1,7 +1,9 @@
 from module import Block 
 import sys
+import os
+from copy import deepcopy
 
-print('=============================================')
+#print('=============================================')
 
 
 def specialize(block: Block) -> Block:
@@ -68,7 +70,7 @@ def insert_default_block(block: Block, host) -> Block:
                 Block(
                     type='statement',
                     bodies=[
-                        'proxy_pass http:// qqueueing-main:8081;'
+                        'proxy_pass http://qqueueing-main:8081;'
                         ]
                     ),
                 ]
@@ -138,6 +140,11 @@ def insert_default_block(block: Block, host) -> Block:
 
 
     # insert one server block named host.docker.internal
+    real_location = None
+    locations = ssl_server.find_by_type(type='location')
+    for i in locations:
+        if ssl_server.get(i).cond == '/':
+            real_location = deepcopy(ssl_server.get(i))
     ## insert in last 
     last_server = Block(
         type='server',
@@ -150,7 +157,7 @@ def insert_default_block(block: Block, host) -> Block:
             ),
             Block(
                 type='statement',
-                bodies=['listen [::]80;']
+                bodies=['listen [::]:80;']
             ),
             Block(
                 type='statement',
@@ -158,32 +165,43 @@ def insert_default_block(block: Block, host) -> Block:
             ),
         ]
     )
+    last_server.push(ind=-1, val=real_location)
 
-    return true
+    block.push(ind=-1, val=last_server)
 
-
-
-
-host, endpoint = Block.find_host_end(sys.argv[1])
-
-path = '/etc/nginx/nginx.conf'
-#with open(path, 'r') as f:
-#    print(f.read())
-
-path = '/etc/nginx'
-full_context = Block.merge_files(path)
+    return block
 
 
-nginx_block = Block.file_import(full_context)
-http_block = None
-for i in nginx_block.bodies:
-    if i.type == 'http':
-        http_block = i
-        break
+def main():
+    host, endpoint = Block.find_host_end(sys.argv[1])
+    path = '/etc/nginx'
 
-http_block = specialize(http_block)
+    full_context = Block.merge_files(path)
+    nginx_block = Block.file_import(full_context)
 
-insert_default_block(http_block, host)
+    http_block = None
+    for i in nginx_block.bodies:
+        if i.type == 'http':
+            http_block = i
+            break
+
+    http_block = specialize(http_block)
+
+    # check if already initialized, and if not terminate
+    servers = http_block.find_by_type(type='server')
+    for i in servers:
+        if 'host.docker.internal' in http_block.get(i).hosts:
+            print('already init executed')
+            exit(0)
+
+    http_block = insert_default_block(http_block, host)
+    init_path = path + '/init.conf'
+    if os.path.exists(init_path):
+        print('already init.conf exist, restart')
+        os.remove(init_path)
+    with open(init_path, 'w') as f:
+        f.write(http_block.export())
 
 
-
+if __name__ == '__main__':
+    main()
