@@ -355,7 +355,7 @@ public class WaitingService {
                 waitingStatus.setLastOffset(batchRes.getLastOffset());
                 cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
                 waitingStatus.setTotalQueueSize(
-                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset() - waitingStatus.getOutList().size()));
+                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset()));
 
                 // capture and reset enter count
                 AtomicInteger enterCnt = waitingStatus.getEnterCnt();
