@@ -1,6 +1,5 @@
-import { WaitingListType } from "@/entities/waitingList/type";
 import { monitoringInstance } from "@/shared";
-import { AxiosInstance, AxiosResponse } from "axios";
+import { AxiosInstance } from "axios";
 import {
   DiskFreeType,
   DiskTotalType,
@@ -11,6 +10,7 @@ import {
   ServerLogsType,
   SystemCpuUsageType,
   VirtualThreadType,
+  requestCountType,
 } from "./type";
 import { ResponseType } from "..";
 
@@ -69,6 +69,12 @@ const getSystemCpuUsage = async () => {
     .then(({ data }) => data);
 };
 
+const getRequestCount = async () => {
+  return await instance
+    .get<ResponseType<requestCountType>>("/request-count")
+    .then(({ data }) => data.result);
+};
+
 export {
   getVirtualThread,
   getDiskTotal,
@@ -79,4 +85,5 @@ export {
   getProcessCpuUsage,
   getSystemCpuUsage,
   getServerLogs,
+  getRequestCount,
 };

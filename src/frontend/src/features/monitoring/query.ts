@@ -9,6 +9,7 @@ import {
   ProcessCpuUsageType,
   ServerLogsType,
   SystemCpuUsageType,
+  requestCountType,
 } from "./type";
 import {
   getProcessCpuUsage,
@@ -17,6 +18,8 @@ import {
   getJvmMemoryMax,
   getJvmMemoryUsed,
   getServerLogs,
+  getSystemCpuUsage,
+  getRequestCount,
 } from "./api";
 
 const queryOptions = {
@@ -58,13 +61,13 @@ const useGetProcessCpuUsage = () => {
 
 const useGetSystemCpuUsage = () => {
   const { data, isLoading, isError } = useQuery<
-    ProcessCpuUsageType,
+    SystemCpuUsageType,
     AxiosError,
     Measurement,
     [_1: string]
   >({
     queryKey: ["cpu"],
-    queryFn: getProcessCpuUsage,
+    queryFn: getSystemCpuUsage,
     ...queryOptions,
     select: (data) => data.measurements[0],
   });
@@ -135,6 +138,21 @@ const useGetJvmMemoryUsed = () => {
   return { data, isLoading, isError };
 };
 
+const useGetRequestCount = () => {
+  const { data, isLoading, isError } = useQuery<
+    requestCountType,
+    AxiosError,
+    requestCountType,
+    [_1: string]
+  >({
+    queryKey: ["get_request_count"],
+    queryFn: getRequestCount,
+    ...queryOptions,
+  });
+
+  return { data, isLoading, isError };
+};
+
 export {
   useGetProcessCpuUsage,
   useGetSystemCpuUsage,
@@ -143,4 +161,5 @@ export {
   useGetJvmMemoryMax,
   useGetJvmMemoryUsed,
   useGetServerLogs,
+  useGetRequestCount,
 };
