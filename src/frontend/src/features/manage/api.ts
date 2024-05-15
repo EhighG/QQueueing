@@ -2,7 +2,7 @@ import {
   WaitingListType,
   waitingRegistType,
 } from "@/entities/waitingList/type";
-import { ResponseType } from "./type";
+import { ResponseType, waitingStatusType } from "./type";
 import { axiosInstance } from "@/shared";
 import { AxiosInstance } from "axios";
 
@@ -38,6 +38,12 @@ const getWaitingImage = async (id: string) => {
   return await instance
     .get(`/queue/image-file/${id}`)
     .then(({ data }) => data.result);
+};
+
+const getWaitingStatus = async (id: string) => {
+  return await instance<ResponseType<waitingStatusType>>(
+    `/queue/${id}/info`
+  ).then(({ data }) => data.result);
 };
 
 const getServiceImage = async (targetUrl: string) => {
@@ -85,4 +91,5 @@ export {
   deleteWaiting,
   getWaitingImage,
   getServiceImage,
+  getWaitingStatus,
 };

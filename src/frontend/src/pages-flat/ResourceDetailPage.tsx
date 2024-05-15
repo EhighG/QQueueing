@@ -1,11 +1,9 @@
 "use client";
-import { Measurement, ServerLogsType } from "@/features/monitoring";
 import {
-  useGetDiskFree,
   useGetDiskTotal,
   useGetJvmMemoryMax,
   useGetJvmMemoryUsed,
-  useGetServerLogs,
+  useGetRequestCount,
   useGetSystemCpuUsage,
 } from "@/features/monitoring/query";
 import React from "react";
@@ -24,20 +22,26 @@ import {
 } from "recharts";
 
 const ResourceDetailPage = () => {
-  const { data: cpuUsage } = useGetSystemCpuUsage();
+  const { data: cpuUsage, isFetching: cpuFetching } = useGetSystemCpuUsage();
   const { data: diskTotal } = useGetDiskTotal();
-  const { data: diskFree } = useGetDiskFree();
   const { data: jvmMemoryMax } = useGetJvmMemoryMax();
-  const { data: jvmMemoryUsed } = useGetJvmMemoryUsed();
+  const { data: jvmMemoryUsed, isFetching: memoryFetching } =
+    useGetJvmMemoryUsed();
+  const { data: requestCount, isFetching: requestFetching } =
+    useGetRequestCount();
 
   type logDataProps = {
     value: number;
   };
 
-  const [cpuUsageData, setCpuUsageData] = useState<{ cpuUsage: number }[]>([]);
-  const [diskFreeData, setDiskFreeData] = useState<{ diskFree: number }[]>([]);
+  const [cpuUsageData, setCpuUsageData] = useState<
+    { id: number; cpuUsage: number }[]
+  >([]);
   const [jvmMemoryUsedData, setJvmMemoryUsedData] = useState<
-    { jvmMemoryUsed: number }[]
+    { id: number; jvmMemoryUsed: number }[]
+  >([]);
+  const [requestCountData, setRequestCountData] = useState<
+    { id: number; tomcatRequestCount: number }[]
   >([]);
 
   const formatBytesToGB = (byte: number) =>
@@ -46,31 +50,36 @@ const ResourceDetailPage = () => {
   const formatPercents = (percent: number) => percent + "%";
 
   useEffect(() => {
-    if (cpuUsage)
-      setCpuUsageData((prev) => [...prev, { cpuUsage: cpuUsage.value * 100 }]);
-  }, [cpuUsage]);
-
-  useEffect(() => {
-    if (diskFree) {
-      setDiskFreeData((prev) => [
+    if (cpuFetching && cpuUsage)
+      setCpuUsageData((prev) => [
         ...prev,
-        {
-          diskFree: diskFree.value,
-        },
+        { id: cpuUsageData.length + 1, cpuUsage: cpuUsage.value * 100 },
       ]);
-    }
-  }, [diskFree]);
+  }, [cpuFetching, cpuUsage]);
 
   useEffect(() => {
-    if (jvmMemoryUsed) {
+    if (memoryFetching && jvmMemoryUsed) {
       setJvmMemoryUsedData((prev) => [
         ...prev,
         {
+          id: jvmMemoryUsedData.length + 1,
           jvmMemoryUsed: jvmMemoryUsed.value,
         },
       ]);
     }
-  }, [jvmMemoryUsed]);
+  }, [memoryFetching, jvmMemoryUsed]);
+
+  useEffect(() => {
+    if (requestFetching && requestCount) {
+      setRequestCountData((prev) => [
+        ...prev,
+        {
+          id: requestCountData.length + 1,
+          tomcatRequestCount: parseInt(requestCount.tomcatRequestCount),
+        },
+      ]);
+    }
+  }, [requestFetching, requestCount]);
 
   return (
     <>
@@ -87,13 +96,29 @@ const ResourceDetailPage = () => {
             tickFormatter={formatPercents}
             width={80}
           />
-          <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
+          <XAxis tickFormatter={(id, index) => `${id * 5}s`} />
           <Tooltip />
           <Legend />
           <CartesianGrid strokeDasharray="3 3" />
           <Line type="monotone" dataKey="cpuUsage" />
         </LineChart>
       </ResponsiveContainer>
+      {/* HTTP 요청량 */}
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+        className="bg-white p-4 shadow-md rounded-md"
+      >
+        <LineChart width={500} height={600} data={requestCountData}>
+          <YAxis dataKey="tomcatRequestCount" width={80} />
+          <XAxis tickFormatter={(id, index) => `${id * 5}s`} />
+          <Tooltip />
+          <Legend />
+          <CartesianGrid strokeDasharray="3 3" />
+          <Line type="monotone" dataKey="tomcatRequestCount" />
+        </LineChart>
+      </ResponsiveContainer>
+
       {/* 메모리 사용 가능량 */}
       <ResponsiveContainer
         width="100%"
@@ -107,34 +132,11 @@ const ResourceDetailPage = () => {
             domain={[0, jvmMemoryMax?.value ?? 0]}
             width={80}
           />
-          <XAxis
-            dataKey="value"
-            tickFormatter={(value, index) => `${(index + 1) * 5}s`}
-          />
+          <XAxis tickFormatter={(id, index) => `${id * 5}s`} />
           <Tooltip />
           <Legend />
           <CartesianGrid strokeDasharray="3 3" />
           <Line type="monotone" dataKey="jvmMemoryUsed" />
-        </LineChart>
-      </ResponsiveContainer>
-      {/* 디스크 사용 가능량 */}
-      <ResponsiveContainer
-        width="100%"
-        height="100%"
-        className="bg-white p-4 shadow-md rounded-md"
-      >
-        <LineChart width={500} height={600} data={diskFreeData}>
-          <YAxis
-            dataKey="value"
-            tickFormatter={formatBytesToGB}
-            domain={[0, diskTotal?.value ?? 0]}
-            width={80}
-          />
-          <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
-          <Tooltip />
-          <Legend />
-          <CartesianGrid strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="diskFree" />
         </LineChart>
       </ResponsiveContainer>
     </>
