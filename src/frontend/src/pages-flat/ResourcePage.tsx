@@ -5,7 +5,6 @@ import { Gauge, gaugeClasses } from "@mui/x-charts";
 import {
   useGetSystemCpuUsage,
   useGetJvmMemoryMax,
-  useGetProcessCpuUsage,
   useGetJvmMemoryUsed,
   useGetRequestCount,
 } from "@/features";
@@ -13,7 +12,6 @@ import { useRouter } from "next/navigation";
 
 const ResourcePage = () => {
   const { data: systemCpuUsage } = useGetSystemCpuUsage();
-  const { data: processCpuUsage } = useGetProcessCpuUsage();
   const { data: jvmMemoryMax } = useGetJvmMemoryMax();
   const { data: jvmMemoryUsed } = useGetJvmMemoryUsed();
   const { data: requestCount } = useGetRequestCount();
@@ -41,7 +39,7 @@ const ResourcePage = () => {
           />
         </PerformanceCard>
 
-        <PerformanceCard title="5초당 HTTP 요청량">
+        <PerformanceCard title="5초간 HTTP 요청량">
           <Gauge
             width={240}
             height={240}
