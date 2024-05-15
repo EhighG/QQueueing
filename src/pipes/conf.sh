@@ -19,8 +19,10 @@ CONTAINER_NAME=$(docker ps -a | grep ">80/tcp"| awk '{print $NF}')
 sudo docker network connect qqueueing_qqueueing-network $CONTAINER_NAME 2> /dev/null
 NGINX_PATH="/etc/nginx"
 URL_PATH=$2
+INIT_FILE="/init.conf"
 COMPLETE_FILE="/complete.conf"
 DETETE_FILE="/del.conf"
+SAVE_FILE="/nginx.conf.save"
 
 
 
@@ -35,23 +37,27 @@ case $1 in
 				sudo rm -rf $NGINX_PATH
 			fi
 			sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
+			if [[ -z $NGINX_PATH$SAVE_FILE ]]; then
+				sudo docker exec $CONTAINER_NAME cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.save
+			fi
 			sudo touch $NGINX_PATH$COMPLETE_FILE
 
+			#2.1 execute init script
+			sudo python3 init.py $URL_PATH
+			sudo chmod 664 $NGINX_PATH$INIT_FILE
 
 			#2 execute python script
-			echo "REGITSTERING $URL_PATH"
+			echo "REGISTERING $URL_PATH"
 			sudo python3 register.py $URL_PATH
 			sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
-			sudo cat $NGINX_PATH$COMPLETE_FILE | grep $URL_PATH
 
 			#3 copy completed file to contianer 
-			sudo docker exec $CONTAINER_NAME mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.save
 			sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
 
 			sudo rm -rf $NGINX_PATH
 
 			sudo docker exec $CONTAINER_NAME nginx -t 
-			#exit 1
+			exit 1
 
 			#4 restart nginx
 			sudo docker exec $CONTAINER_NAME nginx -s reload
@@ -84,7 +90,6 @@ case $1 in
 			echo "DELETING $URL_PATH"
 			sudo python3 delete.py $URL_PATH
 			sudo chmod 664 $NGINX_PATH$DETETE_FILE
-			sudo cat $NGINX_PATH$DETETE_FILE | grep $URL_PATH
 
 			#3 copy completed file to contianer 
 			sudo docker cp $NGINX_PATH$DETETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
@@ -92,7 +97,7 @@ case $1 in
 			sudo rm -rf $NGINX_PATH
 
 			sudo docker exec $CONTAINER_NAME nginx -t 
-			#exit 1
+			exit 1
 
 			#4 restart nginx
 			sudo docker exec $CONTAINER_NAME nginx -s reload
