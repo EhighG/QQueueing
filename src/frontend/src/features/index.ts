@@ -14,6 +14,7 @@ export {
   usePostWaitingDeActivate,
   useDeleteWaiting,
   usePostWaitingImage,
+  useGetWaitingStatus,
 } from "./manage";
 export type { ResponseType } from "./manage";
 

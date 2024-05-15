@@ -51,7 +51,6 @@ const WaitingPage = () => {
   }, [enqueueInfo]);
 
   useEffect(() => {
-    console.log(waitingInfo);
     if (waitingInfo?.token) {
       window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}waiting/page-req?token=${waitingInfo.token}`;
     }
@@ -61,12 +60,14 @@ const WaitingPage = () => {
     if (isSuccess) {
       router.back();
     }
-  }, [isSuccess]);
+  }, [router, isSuccess]);
 
   //  estimate 추정 로직
   useEffect(() => {
-    // ((myOrder // enterCount) + 1) * 3
-  }, []);
+    if (waitingInfo) {
+      setEstimateTime((waitingInfo.myOrder / (waitingInfo.enterCnt + 1)) * 3);
+    }
+  }, [waitingInfo]);
 
   return (
     <div className="fixed z-0 flex inset-0 w-full h-full min-w-[700px] bg-black bg-opacity-70 items-center justify-center">
@@ -121,7 +122,7 @@ const WaitingPage = () => {
                 </span>
                 명, 뒤에
                 <span className="text-q-blue animate-blink">
-                  {waitingInfo?.totalQueueSize && waitingInfo?.myOrder
+                  {waitingInfo
                     ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder >= 0
                       ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder
                       : 0
