@@ -97,7 +97,7 @@ public class LogApiService {
 
         // 톰캣 http request 횟수 (5초 이내)
         String tomcatRequestCount = getRateWithMode(TOMCAT_REQUEST_COUNT, TOMCAT_REQUEST_MODE);
-        log.info("tomcatRequestCount : " + tomcatRequestCount);
+        log.debug("tomcatRequestCount : " + tomcatRequestCount);
 
         SearchRequestCountResDto result = SearchRequestCountResDto.builder()
                 .tomcatRequestCount(tomcatRequestCount).build();
