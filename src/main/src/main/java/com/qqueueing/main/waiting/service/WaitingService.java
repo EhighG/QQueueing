@@ -298,18 +298,17 @@ public class WaitingService {
 
         // get target page
         Integer partitionNo = partitionNoMapper.get(targetUrl);
-        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
-        if (waitingStatusDto == null) {
-            throw new RuntimeException("wrong targetUrl");
-        }
 
         // make internal request url
         targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
         log.info("targetPage request url = {}", targetUrl);
 
         String targetPage = targetApiConnector.forward(targetUrl).getBody();
-        // increase enter count
-        waitingStatusDto.getEnterCnt().incrementAndGet(); // add just before return considering possible error in forwarding
+        // increase enter count if queue is active
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        if (waitingStatusDto != null) {
+            waitingStatusDto.getEnterCnt().incrementAndGet(); // add just before return considering possible error in forwarding
+        }
         return targetPage;
     }
 
