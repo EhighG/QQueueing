@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Getter @Setter
@@ -19,6 +20,7 @@ public class WaitingStatusDto {
     private int totalQueueSize;
     private String targetUrl;
     private AtomicLong enterCnt;
+    private AtomicInteger outCnt;
     private long enterCntCapture;
     private int enterCntOfLastTime;
 //    private String cachedQueuePagePath;
@@ -32,5 +34,6 @@ public class WaitingStatusDto {
         this.totalQueueSize = totalQueueSize;
         this.targetUrl = targetUrl;
         this.enterCnt = new AtomicLong(0);
+        this.outCnt = new AtomicInteger(0);
     }
 }
