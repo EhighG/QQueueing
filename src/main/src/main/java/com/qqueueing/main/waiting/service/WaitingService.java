@@ -89,7 +89,6 @@ public class WaitingService {
     }
 
     private void checkTopic() {
-        log.info("Start -- checkTopicr");
         Set<String> topics = kafkaTopicManager.getTopics();
         // for Test -- init every time main server restart
         // disable to remove kafka topic without restart zookeeper-server, kafka-broker now
@@ -100,7 +99,6 @@ public class WaitingService {
             log.info("topic {} not present, create...", TOPIC_NAME);
             kafkaTopicManager.createTopic(TOPIC_NAME);
         }
-        log.info("End -- checkTopic");
     }
 
     /**
@@ -219,7 +217,6 @@ public class WaitingService {
      * @return
      */
     public Object enqueue(String targetUrl, HttpServletRequest request) {
-        log.info("--------------- waitingService.enqueue(), targetUrl = {} --------------------", targetUrl);
         Integer partitionNo = partitionNoMapper.get(targetUrl);
 
 //         카프카에 요청자 ip 저장 후, 대기 정보 반환
@@ -360,7 +357,6 @@ public class WaitingService {
                         (int)(enterCnt - waitingStatus.getEnterCntCapture())
                 );
                 waitingStatus.setEnterCntCapture(enterCnt);
-                log.info("------------------------ partitionNo = 0, consumed. currentOffset = {} ----------------------------", batchRes.getCurrentOffset());
             }
         } catch (Exception e) {
             e.printStackTrace();
