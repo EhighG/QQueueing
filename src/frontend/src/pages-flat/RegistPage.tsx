@@ -139,7 +139,14 @@ const RegistPage = () => {
           </div>
         </div>
         <div className="flex w-full justify-end mt-2 gap-4">
-          <Button edgeType="square" onClick={() => handlePostImage()}>
+          <Button
+            edgeType="square"
+            onClick={() => {
+              imageFile?.name
+                ? handlePostImage()
+                : handleRegistWaiting(waitingInfo);
+            }}
+          >
             등록
           </Button>
         </div>
