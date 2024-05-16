@@ -17,21 +17,21 @@ import {
 } from "recharts";
 
 const LineChartPage = () => {
-  const { data: serverLogs } = useGetServerLogs();
+  const { data: serverLogs, isFetching } = useGetServerLogs();
   const [data, setData] = useState<ServerLogsType[]>([]);
   const [memoryMax, setMemoryMax] = useState<number>(0);
   const [diskMax, setDiskMax] = useState<number>(0);
 
   useEffect(() => {
     // 데이터 패칭 로딩
-    if (serverLogs) {
+    if (isFetching && serverLogs) {
       setData((prev) => [...prev, serverLogs]);
       if (!memoryMax || !diskMax) {
         setMemoryMax(parseInt(serverLogs.memoryAllBytes));
         setDiskMax(parseInt(serverLogs.diskAllBytes));
       }
     }
-  }, [serverLogs]);
+  }, [serverLogs, isFetching]);
 
   const formatBytesToGB = (bytes: number) =>
     (bytes / 1024 / 1024 / 1024).toFixed(2) + "GB";
@@ -55,9 +55,9 @@ const LineChartPage = () => {
           />
           <XAxis tickFormatter={(value, index) => `${(index + 1) * 5}s`} />
           <Tooltip />
-          <Legend />
+          <Legend name="cpu 사용률" />
           <CartesianGrid strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="cpuUsageRate" />
+          <Line type="monotone" dataKey="cpuUsageRate" name="cpu 사용률" />
         </LineChart>
       </ResponsiveContainer>
       {/* 메모리 사용 가능량 */}
@@ -66,7 +66,15 @@ const LineChartPage = () => {
         height="100%"
         className="bg-white p-4 shadow-md rounded-md"
       >
-        <LineChart width={500} height={500} data={data}>
+        <LineChart
+          width={500}
+          height={500}
+          data={data.map((entry) => ({
+            ...entry,
+            nodeMemoryMemAvailableBytes:
+              memoryMax - parseInt(entry.nodeMemoryMemAvailableBytes),
+          }))}
+        >
           <YAxis
             dataKey="nodeMemoryMemAvailableBytes"
             tickFormatter={formatBytesToGB}
@@ -77,7 +85,11 @@ const LineChartPage = () => {
           <Tooltip />
           <Legend />
           <CartesianGrid strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="nodeMemoryMemAvailableBytes" />
+          <Line
+            type="monotone"
+            dataKey="nodeMemoryMemAvailableBytes"
+            name="메모리 사용량"
+          />
         </LineChart>
       </ResponsiveContainer>
       {/* 디스크 사용 가능량 */}
@@ -86,7 +98,14 @@ const LineChartPage = () => {
         height="100%"
         className="bg-white p-4 shadow-md rounded-md"
       >
-        <LineChart width={500} height={500} data={data}>
+        <LineChart
+          width={500}
+          height={500}
+          data={data.map((entry) => ({
+            ...entry,
+            diskUsageBytes: diskMax - parseInt(entry.diskAvailableBytes),
+          }))}
+        >
           <YAxis
             dataKey="diskAvailableBytes"
             tickFormatter={formatBytesToGB}
@@ -97,7 +116,7 @@ const LineChartPage = () => {
           <Tooltip />
           <Legend />
           <CartesianGrid strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="diskAvailableBytes" />
+          <Line type="monotone" dataKey="diskUsageBytes" name="디스크 사용량" />
         </LineChart>
       </ResponsiveContainer>
     </>

@@ -100,7 +100,7 @@ const ResourceDetailPage = () => {
           <Tooltip />
           <Legend />
           <CartesianGrid strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="cpuUsage" />
+          <Line type="monotone" dataKey="cpuUsage" name="cpu 사용률" />
         </LineChart>
       </ResponsiveContainer>
       {/* HTTP 요청량 */}
@@ -115,7 +115,11 @@ const ResourceDetailPage = () => {
           <Tooltip />
           <Legend />
           <CartesianGrid strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="tomcatRequestCount" />
+          <Line
+            type="monotone"
+            dataKey="tomcatRequestCount"
+            name="5초간 HTTP 호출량"
+          />
         </LineChart>
       </ResponsiveContainer>
 
@@ -136,7 +140,11 @@ const ResourceDetailPage = () => {
           <Tooltip />
           <Legend />
           <CartesianGrid strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="jvmMemoryUsed" />
+          <Line
+            type="monotone"
+            dataKey="jvmMemoryUsed"
+            name="jvm 메모리 사용량"
+          />
         </LineChart>
       </ResponsiveContainer>
     </>
