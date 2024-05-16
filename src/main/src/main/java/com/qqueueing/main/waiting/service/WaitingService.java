@@ -32,7 +32,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -270,7 +269,7 @@ public class WaitingService {
         int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
         Long myOrder = Math.max(oldOrder - outCntInFront - lastOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
-                waitingStatus.getEnterCntCapture());
+                waitingStatus.getEnterCntOfLastTime());
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
             log.info("ip addr {} requested, and return tempToken");
@@ -356,9 +355,12 @@ public class WaitingService {
                 waitingStatus.setTotalQueueSize(
                         (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset()));
 
-                // capture and reset enter count
-                AtomicInteger enterCnt = waitingStatus.getEnterCnt();
-                waitingStatus.setEnterCntCapture(enterCnt.getAndSet(0));
+                // capture and calculate previous time's enterCnt
+                long enterCnt = waitingStatus.getEnterCnt().get();
+                waitingStatus.setEnterCntOfLastTime(
+                        (int)(enterCnt - waitingStatus.getEnterCntCapture())
+                );
+                waitingStatus.setEnterCntCapture(enterCnt);
             }
         } catch (Exception e) {
             e.printStackTrace();
