@@ -85,7 +85,11 @@ public class WaitingService {
 
     public GetWaitingInfoResDto getWaitingInfo(int partitionNo) {
         WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
-        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(), waitingStatusDto.getTotalQueueSize());
+//        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(), waitingStatusDto.getTotalQueueSize());
+        // 관리 페이지에서 보이는 totalQueueSize는 '실제로 대기열에 몇 명이 남아있는지' 여야 한다.
+        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(),
+                enterProducer.getLastEnteredIdx(partitionNo)
+                        - (waitingStatusDto.getEnterCnt().get() + waitingStatusDto.getOutCnt().get()));
     }
 
     private void checkTopic() {
@@ -250,9 +254,11 @@ public class WaitingService {
     public void out(int partitionNo, Long order) {
         // outList는 '내 앞에 나간 사람 수' 를 알기 위해 쓰이므로, 정렬된 채로 유지
         try {
-            List<Long> outList = queues.get(partitionNo).getOutList();
+            WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+            List<Long> outList = waitingStatusDto.getOutList();
             int insertIdx = !outList.isEmpty() ? -(Collections.binarySearch(outList, order) + 1) : 0;
             outList.add(insertIdx, order);
+            waitingStatusDto.getOutCnt().incrementAndGet();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -351,6 +357,7 @@ public class WaitingService {
                         .addAll(batchRes.getCurDoneList());
                 waitingStatus.setCurrentOffset(batchRes.getCurrentOffset());
                 cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
+                // 대기 페이지에서 보여지는 totalQueueSize는 '내가 얼마나 기다려야 하는지' 를 의미하는 값이어야 한다.
                 waitingStatus.setTotalQueueSize(
                         (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getCurrentOffset()));
 
