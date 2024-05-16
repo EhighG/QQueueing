@@ -5,6 +5,7 @@ import com.qqueueing.main.log.dto.PrometheusResult;
 import com.qqueueing.main.log.dto.SearchLogsResDto;
 import com.qqueueing.main.log.dto.SearchRequestCountResDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,7 +17,10 @@ import java.util.Map;
 @Service
 public class LogApiService {
 
-    private final String PROMETHEUS_URL = "http://k10a401.p.ssafy.io:3003/api/v1/query?query=";
+    @Value("${prometheus.monitoring}")
+    private String prometheus_url_startpoint;
+
+    private final String PROMETHEUS_URL = "/api/v1/query?query=";
 
     private final String MEMORY_ALL_QUERY = "node_memory_MemTotal_bytes";
     private final String MEMORY_AVAILABLE_QUERY = "node_memory_MemAvailable_bytes";
@@ -71,7 +75,7 @@ public class LogApiService {
     public String getMemoryOrDiskQueryResult(String query) {
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> response = restTemplate.getForEntity(PROMETHEUS_URL + query, Map.class);
+        ResponseEntity<Map> response = restTemplate.getForEntity(prometheus_url_startpoint + PROMETHEUS_URL + query, Map.class);
 
         Map<String, PrometheusData> data = (Map<String, PrometheusData>) response.getBody().get("data");
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");
@@ -84,7 +88,7 @@ public class LogApiService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<Map> response = restTemplate.getForEntity(PROMETHEUS_URL + query, Map.class, mode);
+        ResponseEntity<Map> response = restTemplate.getForEntity(prometheus_url_startpoint + PROMETHEUS_URL + query, Map.class, mode);
 
         Map<String, PrometheusData> data = (Map<String, PrometheusData>) response.getBody().get("data");
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");

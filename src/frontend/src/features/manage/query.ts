@@ -211,7 +211,7 @@ const useGetWaitingStatus = (id: string) => {
   >({
     queryKey: ["waitingStatus", id],
     queryFn: () => getWaitingStatus(id),
-    refetchInterval: 5000,
+    refetchInterval: 1000,
   });
 
   return { data, isLoading };
