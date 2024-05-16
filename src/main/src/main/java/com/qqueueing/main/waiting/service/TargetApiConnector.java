@@ -44,9 +44,7 @@ public class TargetApiConnector {
         HttpEntity<String> httpEntity = new HttpEntity<>(getDefaultHeaders());
 
         String requestUrl = queuePageUrl + "?Target-URL=" + targetUrl;
-        System.out.println("main server -> next.js request url = " + requestUrl);
         ResponseEntity<String> result = restTemplate.exchange(requestUrl, HttpMethod.GET, httpEntity, String.class);
-        log.info("waitingPage result : " + result);
 
         return result;
     }
