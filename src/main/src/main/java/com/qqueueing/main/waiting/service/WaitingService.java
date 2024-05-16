@@ -32,7 +32,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -127,11 +126,8 @@ public class WaitingService {
                 });
     }
 
-    public void addUrlPartitionMapping(String targetUrl) {
-        Registration registration = registrationRepository.findByTargetUrl(targetUrl);
-        if (registration != null) {
-            partitionNoMapper.put(registration.getTargetUrl(), registration.getPartitionNo());
-        }
+    public void addUrlPartitionMapping(Registration registration) {
+        partitionNoMapper.put(registration.getTargetUrl(), registration.getPartitionNo());
     }
 
     /**
@@ -223,7 +219,7 @@ public class WaitingService {
      * @return
      */
     public Object enqueue(String targetUrl, HttpServletRequest request) {
-        log.info("targetUrl = {}", targetUrl);
+        log.info("--------------- waitingService.enqueue(), targetUrl = {} --------------------", targetUrl);
         Integer partitionNo = partitionNoMapper.get(targetUrl);
 
 //         카프카에 요청자 ip 저장 후, 대기 정보 반환
@@ -270,10 +266,12 @@ public class WaitingService {
         int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
         Long myOrder = Math.max(oldOrder - outCntInFront - lastOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
-                waitingStatus.getEnterCntCapture());
+                waitingStatus.getEnterCntOfLastTime());
+        // test
+        result.update(oldOrder, outCntInFront, lastOffset);
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
-            log.info("ip addr {} requested, and return tempToken");
+            log.info("ip addr {} requested, and return tempToken", ip);
             doneSet.remove(ip);
             result.setToken(createTempToken(waitingStatus.getTargetUrl()));
         }
@@ -298,18 +296,17 @@ public class WaitingService {
 
         // get target page
         Integer partitionNo = partitionNoMapper.get(targetUrl);
-        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
-        if (waitingStatusDto == null) {
-            throw new RuntimeException("wrong targetUrl");
-        }
 
         // make internal request url
         targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
         log.info("targetPage request url = {}", targetUrl);
 
         String targetPage = targetApiConnector.forward(targetUrl).getBody();
-        // increase enter count
-        waitingStatusDto.getEnterCnt().incrementAndGet(); // add just before return considering possible error in forwarding
+        // increase enter count if queue is active
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        if (waitingStatusDto != null) {
+            waitingStatusDto.getEnterCnt().incrementAndGet(); // add just before return considering possible error in forwarding
+        }
         return targetPage;
     }
 
@@ -337,7 +334,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 3초마다
+    @Scheduled(cron = "* * * * * *") // 매 초
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
@@ -357,9 +354,13 @@ public class WaitingService {
                 waitingStatus.setTotalQueueSize(
                         (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset()));
 
-                // capture and reset enter count
-                AtomicInteger enterCnt = waitingStatus.getEnterCnt();
-                waitingStatus.setEnterCntCapture(enterCnt.getAndSet(0));
+                // capture and calculate previous time's enterCnt
+                long enterCnt = waitingStatus.getEnterCnt().get();
+                waitingStatus.setEnterCntOfLastTime(
+                        (int)(enterCnt - waitingStatus.getEnterCntCapture())
+                );
+                waitingStatus.setEnterCntCapture(enterCnt);
+                log.info("------------------------ partitionNo = 0, consumed. lastOffset = {} ----------------------------", batchRes.getLastOffset());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -442,7 +443,7 @@ public class WaitingService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-        log.info("response : " + response.getBody());
+//        log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
