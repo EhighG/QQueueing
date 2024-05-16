@@ -1,66 +1,66 @@
 "use client";
-import { PerformanceCard, SectionTitle } from "@/shared";
+import { PerformanceCard, SectionTitle, Button } from "@/shared";
 import React, { useEffect, useState } from "react";
-import { Button } from "@/shared";
 import { Gauge, gaugeClasses } from "@mui/x-charts";
 import {
   useGetSystemCpuUsage,
-  useGetDiskFree,
-  useGetDiskTotal,
   useGetJvmMemoryMax,
-} from "@/features/monitoring/query";
-import { useGetJvmMemoryUsed } from "../features/monitoring/query";
+  useGetJvmMemoryUsed,
+  useGetRequestCount,
+} from "@/features";
 import { useRouter } from "next/navigation";
 
 const ResourcePage = () => {
-  const { data: cpuUsage } = useGetSystemCpuUsage();
-  const { data: diskTotal } = useGetDiskTotal();
-  const { data: diskFree } = useGetDiskFree();
+  const { data: systemCpuUsage } = useGetSystemCpuUsage();
   const { data: jvmMemoryMax } = useGetJvmMemoryMax();
   const { data: jvmMemoryUsed } = useGetJvmMemoryUsed();
+  const { data: requestCount } = useGetRequestCount();
+
   const router = useRouter();
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md">
       <SectionTitle title="큐잉 서버" />
       <div className="flex items-center flex-1 justify-around">
-        <PerformanceCard title="CPU 사용량">
+        <PerformanceCard title="시스템 CPU">
           <Gauge
             width={240}
             height={240}
-            value={cpuUsage ? Math.ceil(cpuUsage.value * 100) : 0}
+            value={systemCpuUsage ? Math.ceil(systemCpuUsage.value * 100) : 0}
             sx={{
               [`& .${gaugeClasses.valueText}`]: {
                 fontSize: 40,
                 transform: "translate(0px, 0px)",
               },
+              [`& .${gaugeClasses.valueArc}`]: {
+                fill: "#52b202",
+              },
             }}
-            text={({ value, valueMax }) => `${value} / ${valueMax}`}
+            text={({ value, valueMax }) => `${value} / ${valueMax}%`}
           />
         </PerformanceCard>
 
-        <PerformanceCard title="디스크">
+        <PerformanceCard title="5초간 HTTP 요청량">
           <Gauge
             width={240}
             height={240}
             value={
-              diskFree && diskTotal
-                ? Math.ceil(diskTotal.value / 1024 / 1024 / 1024) -
-                  Math.ceil(diskFree.value / 1024 / 1024 / 1024)
+              requestCount?.tomcatRequestCount
+                ? parseInt(requestCount.tomcatRequestCount)
                 : 0
-            }
-            valueMax={
-              diskTotal ? Math.floor(diskTotal.value / 1024 / 1024 / 1024) : 0
             }
             sx={{
               [`& .${gaugeClasses.valueText}`]: {
                 fontSize: 40,
                 transform: "translate(0px, 0px)",
               },
+              [`& .${gaugeClasses.valueArc}`]: {
+                fill: "#52b202",
+              },
             }}
-            text={({ value, valueMax }) => `${value} / ${valueMax}GB`}
+            text={({ value }) => `${value}회`}
           />
         </PerformanceCard>
-        <PerformanceCard title="JVM">
+        <PerformanceCard title="JVM 메모리">
           <Gauge
             width={240}
             height={240}
@@ -80,6 +80,9 @@ const ResourcePage = () => {
               [`& .${gaugeClasses.valueText}`]: {
                 fontSize: 40,
                 transform: "translate(0px, 0px)",
+              },
+              [`& .${gaugeClasses.valueArc}`]: {
+                fill: "#52b202",
               },
             }}
             text={({ value, valueMax }) => `${value} / ${valueMax}GB`}

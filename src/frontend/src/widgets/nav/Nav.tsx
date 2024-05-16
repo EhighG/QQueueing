@@ -9,7 +9,6 @@ import TerminalIcon from "@mui/icons-material/Terminal";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import Diversity1Icon from "@mui/icons-material/Diversity1";
-import AuthButton from "@/shared/components/AuthButton/AuthButton.server";
 const NavMenu = () => {
   return (
     <nav className="max-2xl:w-[240px] w-[300px] h-full bg-white border-r rounded-r-md shadow-sm">
@@ -36,9 +35,6 @@ const NavMenu = () => {
               href="/regist"
               title="등록 하기"
             />
-          </dd>
-          <dd>
-            <AuthButton />
           </dd>
         </dl>
         <dl>

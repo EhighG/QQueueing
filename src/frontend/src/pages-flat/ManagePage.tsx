@@ -1,6 +1,6 @@
 "use client";
 import { WaitingListType } from "@/entities/waitingList/type";
-import { ImageRegist, InputForm } from "@/features";
+import { ImageRegist, InputForm, useGetWaitingStatus } from "@/features";
 import { useGetWaitingDetail, useDeleteWaiting } from "@/features";
 import {
   useGetWaitingImage,
@@ -10,7 +10,7 @@ import {
   usePostWaitingImage,
 } from "@/features/manage/query";
 import { Button, SectionTitle, logo } from "@/shared";
-import { LinearProgress } from "@mui/material";
+import { CircularProgress, LinearProgress } from "@mui/material";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
@@ -22,28 +22,30 @@ const ManagePage = ({ id }: ManagePageProps) => {
   // 삭제
   const [imageFile, setImageFile] = useState<File>({} as File);
   const [thumbnail, setThumbnail] = useState<string>("");
-  const { mutate: handleDelete } = useDeleteWaiting(id);
-  const { data: waitingDetail } = useGetWaitingDetail(id);
   const [waitingInfo, setWaitingInfo] = useState<WaitingListType>(
     {} as WaitingListType
   );
   const [partitionNo, setPartitionNo] = useState<number>(0);
+  const { data: waitingStatus, isLoading: statusLoading } =
+    useGetWaitingStatus(id);
+  const { data: waitingDetail } = useGetWaitingDetail(id);
+  const { data: imageData } = useGetWaitingImage(id);
+  const { mutate: handleDelete } = useDeleteWaiting(id);
+
+  const { mutate: activate } = usePostWaitingActivate(partitionNo);
+  const { mutate: deActivate } = usePostWaitingDeActivate(partitionNo);
+  const { mutate: handlePatch } = usePatchWaiting(id);
+  const {
+    mutate: handlePostImage,
+    isSuccess,
+    data: imageResponse,
+  } = usePostWaitingImage(imageFile);
 
   useEffect(() => {
     if (waitingDetail) {
       setPartitionNo(waitingDetail.partitionNo);
     }
   }, [waitingDetail]);
-
-  const { mutate: activate } = usePostWaitingActivate(partitionNo);
-  const { mutate: deActivate } = usePostWaitingDeActivate(partitionNo);
-  const { mutate: handlePatch } = usePatchWaiting(id);
-  const { data: imageData } = useGetWaitingImage(id);
-  const {
-    mutate: handlePostImage,
-    isSuccess,
-    data: imageResponse,
-  } = usePostWaitingImage(imageFile);
 
   const handleButton = () => {
     if (imageFile.name) {
@@ -79,16 +81,32 @@ const ManagePage = ({ id }: ManagePageProps) => {
           waitingDetail?.isActive ? "활성 중" : "비 활성"
         }`}
       />
+      {/* Section Container */}
       <div className="flex flex-1 flex-col max-2xl:m-5 m-10 p-5 border rounded-md border-slate-300">
+        {/* Section */}
         <div className="flex flex-1 gap-5">
-          <div className="flex flex-1 flex-col gap-4">
-            <div className="flex flex-1">
+          {/* Left Section */}
+          <div className="flex flex-1 flex-col gap-10">
+            {/*Left Top*/}
+            <div className="flex">
               <InputForm
                 waitingDetail={waitingDetail}
                 setWaitingInfo={setWaitingInfo}
               />
             </div>
-            <div>
+            {/*Left Middle*/}
+            <div className="flex border border-md shadow-sm border-black rounded-md p-4">
+              <ol className="font-bold text-[1.5rem]">
+                <li>1. 타겟 URL, 서비스 명의 변경이 가능합니다.</li>
+                <li>2. 대기열 이미지 변경이 가능합니다.</li>
+                <li>3. 변경을 눌러야 최종 반영 됩니다.</li>
+                <li>4. 대기열을 활성화 하거나 비 활성화 할 수 있습니다</li>
+                <li>5. 삭제를 눌러 대기열을 삭제할 수 있습니다</li>
+                <li>6. 현재의 대기열 상태를 모니터링 할 수 있습니다</li>
+              </ol>
+            </div>
+            {/*Left Bottom*/}
+            <div className="flex flex-1 flex-col gap-4">
               <ImageRegist
                 thumbNail={thumbnail}
                 setThumbnail={setThumbnail}
@@ -96,10 +114,13 @@ const ManagePage = ({ id }: ManagePageProps) => {
               />
             </div>
           </div>
-          <div className="flex flex-1 flex-col gap-2">
-            <div className="flex flex-col flex-[1] border rounded-md border-black">
+
+          {/* Right Section */}
+          <div className="flex flex-1 flex-col gap-10">
+            {/* Right Top */}
+            <div className="flex flex-col border rounded-md border-black">
               <SectionTitle title="미리보기" />
-              <div className="flex flex-col justify-between h-full  p-4">
+              <div className="flex flex-col gap-10 p-4 h-[460px]">
                 <div className="flex w-full justify-between  items-center">
                   <Image
                     src={logo}
@@ -108,7 +129,6 @@ const ManagePage = ({ id }: ManagePageProps) => {
                   />
                   <h1 className="text-[2rem] font-bold">접속 대기 중</h1>
                   <Image
-                    // 최신이미지 url로 대체 필요
                     src={thumbnail ? thumbnail : logo}
                     alt="product"
                     width={500}
@@ -148,12 +168,38 @@ const ManagePage = ({ id }: ManagePageProps) => {
                 <p className="font-bold text-center">powered by QQueueing</p>
               </div>
             </div>
-            <div className="flex flex-1 flex-col">
-              <SectionTitle title="모니터링" />
+            {/* Right Bottom */}
+            <div className="flex flex-1 min-h-[450px] flex-col">
+              <SectionTitle title="실시간 상태" />
               <div className="flex flex-1 border rounded-md border-slate-300">
-                <div className="flex flex-1 items-center justify-around">
-                  <div>모니터링 지표1</div>
-                  <div>모니터링 지표2</div>
+                <div className="w-full h-full grid grid-cols-2 grid-rows-1 place-items-center">
+                  {!statusLoading ? (
+                    <>
+                      <div className="flex flex-col items-center">
+                        <h1 className="text-[2rem] font-bold">
+                          현재 대기 중 인원
+                        </h1>
+                        <p className="text-[2.5rem] font-bold">
+                          {waitingStatus?.totalQueueSize}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <h1 className="text-[2rem] font-bold">통과 인원</h1>
+                        <p className="text-[2.5rem] font-bold">
+                          {waitingStatus?.enterCnt}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <CircularProgress />
+                      </div>
+                      <div>
+                        <CircularProgress />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

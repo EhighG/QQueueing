@@ -9,6 +9,7 @@ import {
   ProcessCpuUsageType,
   ServerLogsType,
   SystemCpuUsageType,
+  requestCountType,
 } from "./type";
 import {
   getProcessCpuUsage,
@@ -17,6 +18,8 @@ import {
   getJvmMemoryMax,
   getJvmMemoryUsed,
   getServerLogs,
+  getSystemCpuUsage,
+  getRequestCount,
 } from "./api";
 
 const queryOptions = {
@@ -57,19 +60,19 @@ const useGetProcessCpuUsage = () => {
 };
 
 const useGetSystemCpuUsage = () => {
-  const { data, isLoading, isError } = useQuery<
-    ProcessCpuUsageType,
+  const { data, isLoading, isError, isFetching } = useQuery<
+    SystemCpuUsageType,
     AxiosError,
     Measurement,
     [_1: string]
   >({
     queryKey: ["cpu"],
-    queryFn: getProcessCpuUsage,
+    queryFn: getSystemCpuUsage,
     ...queryOptions,
     select: (data) => data.measurements[0],
   });
 
-  return { data, isLoading, isError };
+  return { data, isLoading, isError, isFetching };
 };
 const useGetDiskTotal = () => {
   const { data, isLoading, isError } = useQuery<
@@ -120,7 +123,7 @@ const useGetJvmMemoryMax = () => {
 };
 
 const useGetJvmMemoryUsed = () => {
-  const { data, isLoading, isError } = useQuery<
+  const { data, isLoading, isError, isFetching } = useQuery<
     JvmMemoryUsedType,
     AxiosError,
     Measurement,
@@ -132,7 +135,22 @@ const useGetJvmMemoryUsed = () => {
     select: (data) => data.measurements[0],
   });
 
-  return { data, isLoading, isError };
+  return { data, isLoading, isError, isFetching };
+};
+
+const useGetRequestCount = () => {
+  const { data, isLoading, isError, isSuccess, isFetching } = useQuery<
+    requestCountType,
+    AxiosError,
+    requestCountType,
+    [_1: string]
+  >({
+    queryKey: ["get_request_count"],
+    queryFn: getRequestCount,
+    ...queryOptions,
+  });
+
+  return { data, isLoading, isError, isSuccess, isFetching };
 };
 
 export {
@@ -143,4 +161,5 @@ export {
   useGetJvmMemoryMax,
   useGetJvmMemoryUsed,
   useGetServerLogs,
+  useGetRequestCount,
 };

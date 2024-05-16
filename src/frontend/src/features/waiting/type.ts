@@ -5,9 +5,10 @@ type infoType = {
 };
 
 type statusType = {
-  myOrder?: number;
-  totalQueueSize?: number;
-  token?: string;
+  myOrder: number;
+  totalQueueSize: number;
+  token: string;
+  enterCnt: number;
 };
 
 export type { infoType, statusType };
