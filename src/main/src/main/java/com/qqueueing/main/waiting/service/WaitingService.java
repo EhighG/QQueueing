@@ -272,7 +272,7 @@ public class WaitingService {
                 waitingStatus.getEnterCntOfLastTime());
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
-            log.info("ip addr {} requested, and return tempToken");
+            log.info("ip addr {} requested, and return tempToken", ip);
             doneSet.remove(ip);
             result.setToken(createTempToken(waitingStatus.getTargetUrl()));
         }
@@ -444,7 +444,7 @@ public class WaitingService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-        log.info("response : " + response.getBody());
+//        log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
