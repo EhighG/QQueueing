@@ -222,7 +222,7 @@ public class WaitingService {
      * @return
      */
     public Object enqueue(String targetUrl, HttpServletRequest request) {
-        log.info("targetUrl = {}", targetUrl);
+        log.info("--------------- waitingService.enqueue(), targetUrl = {} --------------------", targetUrl);
         Integer partitionNo = partitionNoMapper.get(targetUrl);
 
 //         카프카에 요청자 ip 저장 후, 대기 정보 반환
@@ -272,7 +272,7 @@ public class WaitingService {
                 waitingStatus.getEnterCntOfLastTime());
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
-            log.info("ip addr {} requested, and return tempToken");
+            log.info("ip addr {} requested, and return tempToken", ip);
             doneSet.remove(ip);
             result.setToken(createTempToken(waitingStatus.getTargetUrl()));
         }
@@ -361,6 +361,7 @@ public class WaitingService {
                         (int)(enterCnt - waitingStatus.getEnterCntCapture())
                 );
                 waitingStatus.setEnterCntCapture(enterCnt);
+                log.info("------------------------ partitionNo = 0, consumed. lastOffset = {} ----------------------------", batchRes.getLastOffset());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -443,7 +444,7 @@ public class WaitingService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-        log.info("response : " + response.getBody());
+//        log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
