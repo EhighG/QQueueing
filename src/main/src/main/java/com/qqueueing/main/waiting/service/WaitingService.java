@@ -222,7 +222,7 @@ public class WaitingService {
      * @return
      */
     public Object enqueue(String targetUrl, HttpServletRequest request) {
-        log.info("targetUrl = {}", targetUrl);
+        log.info("--------------- waitingService.enqueue(), targetUrl = {} --------------------", targetUrl);
         Integer partitionNo = partitionNoMapper.get(targetUrl);
 
 //         카프카에 요청자 ip 저장 후, 대기 정보 반환
@@ -361,6 +361,7 @@ public class WaitingService {
                         (int)(enterCnt - waitingStatus.getEnterCntCapture())
                 );
                 waitingStatus.setEnterCntCapture(enterCnt);
+                log.info("------------------------ partitionNo = 0, consumed. lastOffset = {} ----------------------------", batchRes.getLastOffset());
             }
         } catch (Exception e) {
             e.printStackTrace();
