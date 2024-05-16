@@ -11,15 +11,8 @@ type NavButtonProps = {
 };
 
 const NavButton = ({ path, title, className }: NavButtonProps) => {
-  const pathName = usePathname();
   return (
-    <Link
-      href={path}
-      className={cls(
-        className ? className : "",
-        pathName === path ? "text-black font-bold" : "text-gray-600"
-      )}
-    >
+    <Link href={path} className={cls(className ? className : "")}>
       {title}
     </Link>
   );
