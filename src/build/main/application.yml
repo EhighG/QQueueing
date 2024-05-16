@@ -82,7 +82,7 @@ info:
 #shell script 실행 관련
 shell:
   path: /pipes
-  fileNm: conf.sh
+  fileNm: src/pipes/conf.sh
 
 
 testing:

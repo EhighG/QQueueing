@@ -34,6 +34,9 @@ def main(url):
             Statement(f'proxy_set_header Target-URL {url} ;')
         ])
     )
+    print(b_nginx.export())
+
+
     b_nginx.save_file(path=path+'/complete.conf')
 
 
