@@ -15,7 +15,7 @@ public class GetMyOrderResDto {
     // test
     private Long oldOrder;
     private int outCntInFront;
-    private int lastOffset;
+    private long currentOffset;
 
 
     // on waiting
@@ -25,10 +25,10 @@ public class GetMyOrderResDto {
         this.enterCnt = enterCnt;
     }
 
-    public void update(Long oldOrder, int outCntInFront, int lastOffset) {
+    public void update(Long oldOrder, int outCntInFront, long currentOffset) {
         this.oldOrder = oldOrder;
         this.outCntInFront = outCntInFront;
-        this.lastOffset = lastOffset;
+        this.currentOffset = currentOffset;
     }
 
     //
