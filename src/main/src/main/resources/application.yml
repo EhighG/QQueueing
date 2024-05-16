@@ -89,3 +89,6 @@ shell:
 
 testing:
   target-url: http://k10a401.p.ssafy.io/product/1
+
+prometheus:
+  monitoring: http://k10a401.p.ssafy.io:3003

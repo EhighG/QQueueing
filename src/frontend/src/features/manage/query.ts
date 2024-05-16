@@ -10,7 +10,7 @@ import {
   waitingRegistType,
 } from "@/entities/waitingList/type";
 import { AxiosError } from "axios";
-import { getWaitingDetail } from ".";
+import { getWaitingDetail, getWaitingStatus } from ".";
 import {
   deleteWaiting,
   getServiceImage,
@@ -19,6 +19,7 @@ import {
   postWaitingImage,
 } from "./api";
 import Swal from "sweetalert2";
+import { waitingStatusType } from "@/features/manage/type";
 
 // 대기열 등록
 const useRegistWaiting = () => {
@@ -201,6 +202,21 @@ const usePostWaitingDeActivate = (partitionNo: number) => {
   return { mutate, data };
 };
 
+const useGetWaitingStatus = (id: string) => {
+  const { data, isLoading } = useQuery<
+    waitingStatusType,
+    AxiosError,
+    waitingStatusType,
+    [_1: string, _2: string]
+  >({
+    queryKey: ["waitingStatus", id],
+    queryFn: () => getWaitingStatus(id),
+    refetchInterval: 1000,
+  });
+
+  return { data, isLoading };
+};
+
 export {
   useRegistWaiting,
   useGetWaitingList,
@@ -212,4 +228,5 @@ export {
   usePatchWaiting,
   useGetWaitingImage,
   useGetServiceImage,
+  useGetWaitingStatus,
 };

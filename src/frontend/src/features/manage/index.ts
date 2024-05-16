@@ -5,6 +5,7 @@ export {
   postWaitingActivate,
   postWaitingDeActivate,
   deleteWaiting,
+  getWaitingStatus
 } from "./api";
 
 export {
@@ -17,6 +18,7 @@ export {
   useGetWaitingImage,
   useGetServiceImage,
   usePostWaitingImage,
+  useGetWaitingStatus
 } from "./query";
 
 export type { ResponseType } from "./type";

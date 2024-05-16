@@ -5,6 +5,7 @@ import com.qqueueing.main.log.dto.PrometheusResult;
 import com.qqueueing.main.log.dto.SearchLogsResDto;
 import com.qqueueing.main.log.dto.SearchRequestCountResDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,7 +17,10 @@ import java.util.Map;
 @Service
 public class LogApiService {
 
-    private final String PROMETHEUS_URL = "http://k10a401.p.ssafy.io:3003/api/v1/query?query=";
+    @Value("${prometheus.monitoring}")
+    private String prometheus_url_startpoint;
+
+    private final String PROMETHEUS_URL = "/api/v1/query?query=";
 
     private final String MEMORY_ALL_QUERY = "node_memory_MemTotal_bytes";
     private final String MEMORY_AVAILABLE_QUERY = "node_memory_MemAvailable_bytes";
@@ -31,31 +35,31 @@ public class LogApiService {
     private final String CPU_USAGE_MODE = "{mode=\"user\"}[1m]))*100";
 
     private final String TOMCAT_REQUEST_COUNT = "rate(tomcat_servlet_request_seconds_count{TOMCAT_REQUEST_MODE}";
-    private final String TOMCAT_REQUEST_MODE = "{name=\"dispatcherServlet\"}[5s])*100";
+    private final String TOMCAT_REQUEST_MODE = "{name=\"dispatcherServlet\"}[5s])";
 
     public SearchLogsResDto searchLogs() {
 
         // 메모리 전체 용량
         String memoryAllBytes = getMemoryOrDiskQueryResult(MEMORY_ALL_QUERY);
-        log.info("memoryAllBytes : " + memoryAllBytes);
+        log.debug("memoryAllBytes : " + memoryAllBytes);
 
         // 메모리 사용 가능량
         String nodeMemoryMemAvailableBytes = getMemoryOrDiskQueryResult(MEMORY_AVAILABLE_QUERY);
-        log.info("nodeMemoryMemAvailableBytes : " + nodeMemoryMemAvailableBytes);
+        log.debug("nodeMemoryMemAvailableBytes : " + nodeMemoryMemAvailableBytes);
 
         // 디스크 전체 용량
         String diskAllBytes = getMemoryOrDiskQueryResult(DISK_ALL_QUERY);
-        log.info("diskAllBytes : " + diskAllBytes);
+        log.debug("diskAllBytes : " + diskAllBytes);
 
         // 디스크 사용 가능량
         String diskAvailableBytes = getMemoryOrDiskQueryResult(DISK_AVAILABLE_QUERY);
-        log.info("diskAvailableBytes : " + diskAvailableBytes);
+        log.debug("diskAvailableBytes : " + diskAvailableBytes);
 
         // 현재 cpu 사용량
         String sumCpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
         Double avgCpuUsageRate = Double.parseDouble(sumCpuUsageRate);
         avgCpuUsageRate /= 4;
-        log.info("avgCpuUsageRate : " + avgCpuUsageRate);
+        log.debug("avgCpuUsageRate : " + avgCpuUsageRate);
 
         SearchLogsResDto searchLogsResDto = SearchLogsResDto.builder()
                 .memoryAllBytes(memoryAllBytes)
@@ -71,7 +75,7 @@ public class LogApiService {
     public String getMemoryOrDiskQueryResult(String query) {
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> response = restTemplate.getForEntity(PROMETHEUS_URL + query, Map.class);
+        ResponseEntity<Map> response = restTemplate.getForEntity(prometheus_url_startpoint + PROMETHEUS_URL + query, Map.class);
 
         Map<String, PrometheusData> data = (Map<String, PrometheusData>) response.getBody().get("data");
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");
@@ -84,7 +88,7 @@ public class LogApiService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<Map> response = restTemplate.getForEntity(PROMETHEUS_URL + query, Map.class, mode);
+        ResponseEntity<Map> response = restTemplate.getForEntity(prometheus_url_startpoint + PROMETHEUS_URL + query, Map.class, mode);
 
         Map<String, PrometheusData> data = (Map<String, PrometheusData>) response.getBody().get("data");
         List<Map<String, PrometheusResult>> prometheusResult = (List<Map<String, PrometheusResult>>) data.get("result");
@@ -97,7 +101,7 @@ public class LogApiService {
 
         // 톰캣 http request 횟수 (5초 이내)
         String tomcatRequestCount = getRateWithMode(TOMCAT_REQUEST_COUNT, TOMCAT_REQUEST_MODE);
-        log.info("tomcatRequestCount : " + tomcatRequestCount);
+        log.debug("tomcatRequestCount : " + tomcatRequestCount);
 
         SearchRequestCountResDto result = SearchRequestCountResDto.builder()
                 .tomcatRequestCount(tomcatRequestCount).build();

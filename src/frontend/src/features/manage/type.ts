@@ -3,3 +3,7 @@ export type ResponseType<T> = {
   message: string;
   result: T;
 };
+
+export type waitingStatusType = {
+  enterCnt: number, totalQueueSize: number
+}

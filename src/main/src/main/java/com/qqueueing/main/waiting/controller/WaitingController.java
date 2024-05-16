@@ -79,7 +79,7 @@ public class WaitingController {
     @PostMapping
     public ResponseEntity<?> enqueue(HttpServletRequest request) {
         String targetUrl = request.getHeader("Target-URL");
-        log.info("enqueue api called");
+        log.info("-------------------------- enqueue api called. in controller -------------------------------");
         log.info("targetUrl = {}", targetUrl);
         Object result = waitingService.enqueue(targetUrl, request);
         return ResponseEntity
