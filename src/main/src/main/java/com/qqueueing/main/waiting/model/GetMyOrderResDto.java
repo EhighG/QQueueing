@@ -12,6 +12,12 @@ public class GetMyOrderResDto {
     @Setter
     private String token;
 
+    // test
+    private Long oldOrder;
+    private int outCntInFront;
+    private int lastOffset;
+
+
     // on waiting
     public GetMyOrderResDto(Long myOrder, Integer totalQueueSize, int enterCnt) {
         this.myOrder = myOrder;
