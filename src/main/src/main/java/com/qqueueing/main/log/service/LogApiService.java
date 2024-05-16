@@ -37,25 +37,25 @@ public class LogApiService {
 
         // 메모리 전체 용량
         String memoryAllBytes = getMemoryOrDiskQueryResult(MEMORY_ALL_QUERY);
-        log.info("memoryAllBytes : " + memoryAllBytes);
+        log.debug("memoryAllBytes : " + memoryAllBytes);
 
         // 메모리 사용 가능량
         String nodeMemoryMemAvailableBytes = getMemoryOrDiskQueryResult(MEMORY_AVAILABLE_QUERY);
-        log.info("nodeMemoryMemAvailableBytes : " + nodeMemoryMemAvailableBytes);
+        log.debug("nodeMemoryMemAvailableBytes : " + nodeMemoryMemAvailableBytes);
 
         // 디스크 전체 용량
         String diskAllBytes = getMemoryOrDiskQueryResult(DISK_ALL_QUERY);
-        log.info("diskAllBytes : " + diskAllBytes);
+        log.debug("diskAllBytes : " + diskAllBytes);
 
         // 디스크 사용 가능량
         String diskAvailableBytes = getMemoryOrDiskQueryResult(DISK_AVAILABLE_QUERY);
-        log.info("diskAvailableBytes : " + diskAvailableBytes);
+        log.debug("diskAvailableBytes : " + diskAvailableBytes);
 
         // 현재 cpu 사용량
         String sumCpuUsageRate = getRateWithMode(CPU_USAGE_QUERY, CPU_USAGE_MODE);
         Double avgCpuUsageRate = Double.parseDouble(sumCpuUsageRate);
         avgCpuUsageRate /= 4;
-        log.info("avgCpuUsageRate : " + avgCpuUsageRate);
+        log.debug("avgCpuUsageRate : " + avgCpuUsageRate);
 
         SearchLogsResDto searchLogsResDto = SearchLogsResDto.builder()
                 .memoryAllBytes(memoryAllBytes)
