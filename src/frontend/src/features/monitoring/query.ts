@@ -28,7 +28,7 @@ const queryOptions = {
 };
 
 const useGetServerLogs = () => {
-  const { data } = useQuery<
+  const { data, isFetching } = useQuery<
     ServerLogsType,
     AxiosError,
     ServerLogsType,
@@ -40,7 +40,7 @@ const useGetServerLogs = () => {
     refetchInterval: 5000,
   });
 
-  return { data };
+  return { data, isFetching };
 };
 
 const useGetProcessCpuUsage = () => {
