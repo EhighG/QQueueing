@@ -262,13 +262,13 @@ public class WaitingService {
         WaitingStatusDto waitingStatus = queues.get(partitionNo);
         Set<String> doneSet = waitingStatus.getDoneSet();
         List<Long> outList = waitingStatus.getOutList();
-        int lastOffset = waitingStatus.getLastOffset();
+        long currentOffset = waitingStatus.getCurrentOffset();
         int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
-        Long myOrder = Math.max(oldOrder - outCntInFront - lastOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
+        Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
                 waitingStatus.getEnterCntOfLastTime());
         // test
-        result.update(oldOrder, outCntInFront, lastOffset);
+        result.update(oldOrder, outCntInFront, currentOffset);
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
             log.info("ip addr {} requested, and return tempToken", ip);
@@ -349,10 +349,10 @@ public class WaitingService {
                 BatchResDto batchRes = response.get(partitionNo);
                 waitingStatus.getDoneSet()
                         .addAll(batchRes.getCurDoneList());
-                waitingStatus.setLastOffset(batchRes.getLastOffset());
+                waitingStatus.setCurrentOffset(batchRes.getCurrentOffset());
                 cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
                 waitingStatus.setTotalQueueSize(
-                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset()));
+                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getCurrentOffset()));
 
                 // capture and calculate previous time's enterCnt
                 long enterCnt = waitingStatus.getEnterCnt().get();
@@ -360,7 +360,7 @@ public class WaitingService {
                         (int)(enterCnt - waitingStatus.getEnterCntCapture())
                 );
                 waitingStatus.setEnterCntCapture(enterCnt);
-                log.info("------------------------ partitionNo = 0, consumed. lastOffset = {} ----------------------------", batchRes.getLastOffset());
+                log.info("------------------------ partitionNo = 0, consumed. currentOffset = {} ----------------------------", batchRes.getCurrentOffset());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -371,10 +371,10 @@ public class WaitingService {
      * 대기 끝난 사람들 삭제
      */
     private void cleanUpOutList(WaitingStatusDto waitingStatus) {
-        int lastOffset = waitingStatus.getLastOffset();
+        long currentOffset = waitingStatus.getCurrentOffset();
         waitingStatus.setOutList(
                 waitingStatus.getOutList().stream()
-                        .filter(i -> i > lastOffset)
+                        .filter(i -> i > currentOffset)
                         .collect(Collectors.toList()) // modifiable list
         );
     }
