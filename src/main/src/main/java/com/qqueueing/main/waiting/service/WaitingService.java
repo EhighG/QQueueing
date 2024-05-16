@@ -335,7 +335,7 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/3 * * * * *") // 매 분 0초부터, 3초마다
+    @Scheduled(cron = "* * * * * *") // 매 초
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
