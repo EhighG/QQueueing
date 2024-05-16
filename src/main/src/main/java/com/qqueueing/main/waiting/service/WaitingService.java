@@ -126,11 +126,8 @@ public class WaitingService {
                 });
     }
 
-    public void addUrlPartitionMapping(String targetUrl) {
-        Registration registration = registrationRepository.findByTargetUrl(targetUrl);
-        if (registration != null) {
-            partitionNoMapper.put(registration.getTargetUrl(), registration.getPartitionNo());
-        }
+    public void addUrlPartitionMapping(Registration registration) {
+        partitionNoMapper.put(registration.getTargetUrl(), registration.getPartitionNo());
     }
 
     /**

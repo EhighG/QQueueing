@@ -36,8 +36,9 @@ public class RegistrationService {
         Registration savedRegistration = registrationRepository.save(registration);
         // 등록 스크립트 실행
         scriptExecService.execShell(registration.getTargetUrl(), "register");
-        // 대기열 기능에서 쓰이는 url-파티션 키 매핑에 추가한다.
-        waitingService.addUrlPartitionMapping(registration.getTargetUrl());
+        // 대기열 활성화
+        waitingService.addUrlPartitionMapping(registration);
+        waitingService.activate(registration);
         return savedRegistration;
     }
 
