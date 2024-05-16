@@ -71,7 +71,7 @@ public class EnterProducer {
 
         // 파티션 번호를 키로 사용하여 메시지 보냄
         kafkaTemplate.send(TOPIC_NAME, partitionNo, key, sampleIp);
-
+        log.info("-------------------------------------- produced. idx = {} ----------------------------", curIdx);
         return new EnterQueueResDto(partitionNo, curIdx, sampleIp);
     }
 
