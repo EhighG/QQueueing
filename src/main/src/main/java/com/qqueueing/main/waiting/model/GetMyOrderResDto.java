@@ -24,7 +24,14 @@ public class GetMyOrderResDto {
         this.totalQueueSize = totalQueueSize;
         this.enterCnt = enterCnt;
     }
-//
+
+    public void update(Long oldOrder, int outCntInFront, int lastOffset) {
+        this.oldOrder = oldOrder;
+        this.outCntInFront = outCntInFront;
+        this.lastOffset = lastOffset;
+    }
+
+    //
 //    public GetMyOrderResDto(Long myOrder, Integer totalQueueSize, String tempToken) {
 //        this.myOrder = myOrder;
 //        this.totalQueueSize = totalQueueSize;
