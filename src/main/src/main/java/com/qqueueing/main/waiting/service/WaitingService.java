@@ -195,10 +195,10 @@ public class WaitingService {
         UriComponentsBuilder uriBuilder;
 
         if (activePartitions.contains(partitionNo)) { // 대기 필요
-            log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
+//            log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
             return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + targetUrl);
         } else { // 대기 불필요
-            log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
+//            log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
             String tempToken = createTempToken(targetUrl); // 토큰 생성
             uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + TARGET_PAGE_URI)
                     .queryParam("token", tempToken);
