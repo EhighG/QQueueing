@@ -235,9 +235,9 @@ public class KafkaConsumerService {
                 System.out.println("partitionNumber = " + partitionNumber);
                 System.out.println("initialOffset = " + initialOffset);
                 System.out.println("currentOffset = " + currentOffset);
-//                consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
+                consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
 //                consumeMessageResDto.setCurrentOffset(currentOffset);
-                consumeMessageResDto.setLastOffset(lastOffset);
+//                consumeMessageResDto.setLastOffset(lastOffset);
                 consumeMessageResDto.setCurrentOffset(currentOffset - initialOffset);
 
             } catch (WakeupException e) {
