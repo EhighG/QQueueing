@@ -26,7 +26,7 @@ public class EnterProducer {
     private ObjectMapper mapper = new ObjectMapper();
 
     public EnterProducer(KafkaTemplate<Long, String> enterMsgTemplate,
-                         @Value("${kafka.topic-names.enter}") String topicName) {
+                         @Value("${kafka.topics.enter.name}") String topicName) {
         log.info("Start -- EnterProducer constructor");
         this.kafkaTemplate = enterMsgTemplate;
         this.TOPIC_NAME = topicName;
