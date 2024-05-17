@@ -2,8 +2,8 @@ package com.example.tes24.controller;
 
 import com.example.tes24.dto.WaitingRequest;
 import com.example.tes24.dto.WaitingStatusResponse;
-import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
-import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
+import com.example.tes24.qqueueing.dto.Q2ClientRequest;
+import com.example.tes24.qqueueing.dto.Q2ServerResponse;
 import com.example.tes24.service.MainService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -66,7 +66,6 @@ public class MainController {
 
     @PostMapping
     public ResponseEntity<?> test(@RequestBody Q2ClientRequest q2ClientRequest) {
-        log.info(String.valueOf(q2ClientRequest));
         Q2ServerResponse q2ServerResponse = new Q2ServerResponse();
         q2ServerResponse.setClientId(q2ClientRequest.getClientId());
         q2ServerResponse.setClientKey(q2ClientRequest.getClientKey());
