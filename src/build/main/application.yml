@@ -50,6 +50,7 @@ kafka:
   topics:
     enter:
       name: queueing.waiting-queue.enter2 # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
+      retention-ms: 259200000 # 3 days
   partition:
     max-index: 20
 
