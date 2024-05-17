@@ -17,9 +17,14 @@ const config: Config = {
           "0%, 100%": { "text-decoration": "underline" },
           "50%": { "text-decoration": "none" },
         },
+        shine: {
+          "0%": { backgroundPosition: "-200px 0" },
+          "100%": { backgroundPosition: "200px 0" },
+        },
       },
       animation: {
         blink: "blink 1.5s linear infinite",
+        shine: "shine 5s infinite linear",
       },
 
       backgroundImage: {

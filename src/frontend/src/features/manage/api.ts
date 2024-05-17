@@ -48,8 +48,10 @@ const getWaitingStatus = async (id: string) => {
 
 const getServiceImage = async (targetUrl: string) => {
   return await instance
-    .get(`/queue/image-file/by-target-url?targetUrl=${targetUrl}`)
-    .then(({ data }) => data.result);
+    .get<ResponseType<undefined | string>>(
+      `/queue/image-file/by-target-url?targetUrl=${targetUrl}`
+    )
+    .then(({ data }) => data);
 };
 
 const getWaitingDetail = async (id: string) => {

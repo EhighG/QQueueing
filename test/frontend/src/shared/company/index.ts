@@ -66,6 +66,19 @@ import {
 } from "../assets";
 
 const companyData = [
+  // 전자랑, 멀캠,
+  {
+    src: 삼성,
+    name: "삼성",
+    title: "2024년 신입사원 공개채용",
+    duedate: 17,
+  },
+  {
+    src: 미래에셋,
+    name: "미래에셋",
+    title: "2024년 신입사원 공개채용",
+    duedate: 17,
+  },
   {
     src: DB,
     name: "DB",
@@ -180,24 +193,14 @@ const companyData = [
     title: "2024년 신입사원 공개채용",
     duedate: 17,
   },
-  {
-    src: 미래에셋,
-    name: "미래에셋",
-    title: "2024년 신입사원 공개채용",
-    duedate: 17,
-  },
+
   {
     src: 부영,
     name: "부영",
     title: "2024년 신입사원 공개채용",
     duedate: 17,
   },
-  {
-    src: 삼성,
-    name: "삼성",
-    title: "2024년 신입사원 공개채용",
-    duedate: 17,
-  },
+
   {
     src: 삼양,
     name: "삼양",
