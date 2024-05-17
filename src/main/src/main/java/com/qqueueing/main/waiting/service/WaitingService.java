@@ -384,15 +384,17 @@ public class WaitingService {
         );
     }
 
-    public ResponseEntity<?> parsing(String address) {
+    public ResponseEntity<?> parsing(String address, String scheme) {
 
-        address = "http://" + address;
+        String serverPort = ":3001";
+
+        address = scheme + "://" + address;
 
         HttpHeaders headers = new HttpHeaders();
 
         String splitUrl = serverUrl.split("http://")[1];
 
-        String url = splitUrl.split(":3000")[0];
+        String url = splitUrl.split(serverPort)[0];
 
         if(address.contains("image")) {
 
@@ -402,7 +404,7 @@ public class WaitingService {
             String[] imageAddressSplit2 = imageAddressSplit1result.split("/_next");
             String imageAddressSplit2result = imageAddressSplit2[0];
 
-            address = address.replace(imageAddressSplit2result, ":3000");
+            address = address.replace(imageAddressSplit2result, serverPort);
 
             String[] imageAddressSplit3 = address.split("url=");
 
@@ -446,7 +448,7 @@ public class WaitingService {
         String[] endPointSplit2 = endPointSplit[1].split("/_next");
         String endPoint = endPointSplit2[0];
 
-        String serverURL = serverUrl + ":3000" + targetUrl;
+        String serverURL = serverUrl + serverPort + targetUrl;
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
