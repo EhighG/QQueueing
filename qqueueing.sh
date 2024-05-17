@@ -53,9 +53,25 @@ if [[ -z $(groups | grep docker) ]]; then
 	echo "Please enter into new terminal. "
 	exit 0
 fi
+
+
 # need to check their version
 # need to check user set files
 case $1 in
+  install|i)
+	# TODO: check if .env file is valid
+	# TODO: if not, wait for user's input
+	# TODO: if good, execute default setting
+	# TODO: default -> insert hosts to .env, application.yml
+	# TODO: default -> execute init.py
+  
+
+  ;;
+
+
+
+
+
   build)
 	if [[ -z $2 ]];then
 	  printf "\tno extra input\n"
