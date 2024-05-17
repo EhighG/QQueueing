@@ -1,10 +1,9 @@
 package com.example.tes24.service;
 
 import com.example.tes24.dto.EnqueueResponse;
-import com.example.tes24.qqueue_module.Q2Client;
-import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
-import com.example.tes24.qqueue_module.http.Q2HttpHeader;
-import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
+import com.example.tes24.qqueueing.Q2Client;
+import com.example.tes24.qqueueing.context.beanfactory.Q2Context;
+import com.example.tes24.qqueueing.dto.Q2ClientRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,39 +22,32 @@ public class QueueServiceImpl implements QueueService {
     @Value("${qqueue.server-url}")
     private String remoteUrl;
 
-    @Value("${qqueue.server-port}")
-    private String port;
+    private Q2Client q2Client = (Q2Client) Q2Context.getInstance().get(Q2Client.class);
 
     @Override
     @Async
     public Future<EnqueueResponse> enqueue() {
+        Q2ClientRequest q2ClientRequest = new Q2ClientRequest();
+        try {
+            log.info(String.valueOf(q2Client.requestAsync(q2ClientRequest).get()));
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
+
         RestClient restClient = RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
-                .baseUrl("http://" + remoteUrl + ":" + port + "/waiting")
+                .baseUrl("https://" + remoteUrl + "/product/1")
 //                .defaultUriVariables(Map.of("memberId", memberId))
 //                .defaultHeader("Authorization", "Bearer " + token)
                 .build();
-
-        return CompletableFuture.completedFuture(restClient.post().retrieve().body(EnqueueResponse.class));
-
-//        Q2Client q2Client = Q2Client.getQ2Client();
-//        Q2ClientRequest request = new Q2ClientRequest();
-//        request.setClientId("1");
-//        request.setClientKey("2");
-//        request.setUserId("3");
-//        request.setUserKey("4");
-//
-//        Q2ServerResponse response = q2Client.request(Q2HttpHeader.defaultQ2HttpHeader(), request);
-//        log.info(response.toString());
-//
-//        return CompletableFuture.completedFuture(new EnqueueResponse(-1L, response.getClientId()));
+        return CompletableFuture.completedFuture(restClient.get().retrieve().body(EnqueueResponse.class));
     }
 
     @Override
     public ResponseEntity<?> dequeue() {
         RestClient restClient = RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
-                .baseUrl("http://" + remoteUrl + ":" + port + "dequeue api")
+//                .baseUrl("http://" + remoteUrl + ":" + port + "dequeue api")
                 .build();
 
         return restClient.delete().retrieve().toEntity(String.class);
