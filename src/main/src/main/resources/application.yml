@@ -43,6 +43,8 @@ servers: # 타 서버들의 정보 기록
 #  consumer: localhost:8082
   front: qqueueing-frontend:3000/waiting
   main: http://k10a401.p.ssafy.io # Nginx 거치도록 포트번호 제거
+  parsing: http://qqueueing-frontend
+
 
   replace-url: http://host.docker.internal # replace url value for forwarding to target
 
