@@ -53,6 +53,7 @@ kafka:
   topics:
     enter:
       name: test3
+      retention-ms: 259200000 # 3 days
   partition:
     max-index: 20
 

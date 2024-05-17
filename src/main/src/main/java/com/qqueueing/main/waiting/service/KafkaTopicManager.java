@@ -5,6 +5,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.common.config.TopicConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.stereotype.Component;
@@ -22,15 +23,15 @@ public class KafkaTopicManager {
     private final String KAFKA_BROKER;
     private final Integer PARTITION_NUM;
     private final short REPLICATION_FACTOR = (short) 1;
-//    private final String RETENTION_MS;
+    private final String RETENTION_MS;
 
     public KafkaTopicManager(@Value("${kafka.broker}") String kafkaBrokerAddr,
-                             @Value("${kafka.partition.max-index}") Integer partitoinNum
-//                             @Value("${kafka.topics.enter.retention-ms}") String retentionMsConfig
+                             @Value("${kafka.partition.max-index}") Integer partitoinNum,
+                             @Value("${kafka.topics.enter.retention-ms}") String retentionMsConfig
     ) {
         KAFKA_BROKER = kafkaBrokerAddr;
         PARTITION_NUM = partitoinNum;
-//        RETENTION_MS = retentionMsConfig;
+        RETENTION_MS = retentionMsConfig;
     }
 
     public Set<String> getTopics() {
@@ -55,7 +56,7 @@ public class KafkaTopicManager {
             NewTopic newTopic = TopicBuilder.name(topicName)
                     .partitions(PARTITION_NUM)
                     .replicas(REPLICATION_FACTOR)
-//                    .config(TopicConfig.RETENTION_MS_CONFIG, RETENTION_MS)
+                    .config(TopicConfig.RETENTION_MS_CONFIG, RETENTION_MS)
                     .build();
             adminClient.createTopics(Collections.singletonList(newTopic)).all().get();
         } catch (InterruptedException | ExecutionException e) {
