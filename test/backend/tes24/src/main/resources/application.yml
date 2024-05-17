@@ -10,7 +10,7 @@ allowed-url:
     - /api-docs/**
     - /swagger-ui/**
     - /websocket/**
-    - /member/enqueue/**
+    - /member/**
     - /tes24/**
     - /logs/**
   anonymous:
@@ -34,7 +34,7 @@ spring:
         format_sql: false
   threads:
     virtual:
-      enabled: true
+      enabled: false
 
 springdoc:
   api-docs:
