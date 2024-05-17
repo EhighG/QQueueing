@@ -210,8 +210,8 @@ public class KafkaConsumerService {
                     partitionInfo.partition());
 
             // Get the current offset for the partition
-//            Long currentOffset = consumer.position(topicPartition);
-            Long currentOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
+            Long currentOffset = consumer.position(topicPartition);
+//            Long currentOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
 
 
             ConsumeMessageResDto consumeMessageResDto = new ConsumeMessageResDto();
@@ -223,7 +223,7 @@ public class KafkaConsumerService {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
                 System.out.println("after poll");
-                Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
+//                Long lastOffset = consumer.endOffsets(Collections.singleton(topicPartition)).get(topicPartition);
 
                 for (ConsumerRecord<String, String> record : records) {
                     log.info("record:{}", record);
@@ -235,8 +235,9 @@ public class KafkaConsumerService {
                 System.out.println("partitionNumber = " + partitionNumber);
                 System.out.println("initialOffset = " + initialOffset);
                 System.out.println("currentOffset = " + currentOffset);
-                consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
-                consumeMessageResDto.setLastOffset(currentOffset - initialOffset);
+//                consumeMessageResDto.setTotalQueueSize(lastOffset - currentOffset);
+//                consumeMessageResDto.setCurrentOffset(currentOffset);
+                consumeMessageResDto.setCurrentOffset(currentOffset - initialOffset);
 
             } catch (WakeupException e) {
                 e.printStackTrace();

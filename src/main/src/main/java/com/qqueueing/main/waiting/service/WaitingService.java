@@ -88,11 +88,14 @@ public class WaitingService {
 
     public GetWaitingInfoResDto getWaitingInfo(int partitionNo) {
         WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
-        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(), waitingStatusDto.getTotalQueueSize());
+//        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(), waitingStatusDto.getTotalQueueSize());
+        // 관리 페이지에서 보이는 totalQueueSize는 '실제로 대기열에 몇 명이 남아있는지' 여야 한다.
+        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(),
+                enterProducer.getLastEnteredIdx(partitionNo)
+                        - (waitingStatusDto.getEnterCnt().get() + waitingStatusDto.getOutCnt().get()));
     }
 
     private void checkTopic() {
-        log.info("Start -- checkTopicr");
         Set<String> topics = kafkaTopicManager.getTopics();
         // for Test -- init every time main server restart
         // disable to remove kafka topic without restart zookeeper-server, kafka-broker now
@@ -103,7 +106,6 @@ public class WaitingService {
             log.info("topic {} not present, create...", TOPIC_NAME);
             kafkaTopicManager.createTopic(TOPIC_NAME);
         }
-        log.info("End -- checkTopic");
     }
 
     /**
@@ -222,7 +224,6 @@ public class WaitingService {
      * @return
      */
     public Object enqueue(String targetUrl, HttpServletRequest request) {
-        log.info("--------------- waitingService.enqueue(), targetUrl = {} --------------------", targetUrl);
         Integer partitionNo = partitionNoMapper.get(targetUrl);
 
 //         카프카에 요청자 ip 저장 후, 대기 정보 반환
@@ -253,9 +254,11 @@ public class WaitingService {
     public void out(int partitionNo, Long order) {
         // outList는 '내 앞에 나간 사람 수' 를 알기 위해 쓰이므로, 정렬된 채로 유지
         try {
-            List<Long> outList = queues.get(partitionNo).getOutList();
+            WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+            List<Long> outList = waitingStatusDto.getOutList();
             int insertIdx = !outList.isEmpty() ? -(Collections.binarySearch(outList, order) + 1) : 0;
             outList.add(insertIdx, order);
+            waitingStatusDto.getOutCnt().incrementAndGet();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -265,13 +268,13 @@ public class WaitingService {
         WaitingStatusDto waitingStatus = queues.get(partitionNo);
         Set<String> doneSet = waitingStatus.getDoneSet();
         List<Long> outList = waitingStatus.getOutList();
-        int lastOffset = waitingStatus.getLastOffset();
+        long currentOffset = waitingStatus.getCurrentOffset();
         int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
-        Long myOrder = Math.max(oldOrder - outCntInFront - lastOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
+        Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
                 waitingStatus.getEnterCntOfLastTime());
         // test
-        result.update(oldOrder, outCntInFront, lastOffset);
+        result.update(oldOrder, outCntInFront, currentOffset);
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
             log.info("ip addr {} requested, and return tempToken", ip);
@@ -352,10 +355,11 @@ public class WaitingService {
                 BatchResDto batchRes = response.get(partitionNo);
                 waitingStatus.getDoneSet()
                         .addAll(batchRes.getCurDoneList());
-                waitingStatus.setLastOffset(batchRes.getLastOffset());
+                waitingStatus.setCurrentOffset(batchRes.getCurrentOffset());
                 cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
+                // 대기 페이지에서 보여지는 totalQueueSize는 '내가 얼마나 기다려야 하는지' 를 의미하는 값이어야 한다.
                 waitingStatus.setTotalQueueSize(
-                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getLastOffset()));
+                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getCurrentOffset()));
 
                 // capture and calculate previous time's enterCnt
                 long enterCnt = waitingStatus.getEnterCnt().get();
@@ -363,7 +367,6 @@ public class WaitingService {
                         (int)(enterCnt - waitingStatus.getEnterCntCapture())
                 );
                 waitingStatus.setEnterCntCapture(enterCnt);
-                log.info("------------------------ partitionNo = 0, consumed. lastOffset = {} ----------------------------", batchRes.getLastOffset());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -374,10 +377,10 @@ public class WaitingService {
      * 대기 끝난 사람들 삭제
      */
     private void cleanUpOutList(WaitingStatusDto waitingStatus) {
-        int lastOffset = waitingStatus.getLastOffset();
+        long currentOffset = waitingStatus.getCurrentOffset();
         waitingStatus.setOutList(
                 waitingStatus.getOutList().stream()
-                        .filter(i -> i > lastOffset)
+                        .filter(i -> i > currentOffset)
                         .collect(Collectors.toList()) // modifiable list
         );
     }
