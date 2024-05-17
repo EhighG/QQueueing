@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @Service
 public class WaitingService {
 
-    @Value("${servers.parsing}")
+    @Value("${servers.main}")
     private String serverUrl;
 
     private final ConsumerConnector consumerConnector;
