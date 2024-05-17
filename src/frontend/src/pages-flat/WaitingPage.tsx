@@ -52,7 +52,7 @@ const WaitingPage = () => {
 
   useEffect(() => {
     if (waitingInfo?.token) {
-      window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}waiting/page-req?token=${waitingInfo.token}`;
+      window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}/waiting/page-req?token=${waitingInfo.token}`;
     }
   }, [waitingInfo]);
 
@@ -65,7 +65,9 @@ const WaitingPage = () => {
   //  estimate 추정 로직
   useEffect(() => {
     if (waitingInfo) {
-      setEstimateTime(Math.round((waitingInfo.myOrder / (waitingInfo.enterCnt + 1)) * 3));
+      setEstimateTime(
+        Math.round((waitingInfo.myOrder / (waitingInfo.enterCnt + 1)) * 3)
+      );
     }
   }, [waitingInfo]);
 
