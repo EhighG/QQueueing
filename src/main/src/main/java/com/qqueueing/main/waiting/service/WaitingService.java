@@ -71,7 +71,7 @@ public class WaitingService {
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
                           @Value("${servers.front}") String queuePageFront,
                           @Value("${servers.main}") String serverOrigin,
-                          @Value("${kafka.topic-names.enter}") String topicName,
+                          @Value("${kafka.topics.enter.name}") String topicName,
                           @Value("${servers.replace-url}") String replaceUrl,
                           @Value("${testing.target-url}") String testTargetUrl) {
         this.consumerConnector = consumerConnector;
@@ -273,8 +273,7 @@ public class WaitingService {
         Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
                 waitingStatus.getEnterCntOfLastTime());
-        // test
-        result.update(oldOrder, outCntInFront, currentOffset);
+
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
             log.info("ip addr {} requested, and return tempToken", ip);
