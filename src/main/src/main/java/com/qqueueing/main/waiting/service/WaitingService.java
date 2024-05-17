@@ -371,8 +371,7 @@ public class WaitingService {
                 waitingStatus.setCurrentOffset(batchRes.getCurrentOffset());
                 cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
                 // 대기 페이지에서 보여지는 totalQueueSize는 '내가 얼마나 기다려야 하는지' 를 의미하는 값이어야 한다.
-                waitingStatus.setTotalQueueSize(
-                        (int)(batchRes.getLastOffset() - batchRes.getCurrentOffset()));
+                waitingStatus.setTotalQueueSize(batchRes.getTotalQueueSize());
 
                 // capture and calculate previous time's enterCnt
                 long enterCnt = waitingStatus.getEnterCnt().get();

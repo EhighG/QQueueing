@@ -12,7 +12,7 @@ import java.util.List;
 @ToString
 public class BatchResDto {
     private List<String> curDoneList;
-    private Integer lastOffset;
+//    private Integer lastOffset;
     private Integer totalQueueSize;
     private long currentOffset;
 }
