@@ -126,6 +126,11 @@ case $1 in
 	sudo rm src/pipes/id.txt src/pipes/pipe
     ;;
 
+  ps)
+    docker compose --env-file .env -f $COMPOSE_PATH ps -a
+    ;;
+
+
   restart)
     docker compose --env-file .env -f $COMPOSE_PATH down
     docker-compose up -d
