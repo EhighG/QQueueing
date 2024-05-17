@@ -9,7 +9,15 @@ import { Button, cls, logo } from "@/shared";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-
+import {
+  auto_mobile,
+  baby_chick,
+  dolphin,
+  egg,
+  flag,
+  front_chick,
+  hatching_chick,
+} from "@/shared/assets";
 const WaitingPage = () => {
   const router = useRouter();
   const params = useSearchParams();
@@ -60,6 +68,12 @@ const WaitingPage = () => {
 
   const { data: imageData } = useGetServiceImage(targetUrl);
 
+  useEffect(() => {
+    return () => {
+      handleButton();
+    };
+  }, []);
+
   // 대기 순번을 받은 순간 부터 timer 시작
   useEffect(() => {
     // enqueueInfo가 있을 때만 인터벌 설정
@@ -95,29 +109,24 @@ const WaitingPage = () => {
   //  estimate 추정 로직
   useEffect(() => {
     if (waitingInfo) {
-      const progress = Math.round(
-        waitingInfo.myOrder / (waitingInfo.enterCnt + 1)
-      );
+      console.log("waitingInfo", waitingInfo);
+      let prog = Math.round(waitingInfo.myOrder / (waitingInfo.enterCnt + 1));
 
-      setEstimateTime(progress * 3);
-      setProgress((Math.round(progress * 10) * 10) as ProgressValue);
+      setEstimateTime(prog * 3);
+      setProgress((Math.round(prog * 10) * 10) as ProgressValue);
     }
   }, [waitingInfo]);
 
   const handleSrc = (progress: number) => {
-    if (!progress || !waitingInfo)
-      return "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Food/Egg.png";
+    if (!progress || !waitingInfo) return egg;
 
-    if (progress < 30)
-      return "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Food/Egg.png";
+    if (progress < 30) return egg;
 
-    if (progress < 60)
-      return "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Hatching%20Chick.png";
+    if (progress < 60) return hatching_chick;
 
-    if (progress < 90)
-      return "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Baby%20Chick.png";
+    if (progress < 90) return baby_chick;
 
-    return "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Front-Facing%20Baby%20Chick.png";
+    return front_chick;
   };
 
   return (
@@ -140,10 +149,11 @@ const WaitingPage = () => {
               </h1>
               <div className="absolute right-[-50px] bottom-0 size-[50px]">
                 <Image
-                  src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Dolphin.png"
+                  src={dolphin}
                   alt="dolphin"
                   width={100}
                   height={100}
+                  unoptimized
                 />
               </div>
             </div>
@@ -184,20 +194,22 @@ const WaitingPage = () => {
             >
               <span className="block z-10 absolute size-[40px] right-[-30px] bottom-0">
                 <Image
-                  src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Automobile.png"
+                  src={auto_mobile}
                   alt="car"
                   width={500}
                   height={500}
                   style={{ transform: "scaleX(-1)" }}
+                  unoptimized
                 />
               </span>
             </div>
             <div className="absolute size-[40px] right-[-25px]">
               <Image
-                src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Chequered%20Flag.png"
+                src={flag}
                 alt="flag"
                 width={500}
                 height={500}
+                unoptimized
               />
             </div>
           </div>
@@ -241,6 +253,7 @@ const WaitingPage = () => {
                   alt="chick"
                   width={500}
                   height={500}
+                  unoptimized
                 />
               </div>
             </div>
