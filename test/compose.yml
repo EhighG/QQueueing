@@ -9,6 +9,8 @@ services:
       - 80:80
       - 443:443
     container_name: test-nginx
+    volumes:
+      - "/etc/letsencrypt:/etc/letsencrypt"
     networks:
       - test-network
 
