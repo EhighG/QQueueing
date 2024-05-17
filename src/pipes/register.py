@@ -12,6 +12,7 @@ def main(url):
 
     conf_string = Block.merge_files(path=path)
     b_nginx = Block.parse_string(conf_file=conf_string)
+    print(b_nginx.export())
     for item in b_nginx:
         if isinstance(item, Http):
             b_http = item
