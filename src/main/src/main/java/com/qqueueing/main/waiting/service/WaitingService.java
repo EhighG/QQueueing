@@ -268,10 +268,19 @@ public class WaitingService {
         WaitingStatusDto waitingStatus = queues.get(partitionNo);
         Set<String> doneSet = waitingStatus.getDoneSet();
         List<Long> outList = waitingStatus.getOutList();
+        int totalQueueSize = waitingStatus.getTotalQueueSize();
         long currentOffset = waitingStatus.getCurrentOffset();
         int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
         Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
-        GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
+        if (totalQueueSize < myOrder) {
+            log.error("Invalid Status totalQueueSize must be graater than myOrder!!");
+            log.info("totalQueueSize = {}", totalQueueSize);
+            log.info("currentOffset = {}", currentOffset);
+            log.info("outCntInFront = {} ------- need negative value check", outCntInFront);
+            log.info("myOrder = {}", myOrder);
+            log.info("oldOrder = {}", oldOrder);
+        }
+        GetMyOrderResDto result = new GetMyOrderResDto(myOrder, totalQueueSize,
                 waitingStatus.getEnterCntOfLastTime());
 
 //        if (doneSet.contains(ip)) { // waiting done
