@@ -5,11 +5,10 @@ import {
   useGetWaitingOut,
   useGetServiceImage,
 } from "@/features";
-import { Button, cls, logo } from "@/shared";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
 import {
+  Button,
+  cls,
+  logo,
   auto_mobile,
   baby_chick,
   dolphin,
@@ -17,7 +16,10 @@ import {
   flag,
   front_chick,
   hatching_chick,
-} from "@/shared/assets";
+} from "@/shared";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 const WaitingPage = () => {
   const router = useRouter();
   const params = useSearchParams();
@@ -72,7 +74,7 @@ const WaitingPage = () => {
     return () => {
       handleButton();
     };
-  }, []);
+  }, [handleButton]);
 
   // 대기 순번을 받은 순간 부터 timer 시작
   useEffect(() => {
@@ -148,13 +150,7 @@ const WaitingPage = () => {
                 접속 대기 중
               </h1>
               <div className="absolute right-[-50px] bottom-0 size-[50px]">
-                <Image
-                  src={dolphin}
-                  alt="dolphin"
-                  width={100}
-                  height={100}
-                  unoptimized
-                />
+                <Image src={dolphin} alt="dolphin" width={100} height={100} />
               </div>
             </div>
             <div className="relative size-[80px]">
@@ -199,18 +195,11 @@ const WaitingPage = () => {
                   width={500}
                   height={500}
                   style={{ transform: "scaleX(-1)" }}
-                  unoptimized
                 />
               </span>
             </div>
             <div className="absolute size-[40px] right-[-25px]">
-              <Image
-                src={flag}
-                alt="flag"
-                width={500}
-                height={500}
-                unoptimized
-              />
+              <Image src={flag} alt="flag" width={500} height={500} />
             </div>
           </div>
           <div className="flex w-full p-2 h-[120px] rounded-md border border-black">
@@ -253,7 +242,6 @@ const WaitingPage = () => {
                   alt="chick"
                   width={500}
                   height={500}
-                  unoptimized
                 />
               </div>
             </div>
