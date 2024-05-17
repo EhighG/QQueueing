@@ -41,7 +41,7 @@ spring:
 servers: # 타 서버들의 정보 기록
   consumer: qqueueing-consumer:8082
   front: qqueueing-frontend:3000/waiting
-  main: https://qqueueing/duckdns.org
+  main: https://qqueueing.duckdns.org
   parsing: http://qqueueing-frontend
 
   replace-url: http://host.docker.internal # replace url value for forwarding to target
