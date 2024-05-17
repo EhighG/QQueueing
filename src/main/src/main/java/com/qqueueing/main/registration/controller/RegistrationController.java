@@ -1,15 +1,16 @@
 package com.qqueueing.main.registration.controller;
 
 import com.qqueueing.main.common.SuccessResponse;
+import com.qqueueing.main.registration.model.GetWaitingInfoResDto;
 import com.qqueueing.main.registration.model.Registration;
 import com.qqueueing.main.registration.model.RegistrationUpdateRequest;
+import com.qqueueing.main.registration.service.ImageService;
 import com.qqueueing.main.registration.service.RegistrationService;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,6 +20,8 @@ public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
+    @Autowired
+    private ImageService imageService;
 
     @PostMapping
     public ResponseEntity<?> createRegistration(@RequestBody Registration registration) {
@@ -60,11 +63,33 @@ public class RegistrationController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/imageUrl/{id}")
+    @GetMapping("/{id}/info")
+    public ResponseEntity<?> getWaitingInfo(@PathVariable String id) throws ChangeSetPersister.NotFoundException {
+        GetWaitingInfoResDto waitingInfo = registrationService.getWaitingInfo(id);
+        String message = "조회에 성공했습니다.";
+        SuccessResponse response = new SuccessResponse(HttpStatus.OK.value(), message, waitingInfo);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/image-file/{id}")
     public ResponseEntity<?> getImage(@PathVariable String id) throws ChangeSetPersister.NotFoundException {
         String imageUrl = registrationService.getImageById(id);
-        String message = "이미지 URL 조회에 성공했습니다.";
-        SuccessResponse response = new SuccessResponse(HttpStatus.OK.value(), message, imageUrl);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.IMAGE_PNG);
+        byte[] result = imageService.sendImage(imageUrl);
+        String message = "이미지 파일 조회에 성공했습니다.";
+        SuccessResponse response = new SuccessResponse(HttpStatus.OK.value(), message, result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/image-file/by-target-url")
+    public ResponseEntity<?> getImageByTargetUrl(@RequestParam("targetUrl") String targetUrl) throws ChangeSetPersister.NotFoundException {
+        String imageUrl = registrationService.getImageByTargetUrl(targetUrl);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.IMAGE_PNG);
+        byte[] result = imageService.sendImage(imageUrl);
+        String message = "이미지 파일 조회에 성공했습니다.";
+        SuccessResponse response = new SuccessResponse(HttpStatus.OK.value(), message, result);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

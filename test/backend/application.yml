@@ -12,11 +12,12 @@ allowed-url:
     - /websocket/**
     - /member/enqueue/**
     - /tes24/**
+    - /logs/**
   anonymous:
     - /member/signup
 
 qqueue:
-  server-url: k10a401.p.ssafy.io 
+  server-url: k10a401.p.ssafy.io
   server-port: 8081
 
 spring:
@@ -29,7 +30,7 @@ spring:
   jpa:
     properties:
       hibernate:
-        show_sql: false
+        show_sql: true
         format_sql: false
   threads:
     virtual:

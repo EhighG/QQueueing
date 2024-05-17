@@ -8,12 +8,12 @@ if [[ -z $1 ]];then
 	exit 1;
 fi
 
-docker compose -f $COMPOSE_PATH down $SER$1
-docker compose -f $COMPOSE_PATH build $SER$1
+docker compose --env-file ../.env -f $COMPOSE_PATH down $SER$1
+docker compose --env-file ../.env -f $COMPOSE_PATH build $SER$1
 
 if [[ -z $2 ]];then
 	echo "no second"
-	docker compose -f $COMPOSE_PATH up $SER$1
+	docker compose --env-file ../.env -f $COMPOSE_PATH up $SER$1
 else
-	docker compose -f $COMPOSE_PATH up $2 $SER$1
+	docker compose --env-file ../.env -f $COMPOSE_PATH up $2 $SER$1
 fi

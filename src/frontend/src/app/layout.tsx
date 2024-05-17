@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { RQProvider } from "@/shared";
 
-//pretendard font 설정
+// pretendard font 설정
 const pretendard = localFont({
   src: "./PretendardVariable.woff2",
   display: "swap",
@@ -15,9 +15,6 @@ export const metadata: Metadata = {
     template: "%s | 큐잉",
     default: "큐잉",
   },
-  icons: {
-    icon: "/favicon.png",
-  },
   description: "편리한 오픈 소스 대기열 시스템 큐잉",
 };
 
@@ -27,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body className={pretendard.className}>
         <RQProvider>
           <>{children}</>

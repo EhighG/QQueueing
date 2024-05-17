@@ -2,7 +2,7 @@ import {
   WaitingListType,
   waitingRegistType,
 } from "@/entities/waitingList/type";
-import { ResponseType } from "./type";
+import { ResponseType, waitingStatusType } from "./type";
 import { axiosInstance } from "@/shared";
 import { AxiosInstance } from "axios";
 
@@ -22,13 +22,35 @@ const postWaiting = async (data: waitingRegistType) => {
     .then(({ data }) => data.result);
 };
 
-const postWaitingImage = async (data: FormData) => {
+const postWaitingImage = async (imageFile: File) => {
+  const formData = new FormData();
+  formData.append("file", imageFile);
   return await instance
-    .post("/queue/image", data, {
+    .post("/image", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     })
+    .then(({ data }) => data);
+};
+
+const getWaitingImage = async (id: string) => {
+  return await instance
+    .get(`/queue/image-file/${id}`)
+    .then(({ data }) => data.result);
+};
+
+const getWaitingStatus = async (id: string) => {
+  return await instance<ResponseType<waitingStatusType>>(
+    `/queue/${id}/info`
+  ).then(({ data }) => data.result);
+};
+
+const getServiceImage = async (targetUrl: string) => {
+  return await instance
+    .get<ResponseType<undefined | string>>(
+      `/queue/image-file/by-target-url?targetUrl=${targetUrl}`
+    )
     .then(({ data }) => data);
 };
 
@@ -69,4 +91,7 @@ export {
   postWaitingActivate,
   postWaitingDeActivate,
   deleteWaiting,
+  getWaitingImage,
+  getServiceImage,
+  getWaitingStatus,
 };

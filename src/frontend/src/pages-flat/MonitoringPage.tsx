@@ -1,57 +1,104 @@
 "use client";
-
+import { ServerLogsType } from "@/features/monitoring";
+import { useGetServerLogs } from "@/features/monitoring/query";
 import { Button, PerformanceCard, SectionTitle } from "@/shared";
 import { Gauge, gaugeClasses } from "@mui/x-charts";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const MonitoringPage = () => {
+  const { data: serverLogs } = useGetServerLogs();
+  const [data, setData] = useState<ServerLogsType>();
+
+  useEffect(() => {
+    // 데이터 패칭 로딩
+    if (serverLogs) setData(serverLogs);
+  }, [serverLogs]);
+
   const router = useRouter();
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md">
-      <SectionTitle title="모니터링" />
+      <SectionTitle title="사용자 서버" />
       <div className="flex items-center flex-1 justify-around">
-        <PerformanceCard title="성능">
+        <PerformanceCard title="CPU 사용량">
           <Gauge
             width={240}
             height={240}
-            value={60}
+            value={serverLogs ? parseInt(serverLogs.cpuUsageRate) : 0}
+            valueMax={100}
             sx={{
               [`& .${gaugeClasses.valueText}`]: {
                 fontSize: 40,
                 transform: "translate(0px, 0px)",
               },
             }}
-            text={({ value, valueMax }) => `${value} / ${valueMax}`}
+            text={({ value, valueMax }) => `${value} / ${valueMax}%`}
           />
         </PerformanceCard>
 
-        <PerformanceCard title="성능">
+        <PerformanceCard title="디스크 공간">
           <Gauge
             width={240}
             height={240}
-            value={60}
+            valueMax={
+              serverLogs
+                ? Math.round(
+                    parseInt(serverLogs.diskAllBytes) / 1024 / 1024 / 1024
+                  )
+                : 0
+            }
+            value={
+              serverLogs
+                ? Math.round(
+                    ((parseInt(serverLogs.diskAllBytes) -
+                      parseInt(serverLogs.diskAvailableBytes)) /
+                      1024 /
+                      1024 /
+                      1024) *
+                      100
+                  ) / 100
+                : 0
+            }
             sx={{
               [`& .${gaugeClasses.valueText}`]: {
                 fontSize: 40,
                 transform: "translate(0px, 0px)",
               },
             }}
-            text={({ value, valueMax }) => `${value} / ${valueMax}`}
+            text={({ value, valueMax }) => `${value} / ${valueMax}GB`}
           />
         </PerformanceCard>
-        <PerformanceCard title="성능">
+        <PerformanceCard title="메모리">
           <Gauge
             width={240}
             height={240}
-            value={60}
+            valueMax={
+              serverLogs
+                ? Math.round(
+                    (parseInt(serverLogs.memoryAllBytes) / 1024 / 1024 / 1024) *
+                      100
+                  ) / 100
+                : 0
+            }
+            value={
+              serverLogs
+                ? Math.round(
+                    ((parseInt(serverLogs.memoryAllBytes) -
+                      parseInt(serverLogs.nodeMemoryMemAvailableBytes)) /
+                      1024 /
+                      1024 /
+                      1024) *
+                      100
+                  ) / 100
+                : 0
+            }
             sx={{
               [`& .${gaugeClasses.valueText}`]: {
                 fontSize: 40,
                 transform: "translate(0px, 0px)",
               },
             }}
-            text={({ value, valueMax }) => `${value} / ${valueMax}`}
+            text={({ value, valueMax }) => `${value} / ${valueMax}GB`}
           />
         </PerformanceCard>
       </div>

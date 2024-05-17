@@ -1,3 +1,7 @@
+type requestCountType = {
+  tomcatRequestCount: string;
+};
+
 type VirtualThreadType = {
   activeThreadCount: number;
   queuedTaskCount: number;
@@ -86,6 +90,8 @@ type ServerLogsType = {
   nodeMemoryMemAvailableBytes: string;
   diskAvailableBytes: string;
   cpuUsageRate: string;
+  diskAllBytes: string;
+  memoryAllBytes: string;
 };
 
 export type {
@@ -100,4 +106,5 @@ export type {
   JvmMemoryMaxType,
   Measurement,
   ServerLogsType,
+  requestCountType,
 };

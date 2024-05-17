@@ -2,12 +2,12 @@ package com.qqueueing.main.registration.service;
 
 import com.qqueueing.main.registration.model.Registration;
 import com.qqueueing.main.registration.model.RegistrationUpdateRequest;
+import com.qqueueing.main.registration.model.GetWaitingInfoResDto;
 import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.waiting.service.WaitingService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -36,8 +36,9 @@ public class RegistrationService {
         Registration savedRegistration = registrationRepository.save(registration);
         // 등록 스크립트 실행
         scriptExecService.execShell(registration.getTargetUrl(), "register");
-        // 대기열 기능에서 쓰이는 url-파티션 키 매핑에 추가한다.
-        waitingService.addUrlPartitionMapping(registration.getTargetUrl());
+        // 대기열 활성화
+        waitingService.addUrlPartitionMapping(registration);
+        waitingService.activate(registration);
         return savedRegistration;
     }
 
@@ -53,7 +54,7 @@ public class RegistrationService {
     public Registration updateRegistrationById(String id, RegistrationUpdateRequest request) throws ChangeSetPersister.NotFoundException {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
-        registration.update(request.getTargetUrl(), request.getMaxCapacity(), request.getProcessingPerMinute(), request.getServiceName(), registration.getQueueImageUrl());
+        registration.update(request.getTargetUrl(), request.getMaxCapacity(), request.getProcessingPerMinute(), request.getServiceName(), request.getQueueImageUrl());
         return registrationRepository.save(registration);
     }
 
@@ -64,7 +65,15 @@ public class RegistrationService {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
         scriptExecService.execShell(registration.getTargetUrl(), "delete");
+        // needed when remove/deactivate queue
+        waitingService.removeInMemoryQueueInfo(registration.getPartitionNo());
         registrationRepository.deleteById(id);
+    }
+
+    public GetWaitingInfoResDto getWaitingInfo(String id) throws ChangeSetPersister.NotFoundException {
+        Registration registration = registrationRepository.findById(id)
+                .orElseThrow(ChangeSetPersister.NotFoundException::new);
+        return waitingService.getWaitingInfo(registration.getPartitionNo());
     }
 
     public String getImageById(String id) throws ChangeSetPersister.NotFoundException {
@@ -73,12 +82,13 @@ public class RegistrationService {
         return registration.getQueueImageUrl();
     }
 
-//    public Registration createRegistration(Registration registration) {
-//        return registrationRepository.save(registration);
-//    }
-//    public Registration createRegistration(Registration registration) {
-//        return registrationRepository.save(registration);
-//    }
+    public String getImageByTargetUrl(String targetUrl) {
+        Registration registration = registrationRepository.findByTargetUrl(targetUrl);
+        if (registration == null || registration.getQueueImageUrl() == null) {
+            return null;
+        }
+        return registration.getQueueImageUrl();
+    }
 
 
     private int findEmptyPartitionNo() {

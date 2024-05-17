@@ -9,6 +9,8 @@ services:
       - 80:80
       - 443:443
     container_name: test-nginx
+    volumes:
+      - "/etc/letsencrypt:/etc/letsencrypt"
     networks:
       - test-network
 
@@ -39,47 +41,17 @@ services:
     container_name: test-mysqldb
     volumes:
       - mysqldb-backup:/backup
-      - ./test_dump.sql:/test_dump.sql
+        # - ./test_dump.sql:/test_dump.sql
     networks:
       - test-network
 
 
 
 
- #  prometheus:
- #    build: ./prometheus
- #    image: prometheus
- #    container_name: prometheus
- #    ports:
- #      - 3001:9090
- #    volumes:
- #      - /opt/bitnami/prometheus/data:/opt/bitnami/prometheus/data
- #    command:
- #      - "--web.enable-lifecycle"
- #    user: root
- #    networks:
- #      - test-network
- #
- #  node-exporter:
- #    build: ./node-exporter
- #    image: node-exporter
- #    container_name: node-exporter
- #    ports:
- #      - 3003:9100
- #
- #  grafana:
- #    build: ./grafana
- #    image: grafana
- #    depends_on:
- #      - prometheus
- #    container_name: grafana
- #    ports:
- #      - 3002:3000
- #    networks:
- #      - test-network
 
 volumes:
   mysqldb-backup: {}
+  nginx-volume: {}
 
 networks:
   test-network: {}

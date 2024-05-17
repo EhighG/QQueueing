@@ -1,2 +1,5 @@
 id.txt
 log.txt
+test.sh
+*.pkl
+__pycache__

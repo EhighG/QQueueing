@@ -27,7 +27,7 @@ public class ImageService {
     private String saveFile(MultipartFile file) throws IOException {
         // 파일 저장 로직
         String fileName = UUID.randomUUID().toString() + "." + getFileExtension(file.getOriginalFilename());
-        Path filePath = Paths.get("/home/qqueueing/uploads", fileName);
+        Path filePath = Paths.get("/var/lib/uploads", fileName);
         Files.createDirectories(filePath.getParent());
 
         try {
@@ -42,12 +42,12 @@ public class ImageService {
 
         // 파일 경로 확인
         File savedFile = filePath.toFile();
-        if (savedFile.exists()) {
+        if (savedFile.isFile()) {
             System.out.println("파일이 정상적으로 저장되었습니다: " + savedFile.getAbsolutePath());
         } else {
             System.out.println("파일 저장에 실패했습니다.");
         }
-        return savedFile.getAbsolutePath() + fileName;
+        return savedFile.getAbsolutePath();
     }
 
     private String getFileExtension(String fileName) {
@@ -56,5 +56,21 @@ public class ImageService {
             return ""; // 확장자가 없는 경우
         }
         return fileName.substring(lastIndexOf + 1);
+    }
+
+    public byte[] sendImage(String filePath) {
+//        String filePath = "사진 경로";
+        try {
+            byte[] imageBytes = imageToByteArray(filePath);
+            return imageBytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static byte[] imageToByteArray(String filePath) throws IOException {
+        File imageFile = new File(filePath);
+        return Files.readAllBytes(imageFile.toPath());
     }
 }

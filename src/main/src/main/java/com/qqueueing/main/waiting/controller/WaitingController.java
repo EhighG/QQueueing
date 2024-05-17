@@ -8,11 +8,14 @@ import com.qqueueing.main.waiting.service.WaitingService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 
 @Slf4j
@@ -59,48 +62,61 @@ public class WaitingController {
     }
 
     @GetMapping("/queue-page")
-    public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl,
-                                          HttpServletRequest request) {
+    public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl) {
         log.info("targetUrl = {}", targetUrl);
         log.info("queue-page 포워딩 api called");
-        return ResponseEntity
-                .ok(waitingService.getQueuePage(targetUrl, request));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+//
+        String result = waitingService.getQueuePage(targetUrl);
+//
+//        return new ResponseEntity<>(result, HttpHeaders.EMPTY, HttpStatus.OK);
+//        String result = new String(waitingService.getQueuePage(targetUrl).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+        return ResponseEntity.ok().headers(headers).body(result);
     }
 
     @PostMapping
     public ResponseEntity<?> enqueue(HttpServletRequest request) {
         String targetUrl = request.getHeader("Target-URL");
-        log.info("enqueue api called");
+        log.info("-------------------------- enqueue api called. in controller -------------------------------");
         log.info("targetUrl = {}", targetUrl);
         Object result = waitingService.enqueue(targetUrl, request);
         return ResponseEntity
                 .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
-
     }
 
 
     @PostMapping("/order")
-    public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto,
-                                        HttpServletRequest request) {
+    public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto) {
         GetMyOrderResDto myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getPartitionNo(),
                 getMyOrderReqDto.getOrder(),
-                getMyOrderReqDto.getIdVal(),
-                request);
+                getMyOrderReqDto.getIdVal());
         return ResponseEntity
                 .ok(myOrderRes);
     }
 
     @GetMapping("/page-req")
-    public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token,
-                                             HttpServletRequest request) {
+    public ResponseEntity<?> forwardToTarget(@RequestParam(value = "token") String token) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+//        headers.setContentType(MediaType.TEXT_HTML);
+//        headers.set("Content-Encoding", "UTF-8");
+
+        String result = waitingService.forward(token);
         log.info("target page 포워딩 api called");
-        return ResponseEntity
-                .ok(waitingService.forward(token, request));
+
+        return ResponseEntity.ok().headers(headers).body(result);
+
+//        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+//        return ResponseEntity
+//                .ok(waitingService.forward(token, request));
     }
 
     @GetMapping("/out")
-    public ResponseEntity<Void> out(@RequestParam int partitionNo,
-                                    @RequestParam Long order) {
+    public ResponseEntity<Void> out(@RequestParam(value = "partitionNo") int partitionNo,
+                                    @RequestParam(value = "order") Long order) {
         waitingService.out(partitionNo, order);
         return ResponseEntity
                 .ok()
@@ -132,6 +148,7 @@ public class WaitingController {
         ResponseEntity<?> result = waitingService.parsing(address);
 
         return result;
+
     }
 
 //    @GetMapping("/testQueuePage")

@@ -5,6 +5,7 @@ export {
   postWaitingActivate,
   postWaitingDeActivate,
   deleteWaiting,
+  getWaitingStatus
 } from "./api";
 
 export {
@@ -14,8 +15,12 @@ export {
   usePostWaitingActivate,
   usePostWaitingDeActivate,
   useDeleteWaiting,
+  useGetWaitingImage,
+  useGetServiceImage,
+  usePostWaitingImage,
+  useGetWaitingStatus
 } from "./query";
 
 export type { ResponseType } from "./type";
 
-export { ImageRegist, InputForm, Performance } from "./component";
+export { ImageRegist, InputForm, TargetPage } from "./component";

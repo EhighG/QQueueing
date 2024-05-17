@@ -1,6 +1,7 @@
 package com.qqueueing.main.waiting.service;
 
 
+import com.qqueueing.main.registration.model.GetWaitingInfoResDto;
 import com.qqueueing.main.registration.model.Registration;
 import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.waiting.model.BatchResDto;
@@ -16,7 +17,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -32,12 +32,16 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
 @Transactional
 @Service
 public class WaitingService {
+
+    @Value("${servers.main}")
+    private String serverUrl;
 
     private final ConsumerConnector consumerConnector;
     private final TargetApiConnector targetApiConnector;
@@ -59,13 +63,17 @@ public class WaitingService {
     // for test
     @Setter
     private String endpoint = "/waiting";
+    private final String TEST_IP = "ipStringValueForTest";
+    private final String TEST_TOKEN = "testTokenStringValue";
+    private final String TEST_TARGET_URL;
 
     public WaitingService(ConsumerConnector consumerConnector, TargetApiConnector targetApiConnector,
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
                           @Value("${servers.front}") String queuePageFront,
                           @Value("${servers.main}") String serverOrigin,
-                          @Value("${kafka.topic-names.enter}") String topicName,
-                          @Value("${servers.replace-url}") String replaceUrl) {
+                          @Value("${kafka.topics.enter.name}") String topicName,
+                          @Value("${servers.replace-url}") String replaceUrl,
+                          @Value("${testing.target-url}") String testTargetUrl) {
         this.consumerConnector = consumerConnector;
         this.targetApiConnector = targetApiConnector;
         this.enterProducer = enterProducer; // init every partitions
@@ -75,10 +83,19 @@ public class WaitingService {
         this.SERVER_ORIGIN = serverOrigin;
         this.TOPIC_NAME = topicName;
         this.REPLACE_URL = replaceUrl;
+        this.TEST_TARGET_URL = testTargetUrl;
+    }
+
+    public GetWaitingInfoResDto getWaitingInfo(int partitionNo) {
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+//        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(), waitingStatusDto.getTotalQueueSize());
+        // 관리 페이지에서 보이는 totalQueueSize는 '실제로 대기열에 몇 명이 남아있는지' 여야 한다.
+        return new GetWaitingInfoResDto(waitingStatusDto.getEnterCntCapture(),
+                enterProducer.getLastEnteredIdx(partitionNo)
+                        - (waitingStatusDto.getEnterCnt().get() + waitingStatusDto.getOutCnt().get()));
     }
 
     private void checkTopic() {
-        log.info("Start -- checkTopicr");
         Set<String> topics = kafkaTopicManager.getTopics();
         // for Test -- init every time main server restart
         // disable to remove kafka topic without restart zookeeper-server, kafka-broker now
@@ -89,7 +106,6 @@ public class WaitingService {
             log.info("topic {} not present, create...", TOPIC_NAME);
             kafkaTopicManager.createTopic(TOPIC_NAME);
         }
-        log.info("End -- checkTopic");
     }
 
     /**
@@ -115,11 +131,8 @@ public class WaitingService {
                 });
     }
 
-    public void addUrlPartitionMapping(String targetUrl) {
-        Registration registration = registrationRepository.findByTargetUrl(targetUrl);
-        if (registration != null) {
-            partitionNoMapper.put(registration.getTargetUrl(), registration.getPartitionNo());
-        }
+    public void addUrlPartitionMapping(Registration registration) {
+        partitionNoMapper.put(registration.getTargetUrl(), registration.getPartitionNo());
     }
 
     /**
@@ -154,12 +167,16 @@ public class WaitingService {
         }
         Registration registration = registrationRepository.findByPartitionNo(partitionNo);
 
-        activePartitions.remove(partitionNo);
-        queues.remove(partitionNo);
+        removeInMemoryQueueInfo(partitionNo);
 
         // update mongodb data
         registration.setIsActive(false);
         registrationRepository.save(registration);
+    }
+
+    public void removeInMemoryQueueInfo(int partitionNo) {
+        activePartitions.remove(partitionNo);
+        queues.remove(partitionNo);
     }
 
     /**
@@ -176,11 +193,9 @@ public class WaitingService {
         }
         log.info("partitionNo = {}", partitionNo);
         UriComponentsBuilder uriBuilder;
+
         if (activePartitions.contains(partitionNo)) { // 대기 필요
             log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
-//            uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + QUEUE_PAGE_API)
-//                    .queryParam("Target-URL", targetUrl);
-//            return uriBuilder.build().toUri();
             return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + targetUrl);
         } else { // 대기 불필요
             log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
@@ -191,9 +206,15 @@ public class WaitingService {
         }
     }
 
-    public String getQueuePage(String targetUrl, HttpServletRequest request) {
-        String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl, request).getBody();
+    public String getQueuePage(String targetUrl) {
+        Integer partitionNo = partitionNoMapper.get(targetUrl);
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        if (waitingStatusDto == null) {
+            throw new RuntimeException("wrong targetUrl");
+        }
 
+        log.info("targetUrl = {}", targetUrl);
+        String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl).getBody();
         return parseHtmlPage(QUEUE_PAGE_FRONT, html);
     }
 
@@ -203,7 +224,6 @@ public class WaitingService {
      * @return
      */
     public Object enqueue(String targetUrl, HttpServletRequest request) {
-        log.info("targetUrl = {}", targetUrl);
         Integer partitionNo = partitionNoMapper.get(targetUrl);
 
 //         카프카에 요청자 ip 저장 후, 대기 정보 반환
@@ -234,24 +254,29 @@ public class WaitingService {
     public void out(int partitionNo, Long order) {
         // outList는 '내 앞에 나간 사람 수' 를 알기 위해 쓰이므로, 정렬된 채로 유지
         try {
-            List<Long> outList = queues.get(partitionNo).getOutList();
-            int insertIdx = -(Collections.binarySearch(outList, order) + 1);
+            WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+            List<Long> outList = waitingStatusDto.getOutList();
+            int insertIdx = !outList.isEmpty() ? -(Collections.binarySearch(outList, order) + 1) : 0;
             outList.add(insertIdx, order);
+            waitingStatusDto.getOutCnt().incrementAndGet();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public GetMyOrderResDto getMyOrder(int partitionNo, Long oldOrder, String ip, HttpServletRequest request) {
+    public GetMyOrderResDto getMyOrder(int partitionNo, Long oldOrder, String ip) {
         WaitingStatusDto waitingStatus = queues.get(partitionNo);
         Set<String> doneSet = waitingStatus.getDoneSet();
         List<Long> outList = waitingStatus.getOutList();
-        int lastOffset = waitingStatus.getLastOffset();
-        int outCntInFront = - (Collections.binarySearch(outList, oldOrder) + 1);
-        Long myOrder = oldOrder - outCntInFront - lastOffset; // newOrder
-        GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize());
-        if (doneSet.contains(ip)) { // waiting done
-            log.info("ip addr {} requested, and return tempToken");
+        long currentOffset = waitingStatus.getCurrentOffset();
+        int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
+        Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
+        GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
+                waitingStatus.getEnterCntOfLastTime());
+
+//        if (doneSet.contains(ip)) { // waiting done
+        if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
+            log.info("ip addr {} requested, and return tempToken", ip);
             doneSet.remove(ip);
             result.setToken(createTempToken(waitingStatus.getTargetUrl()));
         }
@@ -261,30 +286,41 @@ public class WaitingService {
     /**
      * 타겟 프론트 페이지 포워딩 메소드
      */
-    public String forward(String token, HttpServletRequest request) {
+    public String forward(String token) {
         String targetUrl = targetUrlMapper.get(token);
+        // for test
+        if (token.equals(TEST_TOKEN)) {
+            targetUrl = TEST_TARGET_URL;
+        }
+        // check and remove temp token
         log.info("forward target Url = {}", targetUrl);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
         targetUrlMapper.remove(token);
-        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
-        log.info("targetUrl = {}", targetUrl);
 
-        String html = targetApiConnector.forward(targetUrl, request).getBody();
-        log.info("forwording result = \n\n{}", html);
-        return html;
+        // get target page
+        Integer partitionNo = partitionNoMapper.get(targetUrl);
+
+        // make internal request url
+        targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
+        log.info("targetPage request url = {}", targetUrl);
+
+        String targetPage = targetApiConnector.forward(targetUrl).getBody();
+        // increase enter count if queue is active
+        WaitingStatusDto waitingStatusDto = queues.get(partitionNo);
+        if (waitingStatusDto != null) {
+            waitingStatusDto.getEnterCnt().incrementAndGet(); // add just before return considering possible error in forwarding
+        }
+        return targetPage;
     }
 
     private String parseHtmlPage(String targetUrl, String html) {
-//        String[] urlSplitList = targetUrl.split("qqueueing-frontend:3000");
-//        String endPoint = urlSplitList[1];
-        // parse target url(external request -> internal)
-        log.info("html : " + html);
 
-        String newHtml = html.replace("/_next", endpoint + "/_next");
-        log.info("newHtml : " + newHtml);
-        return newHtml;
+        html = html.replace("/_next", endpoint + "/_next");
+        html = html.replace("favicon", "waiting/favicon");
+
+        return html;
     }
 
     private String extractEndpoint(String targetUrl) {
@@ -303,14 +339,13 @@ public class WaitingService {
     }
 
     @Async
-    @Scheduled(cron = "0/5 * * * * *") // 매 분 0초부터, 5초마다
+    @Scheduled(cron = "* * * * * *") // 매 초
     public void getNext() {
         try {
             if (activePartitions.isEmpty()) {
                 return;
             }
             Map<Integer, BatchResDto> response = consumerConnector.getNext(activePartitions); // 대기 완료된 ip 목록을 가져온다.
-            System.out.println("response = " + response);
             Set<Integer> partitionNos = response.keySet();
 
             for (Integer partitionNo : partitionNos) {
@@ -319,10 +354,19 @@ public class WaitingService {
                 BatchResDto batchRes = response.get(partitionNo);
                 waitingStatus.getDoneSet()
                         .addAll(batchRes.getCurDoneList());
-                waitingStatus.setLastOffset(batchRes.getLastOffset());
-                waitingStatus.setTotalQueueSize(batchRes.getTotalQueueSize());
+                waitingStatus.setCurrentOffset(batchRes.getCurrentOffset());
+                cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
+                // 대기 페이지에서 보여지는 totalQueueSize는 '내가 얼마나 기다려야 하는지' 를 의미하는 값이어야 한다.
+                waitingStatus.setTotalQueueSize(
+                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getCurrentOffset()));
+
+                // capture and calculate previous time's enterCnt
+                long enterCnt = waitingStatus.getEnterCnt().get();
+                waitingStatus.setEnterCntOfLastTime(
+                        (int)(enterCnt - waitingStatus.getEnterCntCapture())
+                );
+                waitingStatus.setEnterCntCapture(enterCnt);
             }
-            cleanUpOutList();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -331,16 +375,13 @@ public class WaitingService {
     /**
      * 대기 끝난 사람들 삭제
      */
-    private void cleanUpOutList() {
-        for (int partitionNo : queues.keySet()) {
-            WaitingStatusDto waigtingStatus = queues.get(partitionNo);
-            int lastOffset = waigtingStatus.getLastOffset();
-            waigtingStatus.setOutList(
-                    waigtingStatus.getOutList().stream()
-                            .filter(i -> i > lastOffset)
-                            .toList()
-            );
-        }
+    private void cleanUpOutList(WaitingStatusDto waitingStatus) {
+        long currentOffset = waitingStatus.getCurrentOffset();
+        waitingStatus.setOutList(
+                waitingStatus.getOutList().stream()
+                        .filter(i -> i > currentOffset)
+                        .collect(Collectors.toList()) // modifiable list
+        );
     }
 
     public ResponseEntity<?> parsing(String address) {
@@ -348,10 +389,16 @@ public class WaitingService {
         address = "http://" + address;
         System.out.println("address : " + address);
 
+        HttpHeaders headers = new HttpHeaders();
+
+        String splitUrl = serverUrl.split("http://")[1];
+
+        String url = splitUrl.split(":3001")[0];
+
         if(address.contains("image")) {
 
-            log.info("image 파일 요청됨");
-            String[] imageAddressSplit1 = address.split("p.ssafy.io");
+
+            String[] imageAddressSplit1 = address.split(url);
             String imageAddressSplit1result = imageAddressSplit1[1];
 
             String[] imageAddressSplit2 = imageAddressSplit1result.split("/_next");
@@ -365,15 +412,12 @@ public class WaitingService {
             String imageAddress = imageAddressSplit4[0];
 
             address = address.replace(imageAddress, "");
-            log.info("parsing된 address : " + address);
 
             String imageUrl = address;
 
             try {
-                log.info("imageUrl : " + imageUrl);
                 byte[] imageBytes = getImageBytes(imageUrl);
 
-                HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.IMAGE_PNG);
 
                 return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
@@ -384,31 +428,44 @@ public class WaitingService {
             }
         }
 
+        // favicon 일 경우
+        if(address.contains("favicon")) {
+
+            String serverURL = serverUrl + "/favicon.ico";
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
+
+            String result = response.getBody().replace("favicon", "waiting/favicon");
+
+            headers.setContentType(new MediaType("image", "x-icon", StandardCharsets.UTF_8));
+            return ResponseEntity.ok().headers(headers).body(result);
+        }
+
         String[] addressSplit = address.split("_next");
         String targetUrl = "/_next" + addressSplit[1];
 
-        String[] endPointSplit = address.split("p.ssafy.io");
+        String[] endPointSplit = address.split(url);
         String[] endPointSplit2 = endPointSplit[1].split("/_next");
         String endPoint = endPointSplit2[0];
 
-        log.info("endPoint = " + endPoint);
-
-        String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
-
-        log.info("serverURL = " + serverURL);
+        String serverURL = serverUrl + ":3001" + targetUrl;
 
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getMessageConverters().stream()
-                .filter(StringHttpMessageConverter.class::isInstance)
-                .map(StringHttpMessageConverter.class::cast)
-                .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
-
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-        log.info("결과 : " + response.getBody());
+        log.info("response : " + response.getBody());
+
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
-        return ResponseEntity.ok().body(result);
+        // css 일 경우
+        if(address.contains("css")) {
+
+            headers.setContentType(new MediaType("text", "css", StandardCharsets.UTF_8));
+            return ResponseEntity.ok().headers(headers).body(result);
+        }
+
+        headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+        return ResponseEntity.ok().headers(headers).body(result);
 
     }
 

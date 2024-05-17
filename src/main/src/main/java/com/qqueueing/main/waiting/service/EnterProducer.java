@@ -26,7 +26,7 @@ public class EnterProducer {
     private ObjectMapper mapper = new ObjectMapper();
 
     public EnterProducer(KafkaTemplate<Long, String> enterMsgTemplate,
-                         @Value("${kafka.topic-names.enter}") String topicName) {
+                         @Value("${kafka.topics.enter.name}") String topicName) {
         log.info("Start -- EnterProducer constructor");
         this.kafkaTemplate = enterMsgTemplate;
         this.TOPIC_NAME = topicName;
@@ -71,8 +71,12 @@ public class EnterProducer {
 
         // 파티션 번호를 키로 사용하여 메시지 보냄
         kafkaTemplate.send(TOPIC_NAME, partitionNo, key, sampleIp);
-
+        log.info("-------------------------------------- produced. idx = {} ----------------------------", curIdx);
         return new EnterQueueResDto(partitionNo, curIdx, sampleIp);
+    }
+
+    public long getLastEnteredIdx(int partitionNo) {
+        return ids.get(partitionNo).get() - 1;
     }
 }
 

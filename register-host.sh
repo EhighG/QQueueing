@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# not yest tested, but this file might be useful when nginx is in host
+
 # set variables
 API=qqueueing-api
 API_URL=$(docker network inspect qqueueing_qqueueing-network | jq -r '.[] | .Containers[] | {(.Name): .IPv4Address}| select( ."qqueueing-qqueueing-main-1") | .["qqueueing-qqueueing-main-1"]'| cut -d'/' -f1)
