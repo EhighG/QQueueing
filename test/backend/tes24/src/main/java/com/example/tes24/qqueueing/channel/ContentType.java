@@ -1,4 +1,4 @@
-package com.example.tes24.qqueue_module.http;
+package com.example.tes24.qqueueing.channel;
 
 public enum ContentType {
     SERIALIZE("application/octet-stream"),

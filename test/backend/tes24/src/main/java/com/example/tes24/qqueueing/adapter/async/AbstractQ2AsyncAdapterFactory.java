@@ -1,9 +1,8 @@
-package com.example.tes24.qqueue_module.asyncadapter;
+package com.example.tes24.qqueueing.adapter.async;
 
-import com.example.tes24.qqueue_module.http.Q2HttpHeader;
+import com.example.tes24.qqueueing.channel.Q2HttpHeader;
 
 public abstract class AbstractQ2AsyncAdapterFactory implements Q2AsyncAdapterFactory {
-
     @Override
     public Q2AsyncAdapter getInstance(Q2HttpHeader httpHeaderInfo) {
         return createQ2Adapter(httpHeaderInfo);

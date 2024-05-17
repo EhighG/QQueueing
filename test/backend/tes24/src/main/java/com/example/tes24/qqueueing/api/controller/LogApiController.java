@@ -1,8 +1,8 @@
-package com.example.tes24.qqueue_module.api.controller;
+package com.example.tes24.qqueueing.api.controller;
 
-import com.example.tes24.qqueue_module.api.dto.SearchLogsResDto;
-import com.example.tes24.qqueue_module.api.response.SuccessResponse;
-import com.example.tes24.qqueue_module.api.service.LogApiService;
+import com.example.tes24.qqueueing.api.dto.SearchLogsResDto;
+import com.example.tes24.qqueueing.api.response.SuccessResponse;
+import com.example.tes24.qqueueing.api.service.LogApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

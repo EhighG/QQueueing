@@ -1,7 +1,7 @@
-package com.example.tes24.qqueue_module.syncadapter;
+package com.example.tes24.qqueueing.adapter.sync;
 
-import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
-import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
+import com.example.tes24.qqueueing.dto.Q2ClientRequest;
+import com.example.tes24.qqueueing.dto.Q2ServerResponse;
 
 /**
  * Adapter for communicate with The QQueueing api server.

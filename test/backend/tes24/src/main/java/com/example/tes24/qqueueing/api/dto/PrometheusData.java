@@ -1,4 +1,4 @@
-package com.example.tes24.qqueue_module.api.dto;
+package com.example.tes24.qqueueing.api.dto;
 
 import lombok.Builder;
 import lombok.Data;

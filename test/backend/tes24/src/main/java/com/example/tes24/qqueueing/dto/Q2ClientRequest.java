@@ -1,4 +1,4 @@
-package com.example.tes24.qqueue_module.dto;
+package com.example.tes24.qqueueing.dto;
 
 import java.io.Serial;
 import java.io.Serializable;

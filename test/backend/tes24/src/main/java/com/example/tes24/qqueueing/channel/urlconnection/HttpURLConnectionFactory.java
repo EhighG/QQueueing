@@ -1,6 +1,6 @@
-package com.example.tes24.qqueue_module.http.urlconnection;
+package com.example.tes24.qqueueing.channel.urlconnection;
 
-import com.example.tes24.qqueue_module.http.Q2HttpHeader;
+import com.example.tes24.qqueueing.channel.Q2HttpHeader;
 
 import java.net.HttpURLConnection;
 

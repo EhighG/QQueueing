@@ -1,6 +1,6 @@
-package com.example.tes24.qqueue_module.syncadapter;
+package com.example.tes24.qqueueing.adapter.sync;
 
-import com.example.tes24.qqueue_module.http.Q2HttpHeader;
+import com.example.tes24.qqueueing.channel.Q2HttpHeader;
 
 abstract class AbstractQ2SyncAdapterFactory implements Q2SyncAdapterFactory {
     @Override

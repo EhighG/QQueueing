@@ -1,4 +1,4 @@
-package com.example.tes24.qqueue_module.api.response;
+package com.example.tes24.qqueueing.api.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
