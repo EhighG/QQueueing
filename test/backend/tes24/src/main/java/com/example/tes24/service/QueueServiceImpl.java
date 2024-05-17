@@ -1,10 +1,10 @@
 package com.example.tes24.service;
 
 import com.example.tes24.dto.EnqueueResponse;
-import com.example.tes24.qqueue_module.Q2Client;
-import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
-import com.example.tes24.qqueue_module.http.Q2HttpHeader;
-import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
+//import com.example.tes24.qqueue_module.Q2Client;
+//import com.example.tes24.qqueue_module.dto.Q2ClientRequest;
+//import com.example.tes24.qqueue_module.http.Q2HttpHeader;
+//import com.example.tes24.qqueue_module.dto.Q2ServerResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +36,7 @@ public class QueueServiceImpl implements QueueService {
 //                .defaultHeader("Authorization", "Bearer " + token)
                 .build();
 
-        return CompletableFuture.completedFuture(restClient.post().retrieve().body(EnqueueResponse.class));
+        //return CompletableFuture.completedFuture(restClient.post().retrieve().body(EnqueueResponse.class));
 
 //        Q2Client q2Client = Q2Client.getQ2Client();
 //        Q2ClientRequest request = new Q2ClientRequest();
@@ -48,7 +48,7 @@ public class QueueServiceImpl implements QueueService {
 //        Q2ServerResponse response = q2Client.request(Q2HttpHeader.defaultQ2HttpHeader(), request);
 //        log.info(response.toString());
 //
-//        return CompletableFuture.completedFuture(new EnqueueResponse(-1L, response.getClientId()));
+        return CompletableFuture.completedFuture(new EnqueueResponse(-1L, "1"));
     }
 
     @Override

@@ -2,14 +2,23 @@ jwt:
   key: 94fb6d2d7c74a2bd820a55ad5ef89c2ff6a6da2d4df01a4dff7e5ae0a74b2032
   access-expiration: 15
   refresh-expiration: 60
+
 allowed-url:
   urls:
-    - /prototype
+    - /member/dequeue
   patterns:
-    - /prototype/**
     - /api-docs/**
     - /swagger-ui/**
     - /websocket/**
+    - /member/enqueue/**
+    - /tes24/**
+    - /logs/**
+  anonymous:
+    - /member/signup
+
+qqueue:
+  server-url: k10a401.p.ssafy.io
+  server-port: 8081
 
 spring:
   datasource:
@@ -23,6 +32,9 @@ spring:
       hibernate:
         show_sql: true
         format_sql: false
+  threads:
+    virtual:
+      enabled: true
 
 springdoc:
   api-docs:
@@ -38,3 +50,6 @@ springdoc:
     disabled: true
   package-to-scan: com.example.tes24
 
+logging:
+  level:
+    org.springframework.security: off

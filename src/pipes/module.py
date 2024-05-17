@@ -1,62 +1,37 @@
+from __future__ import annotations
+import re
+from typing import Optional, Union, List, Set
+import os
+import glob
+import pickle
+import copy
+
+
 class Block:
 
-    def __init__(self, type, index=0, bodies=None, port=0, host='', cond=''):
+    def __init__(self, body: List(Block) = None):
         '''
         params: type,
         return: none
         '''
-        # this can be server, location, if, statement
-        self.type = type
-        # this is index in super block
-        self.index = index
-        # this can be list of string(statement), block
-        self.bodies = [] if bodies is None else bodies
+        self.body = [] if body is None else body
 
-        self.port = port
-        self.host = host
-        self.cond = cond
-
-        # this differs type by type
-#        if self.type == 'server':
-#            if not port:
-#                raise Exception("no port")
-#            self.port = port
-#            self.host = host
-#        elif self.type == 'location':
-#            if not cond:
-#                raise Exception("no condition statement")
-#            self.cond = cond
-#        elif self.type == 'if':
-#            if not cond:
-#                raise Exception("no condition statement")
-#        elif self.type == 'statement':
-#            if len(self.bodies) != 1:
-#                raise Exception("statement must not have other")
-#        elif self.type in ['http', 'types', 'nginx', 'event']:
-#            pass
-#        else:
-#            raise Exception("check your type")
-#        print('this is block')
-
-    def push(self, ind, val):
+    def push(self, ind: int, val: Block) -> None:
         '''
         params: ind, val
-        return: none
+        return: None
         '''
-        #print(type(val), val.type, '::', val)
-        if not isinstance(val, Block): raise Exception("input Block")
         if ind == -1:
-            self.bodies.append(val)
+            self.body.append(val)
         else:
-            self.bodies.insert(ind, val)
+            self.body.insert(ind, val)
 
-    def pop(self, ind):
+    def pop(self, ind: int) -> None:
         '''
         params: ind
         return: none
         '''
-        del self.bodies[ind]
-        #print('this is pop')
+        del self.body[ind]
 
     def find_by_type(self, type):
         '''
@@ -64,7 +39,7 @@ class Block:
         params: type
         return: [ind]
         '''
-        ans = [i for i, body in enumerate(self.bodies) if body.type == type]
+        ans = [i for i, body in enumerate(self.body) if body.type == type]
         return ans
 
     def find(self, type, **kwargs):
@@ -93,70 +68,115 @@ class Block:
             except:
                 raise Exception("input cond")
         # dup val, and case of server have to be considered
-        for i, body in enumerate(self.bodies):
+        for i, body in enumerate(self.body):
             if body.type == type:
                 for key in match[type]:
                     if body[key] == kwargs[key]:
                         return i
         return -1
 
-    def get(self, pos):
-        '''
-        params: pos
-        return: block or string
-        '''
-        return self.bodies[pos]
-
     def export(self, indent=0):
         '''
         params: none
         return: string
         '''
-        if self.type == 'statement':
-            return '\t'*indent + self.bodies[0] + '\n'
-        conf_string = ''
-        start = end = '\t' * indent
-        if self.type == 'server':
-            start += 'server {\n'
-            end += '}\n'
-        elif self.type == 'location':
-            start += f'location {self.cond} {{\n'
-            end += '}\n'
-        elif self.type == 'if':
-            start += f'if {self.cond} {{\n'
-            end += '}\n'
-        elif self.type == 'types':
-            start += 'types {\n'
-            end += '}\n'
-        elif self.type == 'events':
-            start += 'events {\n'
-            end += '}\n'
-        elif self.type == 'http':
-            start += 'http {\n'
-            end += '}\n'
-
         conf_string += start
-        for body in self.bodies:
-            conf_string +=  body.export(indent+1)
+        for body in self.body:
+            conf_string += body.export(indent+1)
         conf_string += end
         return conf_string
         
     def __str__(self):
-        if self.type == 'statement':
-            return f'{self.bodies[0]}'
-        return f'{self.type}'
+        return f"{self.__class__.__name__}"
 
     def __repr__(self):
-        return f'{self.type}'
+        return f"{self.__class__.__name__}"
+    
+    def __len__(self) -> int:
+        return len(self.body)
+
+    def __getitem__(self, index: int) -> Block:
+        return self.body[index]
+
+    def __setitem__(self, index: int, value: Block) -> None:
+        self.body[index] = value
+
+    def __iter__(self):
+        return iter(self.body)
 
     @staticmethod
-    def file_import(conf_file):
+    def parse_string(conf_file: str) -> Block:
+        start = -1
+        b_nginx = Nginx()
+        stack: List(Block) = [b_nginx]
+        for i, text in enumerate(conf_file):
+            if text == '{':
+                check_str = conf_file[start:i].split()
+                type = check_str[0]
+                if type == 'http':
+                    stack.append(Http())
+                elif type == 'types':
+                    stack.append(Types())
+                elif type == 'server':
+                    stack.append(Server())
+                elif type == 'events':
+                    stack.append(Events())
+                elif type == 'mail':
+                    stack.append(Mail())
+                elif type == 'upstream':
+                    stack.append(Upstream())
+                elif type == 'location':
+                    cond = ' '.join(check_str[1:])
+                    stack.append(Location(condition=cond))
+                elif type == 'if':
+                    cond = ' '.join(check_str[1:])
+                    stack.append(If(condition=cond))
+                start = -1
+            elif text == '}':
+                close_block = stack.pop()
+                stack[-1].push(ind=-1, val=close_block)
+                start = -1
+            elif text == ';':
+                b_statement = Statement(conf_file[start:i+1])
+                stack[-1].push(ind=-1, val=b_statement)
+                start = -1
+            elif start < 0 and text.isalnum():
+                start = i  # server, location, types, http, if
+        return b_nginx
+
+
+    @staticmethod
+    def merge_files(path):
+        '''
+        merge nginx.conf file.
+        remove comments.
+        params : path
+        return : string
+        '''
+        # merge files
+        conf_dir = os.path.dirname(path)
+        if len(conf_dir) != 0: os.chdir(conf_dir)
+
+        include_directives = '^\s*include\s*(.*);'
+        tmptext=''
+        with open(path+'/nginx.conf', 'r') as f:
+            for line in f.readlines():
+                included = re.findall(include_directives, line)
+                if len(included) > 0:
+                    include_files = glob.glob(included[0])
+                    for file in include_files:
+                        if os.path.exists(file):
+                            with open(file, 'r') as ff:
+                                include_con = ff.read()
+                                tmptext += include_con
+                else:
+                    tmptext += line
 
         # remove comments
         del_cmt_str = ''
         quote_flag = False
         comment_flag = False
-        for i, text in enumerate(conf_file):
+        for i, text in enumerate(tmptext):
             if text in ['\'', '\"'] and not comment_flag:
                 quote_flag = not quote_flag
             elif text == '#' and not quote_flag:
@@ -166,58 +186,307 @@ class Block:
 
             if not comment_flag:
                 del_cmt_str += text
+        return del_cmt_str
+
+    @staticmethod
+    def find_host_end(url):
+        url = url.strip()
+        start_index = 0
+        host = endpoint = 0
+        if url.startswith("http"):
+            start_index = 8 if url[4] == 's' else 7
+
+        for i, val in enumerate(url):
+            if i < start_index: continue
+            if val == '/':
+                host = url[start_index:i]
+                endpoint = url[i:]
+                break
+        return [host, endpoint]
+
+    def save_file(self, path: str, overwrite=True):
+        if os.path.exists(path):
+            if overwrite:
+                os.remove(path)
+            else:
+                raise FileExistsError()
+        with open(path, 'w') as f:
+            f.write(self.export())
+
+    def save_pkl(self, path: str, overwrite=True):
+        """save string to pickle file
+        overwrite true by default.
+        """
+        if os.path.exists(path):
+            if overwrite:
+                os.remove(path)
+            else:
+                raise FileExistsError()
+        with open(path, 'wb') as f:
+            pickle.dump(obj=self, file=f)
+        print('pickle perfectly saved.')
+        
+    @staticmethod
+    def load_pkl(path: str) -> Block:
+        """load pickle file
+        """
+        if not os.path.exists(path):
+            raise FileNotFoundError()
+        with open(path, 'rb') as f:
+            new_block = pickle.load(file=f)
+        return new_block
 
 
-        start = -1
-        std = -1
-        directive_type = ''
-        length = len(del_cmt_str)
+class Statement(Block):
+    '''
+    Statement has exact one statement.
+    Endswith ;
+    usage: set, listen, server_name, proxy~~
+    Statement has directive part, arguement part.
+    Each of them are str type.
 
-        nginx_block = Block(type='nginx')
-        stack = [nginx_block]
-        for i, text in enumerate(del_cmt_str):
-            if text == '{':
-                check_str = del_cmt_str[start:i].split()
-                cond = ''
-                if check_str[0] in ['http', 'types', 'server', 'events', 'mail']:
-                    directive_type = check_str[0]
-                elif check_str[0] in ['location', 'if']:
-                    directive_type = check_str[0]
-                    cond = ' '.join(check_str[1:])
-                new_block = Block(type=directive_type, cond=cond)
-                #print(check_str[0], '||',cond)
-                stack.append(new_block)
-                start = -1
-            elif text == '}':
-                close_block = stack.pop()
-                #print('close_block', close_block)
-                stack[-1].push(ind=-1, val=close_block)
-                start = -1
-            elif text == ';':
-                statement_block = Block(type='statement', bodies=[del_cmt_str[start:i+1]])
-                stack[-1].push(ind=-1, val=statement_block)
-                start = -1
-            elif start < 0 and text.isalnum():
-                start = i  # server, location, types, http, if
-        return nginx_block
+    '''
+    def __init__(self, body: str = None) -> None:
+        if body is None:
+            raise Exception("Statement must have one statement.")
+        elif not body.endswith(';'):
+            raise Exception("Statement must end with ;.")
+        # this is only for query
+        tmp = body.split()
+        self.directive = tmp[0]
+        self.arguement = ' '.join(tmp[1:])
+        super().__init__(body=[body])
+
+    def push(self, ind: int, val: Block) -> None:
+        raise Exception("Statement can not be pushed.")
+
+    def pop(self, ind: int) -> None:
+        raise Exception("Statement can not be popped.")
+
+    def export(self, indent: int = 0) -> str:
+        return '\t'*indent + self.body[0] + '\n'
+
+    def __len__(self) -> int:
+        raise Exception("Statement doesn't have length.")
+
+    def __getitem__(self, index: int) -> Block:
+        raise Exception("Statement doesn't have body")
+
+    def __setitem__(self, index: int, value: Block) -> None:
+        raise Exception("Statement doesn't have body")
+
+    def __iter__(self):
+        raise Exception("Statement doesn't have body")
+
+
+class If(Block):
+
+    """Docstring for If.
+    If has exact one condition.
+    The condition is wrapped in parantheses.
+    If has List of Statements.
+    """
+    def __init__(self, condition: str, body: List = None):
+        super().__init__(body=body)
+        if not ( condition.startswith('(') and condition.endswith(')') ):
+            raise Exception("not invalid condition.")
+        self.condition = condition
+        
+    def export(self, indent: int = 0) -> str:
+        start = end = '\t' * indent
+        string = start + 'if ' + self.condition + ' {\n'
+        for item in self.body:
+            string += item.export(indent=indent+1)
+        string += end + '}\n'
+        return string
+
+class Location(Block):
+
+    """Docstring for Location.
+    Location has exact one condition.
+    Location has List of Statements.
+    """
+    def __init__(self, condition: str, body: List = None):
+        super().__init__(body=body)
+        self.condition = condition
+        
+    def export(self, indent: int = 0) -> str:
+        start = end = '\t' * indent
+        string = start + 'location ' + self.condition + ' {\n'
+        for item in self.body:
+            string += item.export(indent=indent+1)
+        string += end + '}\n'
+        return string
+        
+
+class Upstream(Block):
+
+    """Docstring for Upstream.
+    Upstream has List of Statements.
+    Upstream has name.
+    """
+    def __init__(self, name: str, body: List(Statement) = None):
+        super().__init__(body=body)
+        self.name = name
+
+    def export(self, indent: int = 0) -> str:
+        start = end = '\t' * indent
+        string = start + 'upstream ' + self.name + ' {\n'
+        for item in self.body:
+            string += item.export(indent=indent+1)
+        string += end + '}\n'
+        return string
+
+
+class Server(Block):
+
+    """Docstring for Server.
+    Server has List of Statements.
+    Server can have ports, hosts.
+    """
+    def __init__(self, ports: Set(str) = None, hosts: Set(str) = None, body: List(Block) = None):
+        super().__init__(body=body)
+        self.ports: Set(str) = set() if ports is None else ports
+        self.hosts: Set(str) = set() if hosts is None else hosts
+
+        # set default values for easy query
+        for item in self.body:
+            if isinstance(item, Statement):
+                if item.directive == 'listen':
+                    for jtem in item.arguement.split():
+                        self.ports.add(jtem.strip(';'))
+                elif item.directive == 'server_name':
+                    for jtem in item.arguement.split():
+                        self.hosts.add(jtem.strip(';'))
+
+    def push(self, ind: int, val: Block) -> None:
+        if isinstance(val, Statement):
+            if val.directive == 'listen':
+                for jtem in val.arguement.split():
+                    self.ports.add(jtem.strip(';'))
+            elif val.directive == 'server_name':
+                for jtem in val.arguement.split():
+                    self.hosts.add(jtem.strip(';'))
+        super().push(ind=ind, val=val)
+
+    def pop(self, ind: int) -> None:
+        val: Block = self.body[ind]
+        if isinstance(val, Statement):
+            if val.directive == 'listen':
+                for jtem in val.arguement.split():
+                    self.ports.remove(jtem.strip(';'))
+            elif val.directive == 'server_name':
+                for jtem in val.arguement.split():
+                    self.hosts.remove(jtem.strip(';'))
+        super().pop(ind=ind)
+
+    def export(self, indent: int = 0) -> str:
+        start = end = '\t' * indent
+        string = start + 'server ' + '{\n'
+        for item in self.body:
+            string += item.export(indent=indent+1)
+        string += end + '}\n'
+        return string
+
+
+class Types(Block):
+    """Docstring for Types.
+    Types has List of Statements.
+    """
+    def __init__(self, body: List(Statement) = None) -> None:
+        super().__init__(body=body)
+
+    def export(self, indent: int = 0) -> str:
+        start = end = '\t' * indent
+        string = start + 'types ' + '{\n'
+        for item in self.body:
+            string += item.export(indent=indent+1)
+        string += end + '}\n'
+        return string
+
+
+class Http(Block):
+    """Docstring for Http.
+    Http has List of Statements, Types, Server, Upstream.
+    """
+    def __init__(self, body: List(Block) = None) -> None:
+        super().__init__(body=body)
+
+    def export(self, indent: int = 0) -> str:
+        start = end = '\t' * indent
+        string = start + 'http ' + '{\n'
+        for item in self.body:
+            string += item.export(indent=indent+1)
+        string += end + '}\n'
+        return string
+
+
+class Events(Block):
+    """Docstring for Events.
+    Events has List of Statements.
+    """
+    def __init__(self, body: List(Statement) = None) -> None:
+        super().__init__(body=body)
+
+    def export(self, indent: int = 0) -> str:
+        start = end = '\t' * indent
+        string = start + 'events ' + '{\n'
+        for item in self.body:
+            string += item.export(indent=indent+1)
+        string += end + '}\n'
+        return string
+
+
+class Mail(Block):
+    """Docstring for Mail.
+    Mail has List of Statements.
+    """
+    def __init__(self, body: List(Statement) = None) -> None:
+        super().__init__(body=body)
+
+    def export(self, indent: int = 0) -> str:
+        start = end = '\t' * indent
+        string = start + 'mail ' + '{\n'
+        for item in self.body:
+            string += item.export(indent=indent+1) + '\n'
+        string += end + '}\n'
+        return string
+
+
+class Nginx(Block):
+    '''
+    Nginx has exact one Http, Events.
+    Events has List of Statements.
+
+    '''
+    def __init__(self, body: Optional[List[Union[Http, Events, Statement]]] = None):
+        # need to check exact one value inputted
+        super().__init__(body=body)
+        
+    def export(self, indent: int = -1) -> str:
+        string = ''
+        for item in self.body:
+            string += item.export(indent=indent+1) 
+        return string
+
+
+
+
+
 
 if __name__ == '__main__':
-    lst = [1, 2]
 
-    # later, i need to erase comments first
-
-    http_block = None
-    
+    b_nginx = None
     with open("./tmp.txt", 'r') as f:
-        http_block = Block.file_import(f.read())
-    print(http_block.export())
-    nginx_block: Block = http_block.bodies[0]
-    print(nginx_block.bodies)
-    print(nginx_block.find_by_type(type='server'))
+        b_nginx = Block.parse_string(f.read())
 
-    tmp_block = Block(type='server')
-    nginx_block.push(ind=11, val=tmp_block)
+    #print(b_nginx.export())
+    save_file = './nginx.pkl'
+    #b_nginx.save_pkl(path=save_file)
+    c_nginx = Block.load_pkl(save_file)
+    print(c_nginx.export())
 
-    print(http_block.export())
-    print(nginx_block.bodies)
-    print(nginx_block.find_by_type(type='server'))
+
+#    print(http_block.export())
+#    print(nginx_block.bodies)
+#    print(nginx_block.find_by_type(type='server'))
