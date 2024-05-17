@@ -47,8 +47,9 @@ servers: # 타 서버들의 정보 기록
 
 kafka:
   broker: qqueueing-kafka:9092
-  topic-names:
-    enter: queueing.waiting-queue.enter2 # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
+  topics:
+    enter:
+      name: queueing.waiting-queue.enter2 # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
   partition:
     max-index: 20
 
