@@ -1,5 +1,18 @@
 name: qqueueing
 services:
+  test:
+    image: mysql:8.0.36
+    environment:
+      MYSQL_DATABASE: queing
+      MYSQL_USER: hak
+      MYSQL_PASSWORD: hak
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysqldb-backup:/backup
+        # - "${ROOT_DIR}/src/pipes:/pipes"
+    networks:
+      - qqueueing-network
+
   qqueueing-main:
     build:
       context: .
@@ -11,7 +24,7 @@ services:
     networks:
       - qqueueing-network
     volumes:
-      - "/home/qqueueing/S10P31A401/src/pipes:/pipes"
+      - "${ROOT_DIR}/src/pipes:/pipes"
     depends_on:
       - qqueueing-kafka
       - qqueueing-mongo
@@ -117,15 +130,6 @@ services:
     networks:
       - qqueueing-network
 
-  test:
-    image: ubuntu:focal
-    ports:
-      - "9093:9092"
-    command: sleep infinity
-    container_name: testing
-    networks:
-      - qqueueing-network
-
 volumes:
   zookeeper_data:
     driver: local
@@ -134,4 +138,5 @@ volumes:
   mysqldb-backup: {}
 
 networks:
-  qqueueing-network: {}
+  qqueueing-network:
+    external: true
