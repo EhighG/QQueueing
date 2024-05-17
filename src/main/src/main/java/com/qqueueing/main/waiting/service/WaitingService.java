@@ -409,7 +409,7 @@ public class WaitingService {
 
             address = address.replace(imageAddress, "");
 
-            String imageUrl = address;
+            String imageUrl = serverUrl + serverPort + "/_next" + address.split("/_next")[1];
 
             try {
                 byte[] imageBytes = getImageBytes(imageUrl);
