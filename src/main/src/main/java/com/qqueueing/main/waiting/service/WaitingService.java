@@ -272,6 +272,9 @@ public class WaitingService {
         long currentOffset = waitingStatus.getCurrentOffset();
         int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
         Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
+        if (myOrder > enterProducer.getLastEnteredIdx(partitionNo)) {
+            log.error("lastEnteredIdx if greater than myOrder");
+        }
         if (totalQueueSize < myOrder) {
             log.error("==================Invalid Status!!! totalQueueSize must be greater than myOrder!!============");
             log.info("totalQueueSize = {}", totalQueueSize);
@@ -369,7 +372,7 @@ public class WaitingService {
                 cleanUpOutList(waitingStatus); // 대기하다 나간 사람들 중, 대기 만료된 값 삭제
                 // 대기 페이지에서 보여지는 totalQueueSize는 '내가 얼마나 기다려야 하는지' 를 의미하는 값이어야 한다.
                 waitingStatus.setTotalQueueSize(
-                        (int)(enterProducer.getLastEnteredIdx(partitionNo) - batchRes.getCurrentOffset()));
+                        (int)(batchRes.getLastOffset() - batchRes.getCurrentOffset()));
 
                 // capture and calculate previous time's enterCnt
                 long enterCnt = waitingStatus.getEnterCnt().get();
