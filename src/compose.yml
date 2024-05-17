@@ -1,17 +1,5 @@
 name: qqueueing
 services:
-  test:
-    image: mysql:8.0.36
-    environment:
-      MYSQL_DATABASE: queing
-      MYSQL_USER: hak
-      MYSQL_PASSWORD: hak
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - mysqldb-backup:/backup
-        # - "${ROOT_DIR}/src/pipes:/pipes"
-    networks:
-      - qqueueing-network
 
   qqueueing-main:
     build:
@@ -28,6 +16,7 @@ services:
     depends_on:
       - qqueueing-kafka
       - qqueueing-mongo
+      - qqueueing-consumer
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

@@ -20,6 +20,7 @@ def main():
                 print('already init executed')
                 exit(0)
 
+    # TODO: this should aim exact target server block.
     servers = []
     for item in b_http:
         if isinstance(item, Server):
@@ -46,6 +47,7 @@ def main():
             ind=top,
             val=Location(condition='/waiting', body=[
                 Statement('proxy_set_header address $host$request_uri;'),
+                Statement('proxy_set_header scheme $scheme;'),
                 If(condition='($uri ~ ^(.*)_next/ )', body=[
                     Statement('rewrite ^(.*)$ /waiting/next break;'),
                     Statement('proxy_pass http://qqueueing-main:8081;')

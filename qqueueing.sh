@@ -14,8 +14,11 @@ CONTAINER_NAME=$(docker ps -a | grep ">80/tcp"| awk '{print $NF}')
 ################################################################################
 
 usage() {
+    printf "\n"
+	printf "\tIf this is first time using qqueueing, please command install.\n"
     printf "Usage: \n\t QQueueuing [command]"
     printf "\n\nAvailable Commands:"
+    printf "\n\ninstall | i \t\t\t initialize"
     printf "\n\tstart\t\t\tStart all services"
     printf "\n\tstop\t\t\tStop all services"
     printf "\n\trestart\t\t\tRestart all stopped and running services"
@@ -26,6 +29,9 @@ usage() {
 }
 
 make_env() {
+	echo "Please enter your url, e.g. https://www.ssafy.com"
+	read url
+
 	tee .env << EOF
 ################################################################################
 ####################################SETTING#####################################
@@ -35,7 +41,11 @@ make_env() {
 
 # Enter the domain name of your web site. 
 # e.g. URL=https:/www.ssafy.com
-URL=
+URL=$url
+
+# This port is admin page fo waiting room.
+# default is 3001, but if you use this port already, please change it.
+PORT=3001
 
 # This var should not be changed unless you change your project directory.
 ROOT_DIR=$(git rev-parse --show-toplevel)
@@ -64,42 +74,41 @@ fi
 # need to check user set files
 case $1 in
   install|i)
-	# TODO: check if .env exists, if not make env
-
-	
-	# TODO: check if .env file is valid
-	# TODO: if not, wait for user's input
-	# TODO: if good, execute default setting
-	# TODO: default -> insert hosts to .env, application.yml
-	# TODO: default -> execute init.py
-
-  
-  
-
-  ;;
-
-
-
-
-
-  build)
-	if [[ -z $2 ]];then
-	  printf "\tno extra input\n"
-	  printf "\tbuild all application\n"
-	fi
-    docker compose -f $COMPOSE_PATH build
-	echo "build images to run containers"
-	;;
-
-  
-
-  start)
-	sudo docker network create qqueueing-network
-	# if end, need to be deleted
 	if [[ ! -e .env ]];then
 		make_env
 	fi
+	# TODO: check if .env file is valid
+	# TODO: if not, wait for user's input
+	# from .env, read url info.
+	source .env
 
+	# check qqueueing-network exists
+	if sudo docker network ls | grep -w "qqueueing-network" > /dev/null 2>&1; then
+		echo "qqueueing-network already exists."
+	else
+		sudo docker network create qqueueing-network
+	fi
+	sudo docker network connect qqueueing-network $CONTAINER_NAME 2> /dev/null
+
+	# initalizing user's nginx
+	if [[ -d $NGINX_PATH ]];then
+		sudo rm -rf $NGINX_PATH
+	fi
+	sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
+	if [[ -z $NGINX_PATH/nginx.conf.save ]]; then
+		echo "archiving original file"
+		sudo docker exec $CONTAINER_NAME cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.save
+	fi
+
+	# inital config
+	sudo python3 src/scripts/insert_domain.py $URL
+	# In current, all server blocks get initial setting
+	sudo python3 src/pipes/init.py
+	sudo docker cp $NGINX_PATH/nginx.conf $CONTAINER_NAME:/etc/nginx/nginx.conf
+	sudo rm -rf $NGINX_PATH
+  ;;
+
+  start)
 	if [[ -e src/pipes/id.txt ]];then
 		echo "reconnect pipe"
 		sudo kill $(cat src/pipes/id.txt)
@@ -111,20 +120,6 @@ case $1 in
 	echo $! > src/pipes/id.txt
     docker compose --env-file .env -f $COMPOSE_PATH build
     docker compose --env-file .env -f $COMPOSE_PATH up -d
-
-	# initalizing user's nginx
-	# it is only for nginx in docker
-	sudo docker network connect qqueueing-network $CONTAINER_NAME 2> /dev/null
-	if [[ -d $NGINX_PATH ]];then
-		sudo rm -rf $NGINX_PATH
-	fi
-	sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
-	if [[ -z $NGINX_PATH/nginx.conf.save ]]; then
-		echo "archiving original file"
-		sudo docker exec $CONTAINER_NAME cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.save
-	fi
-	sudo python3 ./src/pipes/init.py
-	sudo docker cp $NGINX_PATH/nginx.conf $CONTAINER_NAME:/etc/nginx/nginx.conf
 
 	sudo docker exec $CONTAINER_NAME nginx -t
 	sudo docker exec $CONTAINER_NAME nginx -s reload
@@ -140,6 +135,14 @@ case $1 in
     docker compose --env-file .env -f $COMPOSE_PATH ps -a
     ;;
 
+  build)
+	if [[ -z $2 ]];then
+	  printf "\tno extra input\n"
+	  printf "\tbuild all application\n"
+	fi
+    docker compose -f $COMPOSE_PATH build
+	echo "build images to run containers"
+	;;
 
   restart)
     docker compose --env-file .env -f $COMPOSE_PATH down
