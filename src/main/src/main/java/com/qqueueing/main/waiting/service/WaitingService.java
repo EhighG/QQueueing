@@ -103,7 +103,7 @@ public class WaitingService {
 //            kafkaTopicManager.deleteTopic(TOPIC_NAME);
 //        }
         if (!topics.contains(TOPIC_NAME)) {
-            log.info("topic {} not present, create...", TOPIC_NAME);
+//            log.info("topic {} not present, create...", TOPIC_NAME);
             kafkaTopicManager.createTopic(TOPIC_NAME);
         }
     }
@@ -147,7 +147,7 @@ public class WaitingService {
         registrationRepository.save(registration);
 //        // re-init partition
         consumerConnector.clearPartition(partitionNo);
-        log.info("activation end");
+//        log.info("activation end");
         // re-init auto increment client order
         enterProducer.activate(partitionNo);
     }
@@ -185,20 +185,20 @@ public class WaitingService {
      * @return redirect url; queue-page req api url || target-page req api url
      */
     public URI enter(String targetUrl) {
-        log.info("targetUrl = {}", targetUrl);
-        log.info("activePartitions = {}", activePartitions);
+//        log.info("targetUrl = {}", targetUrl);
+//        log.info("activePartitions = {}", activePartitions);
         Integer partitionNo = partitionNoMapper.get(targetUrl);
         if (partitionNo == null) {
-            log.error("wrong target url; proxy path applied to wrong target");
+//            log.error("wrong target url; proxy path applied to wrong target");
         }
-        log.info("partitionNo = {}", partitionNo);
+//        log.info("partitionNo = {}", partitionNo);
         UriComponentsBuilder uriBuilder;
 
         if (activePartitions.contains(partitionNo)) { // 대기 필요
-            log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
+//            log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
             return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + targetUrl);
         } else { // 대기 불필요
-            log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
+//            log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
             String tempToken = createTempToken(targetUrl); // 토큰 생성
             uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + TARGET_PAGE_URI)
                     .queryParam("token", tempToken);
@@ -213,7 +213,7 @@ public class WaitingService {
             throw new RuntimeException("wrong targetUrl");
         }
 
-        log.info("targetUrl = {}", targetUrl);
+//        log.info("targetUrl = {}", targetUrl);
         String html = targetApiConnector.forwardToWaitingPage(QUEUE_PAGE_FRONT, targetUrl).getBody();
         return parseHtmlPage(QUEUE_PAGE_FRONT, html);
     }
@@ -243,11 +243,11 @@ public class WaitingService {
     private String extractClientIp(HttpServletRequest request) {
         // 요청이 프록시 등을 거쳤을 때, 원래 ip주소를 담는 헤더
         String ip = request.getHeader("X-Forwarded-For");
-        log.info("client ip(X-Forwarded-For) = {}", ip);
+//        log.info("client ip(X-Forwarded-For) = {}", ip);
         if (ip != null) return ip;
 
         String remoteAddr = request.getRemoteAddr();
-        log.info("request.remoteAddr = {}", remoteAddr);
+//        log.info("request.remoteAddr = {}", remoteAddr);
         return remoteAddr;
     }
 
@@ -273,12 +273,13 @@ public class WaitingService {
         int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
         Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         if (totalQueueSize < myOrder) {
-            log.error("Invalid Status totalQueueSize must be graater than myOrder!!");
+            log.error("==================Invalid Status!!! totalQueueSize must be greater than myOrder!!============");
             log.info("totalQueueSize = {}", totalQueueSize);
             log.info("currentOffset = {}", currentOffset);
             log.info("outCntInFront = {} ------- need negative value check", outCntInFront);
             log.info("myOrder = {}", myOrder);
             log.info("oldOrder = {}", oldOrder);
+            log.info("============================ End ====================================");
         }
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, totalQueueSize,
                 waitingStatus.getEnterCntOfLastTime());
@@ -286,7 +287,7 @@ public class WaitingService {
 
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
-            log.info("ip addr {} requested, and return tempToken", ip);
+//            log.info("ip addr {} requested, and return tempToken", ip);
             doneSet.remove(ip);
             result.setToken(createTempToken(waitingStatus.getTargetUrl()));
         }
@@ -303,7 +304,7 @@ public class WaitingService {
             targetUrl = TEST_TARGET_URL;
         }
         // check and remove temp token
-        log.info("forward target Url = {}", targetUrl);
+//        log.info("forward target Url = {}", targetUrl);
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
@@ -314,7 +315,7 @@ public class WaitingService {
 
         // make internal request url
         targetUrl = REPLACE_URL + extractEndpoint(targetUrl);
-        log.info("targetPage request url = {}", targetUrl);
+//        log.info("targetPage request url = {}", targetUrl);
 
         String targetPage = targetApiConnector.forward(targetUrl).getBody();
         // increase enter count if queue is active
