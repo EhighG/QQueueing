@@ -84,16 +84,11 @@ public class RegistrationService {
 
     public String getImageByTargetUrl(String targetUrl) {
         Registration registration = registrationRepository.findByTargetUrl(targetUrl);
-//                .orElseThrow(() -> new DocumentNotFoundException("Registration not found with targetUrl: " + targetUrl));
+        if (registration == null || registration.getQueueImageUrl() == null) {
+            return null;
+        }
         return registration.getQueueImageUrl();
     }
-
-//    public Registration createRegistration(Registration registration) {
-//        return registrationRepository.save(registration);
-//    }
-//    public Registration createRegistration(Registration registration) {
-//        return registrationRepository.save(registration);
-//    }
 
 
     private int findEmptyPartitionNo() {
