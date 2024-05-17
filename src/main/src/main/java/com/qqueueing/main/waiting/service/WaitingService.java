@@ -40,6 +40,9 @@ import java.util.stream.Collectors;
 @Service
 public class WaitingService {
 
+    @Value("${servers.main}")
+    private String serverUrl;
+
     private final ConsumerConnector consumerConnector;
     private final TargetApiConnector targetApiConnector;
     private final EnterProducer enterProducer;
@@ -389,9 +392,14 @@ public class WaitingService {
 
         HttpHeaders headers = new HttpHeaders();
 
+        String splitUrl = serverUrl.split("http://")[1];
+
+        String url = splitUrl.split(":3001")[0];
+
         if(address.contains("image")) {
 
-            String[] imageAddressSplit1 = address.split("p.ssafy.io");
+
+            String[] imageAddressSplit1 = address.split(url);
             String imageAddressSplit1result = imageAddressSplit1[1];
 
             String[] imageAddressSplit2 = imageAddressSplit1result.split("/_next");
@@ -424,7 +432,7 @@ public class WaitingService {
         // favicon 일 경우
         if(address.contains("favicon")) {
 
-            String serverURL = "http://k10a401.p.ssafy.io:3001/favicon.ico";
+            String serverURL = serverUrl + "/favicon.ico";
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
@@ -437,16 +445,16 @@ public class WaitingService {
         String[] addressSplit = address.split("_next");
         String targetUrl = "/_next" + addressSplit[1];
 
-        String[] endPointSplit = address.split("p.ssafy.io");
+        String[] endPointSplit = address.split(url);
         String[] endPointSplit2 = endPointSplit[1].split("/_next");
         String endPoint = endPointSplit2[0];
 
-        String serverURL = "http://k10a401.p.ssafy.io:3001" + targetUrl;
+        String serverURL = serverUrl + ":3001" + targetUrl;
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
 
-//        log.info("response : " + response.getBody());
+        log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
