@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @Service
 public class WaitingService {
 
-    @Value("${servers.main}")
+    @Value("${servers.parsing}")
     private String serverUrl;
 
     private final ConsumerConnector consumerConnector;
@@ -386,15 +386,11 @@ public class WaitingService {
 
     public ResponseEntity<?> parsing(String address, String scheme) {
 
-        String serverPort = ":3001";
-
-        address = scheme + "://" + address;
+        String serverPort = ":3000";
 
         HttpHeaders headers = new HttpHeaders();
 
-        String splitUrl = serverUrl.split(scheme + "://")[1];
-
-        String url = splitUrl.split(serverPort)[0];
+        String url = address.split("/waiting")[0];
 
         if(address.contains("image")) {
 
