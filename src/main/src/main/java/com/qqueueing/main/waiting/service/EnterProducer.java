@@ -43,15 +43,10 @@ public class EnterProducer {
                     sendResult.whenComplete((response, exception) -> {
                         if (exception != null) {
                             exception.printStackTrace();
-//                            System.out.println("error!");
-                        }
-                        if (response != null) {
-//                            log.info("response = {}", response);
+                            log.error("partition {} initialize Error error!", num);
                         }
                     });
-//                    log.info("while enterProducer.initialize... init partition {}", num);
                 });
-//        log.info("End -- EnterProducer.initialize()");
     }
 
     public void activate(int partitionNo) {
@@ -66,12 +61,8 @@ public class EnterProducer {
         }
         Long curIdx = id.getAndIncrement();
         String sampleIp = message + curIdx;
-
-//        log.info("기본 토픽 : " + kafkaTemplate.getDefaultTopic());
-
         // 파티션 번호를 키로 사용하여 메시지 보냄
         kafkaTemplate.send(TOPIC_NAME, partitionNo, key, sampleIp);
-//        log.info("-------------------------------------- produced. idx = {} ----------------------------", curIdx);
         return new EnterQueueResDto(partitionNo, curIdx, sampleIp);
     }
 

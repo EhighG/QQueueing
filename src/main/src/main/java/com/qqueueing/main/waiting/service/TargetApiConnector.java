@@ -23,7 +23,7 @@ public class TargetApiConnector {
 
     public ResponseEntity<String> forward(String targetUrl) {
         HttpEntity<String> httpEntity = new HttpEntity<>(getDefaultHeaders());
-//        log.info("targetUrl = {}", targetUrl);
+        log.info("forwarding... targetUrl = {}", targetUrl);
         return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, String.class);
     }
 
