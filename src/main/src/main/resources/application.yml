@@ -50,8 +50,10 @@ servers: # 타 서버들의 정보 기록
 
 kafka:
   broker: k10a401.p.ssafy.io:9092
-  topic-names:
-    enter: test3
+  topics:
+    enter:
+      name: test3
+      retention-ms: 259200000 # 3 days
 
   partition:
     max-index: 20
