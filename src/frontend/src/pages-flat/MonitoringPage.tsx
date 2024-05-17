@@ -50,12 +50,13 @@ const MonitoringPage = () => {
             value={
               serverLogs
                 ? Math.round(
-                    (parseInt(serverLogs.diskAllBytes) -
+                    ((parseInt(serverLogs.diskAllBytes) -
                       parseInt(serverLogs.diskAvailableBytes)) /
                       1024 /
                       1024 /
-                      1024
-                  )
+                      1024) *
+                      100
+                  ) / 100
                 : 0
             }
             sx={{

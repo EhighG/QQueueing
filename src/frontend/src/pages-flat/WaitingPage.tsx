@@ -65,7 +65,7 @@ const WaitingPage = () => {
   //  estimate 추정 로직
   useEffect(() => {
     if (waitingInfo) {
-      setEstimateTime((waitingInfo.myOrder / (waitingInfo.enterCnt + 1)) * 3);
+      setEstimateTime(parseInt((waitingInfo.myOrder / (waitingInfo.enterCnt + 1)) * 3));
     }
   }, [waitingInfo]);
 

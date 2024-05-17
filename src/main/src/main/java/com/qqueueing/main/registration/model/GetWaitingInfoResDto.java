@@ -6,9 +6,9 @@ import lombok.Setter;
 @Getter @Setter
 public class GetWaitingInfoResDto {
     private long enterCnt;
-    private int totalQueueSize;
+    private long totalQueueSize;
 
-    public GetWaitingInfoResDto(long enterCnt, int totalQueueSize) {
+    public GetWaitingInfoResDto(long enterCnt, long totalQueueSize) {
         this.enterCnt = enterCnt;
         this.totalQueueSize = totalQueueSize;
     }
