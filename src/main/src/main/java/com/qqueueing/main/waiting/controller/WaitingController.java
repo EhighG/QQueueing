@@ -153,40 +153,4 @@ public class WaitingController {
         return result;
 
     }
-
-//    @GetMapping("/testQueuePage")
-//    public String testQueuePage() {
-//        return "<!DOCTYPE html>\n" +
-//                "<html lang=\"en\">\n" +
-//                "<head>\n" +
-//                "    <meta charset=\"UTF-8\">\n" +
-//                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-//                "    <title>TargetUrl Response Page</title>\n" +
-//                "</head>\n" +
-//                "<body>\n" +
-//                "    \n" +
-//                "</body>\n" +
-//                "</html>";
-//    }
-
-    // 여러 대기열 테스트용 메소드들
-
-//    @PostMapping("/testlink2")
-//    public ResponseEntity<?> enter2(HttpServletRequest request, HttpServletResponse response) {
-//        Object result = waitingService.enter(request);
-//        if (result != null) {
-//            return ResponseEntity
-//                    .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
-//        }
-//        try {
-//            // 대기열 비활성화 시 -> redirect
-//            return ResponseEntity
-//                    .status(302)
-//                    .location(new URI(frontUrl))
-//                    .build();
-//        } catch (URISyntaxException e) {
-//            log.error(e.getMessage());
-//            throw new RuntimeException("리다이렉트 설정 중 에러");
-//        }
-//    }
 }

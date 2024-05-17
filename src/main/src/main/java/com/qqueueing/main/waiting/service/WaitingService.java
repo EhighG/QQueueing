@@ -103,7 +103,7 @@ public class WaitingService {
 //            kafkaTopicManager.deleteTopic(TOPIC_NAME);
 //        }
         if (!topics.contains(TOPIC_NAME)) {
-//            log.info("topic {} not present, create...", TOPIC_NAME);
+            log.info("topic {} not present, create...", TOPIC_NAME);
             kafkaTopicManager.createTopic(TOPIC_NAME);
         }
     }
@@ -147,7 +147,7 @@ public class WaitingService {
         registrationRepository.save(registration);
 //        // re-init partition
         consumerConnector.clearPartition(partitionNo);
-//        log.info("activation end");
+        log.info("partitionNumber {} ....activation end.", partitionNo);
         // re-init auto increment client order
         enterProducer.activate(partitionNo);
     }
@@ -195,10 +195,10 @@ public class WaitingService {
         UriComponentsBuilder uriBuilder;
 
         if (activePartitions.contains(partitionNo)) { // 대기 필요
-//            log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
+            log.info("대기 필요 - 대기 페이지로 redirect 응답 반환");
             return URI.create(SERVER_ORIGIN + QUEUE_PAGE_API + "?Target-URL=" + targetUrl);
         } else { // 대기 불필요
-//            log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
+            log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
             String tempToken = createTempToken(targetUrl); // 토큰 생성
             uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + TARGET_PAGE_URI)
                     .queryParam("token", tempToken);
@@ -272,18 +272,18 @@ public class WaitingService {
         long currentOffset = waitingStatus.getCurrentOffset();
         int outCntInFront = (-Collections.binarySearch(outList, oldOrder)) - 1;
         Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
-        if (myOrder > enterProducer.getLastEnteredIdx(partitionNo)) {
-            log.error("lastEnteredIdx if greater than myOrder");
-        }
-        if (totalQueueSize < myOrder) {
-            log.error("==================Invalid Status!!! totalQueueSize must be greater than myOrder!!============");
-            log.info("totalQueueSize = {}", totalQueueSize);
-            log.info("currentOffset = {}", currentOffset);
-            log.info("outCntInFront = {} ------- need negative value check", outCntInFront);
-            log.info("myOrder = {}", myOrder);
-            log.info("oldOrder = {}", oldOrder);
-            log.info("============================ End ====================================");
-        }
+//        if (myOrder > enterProducer.getLastEnteredIdx(partitionNo)) {
+//            log.error("lastEnteredIdx if greater than myOrder");
+//        }
+//        if (totalQueueSize < myOrder) {
+//            log.error("==================Invalid Status!!! totalQueueSize must be greater than myOrder!!============");
+//            log.info("totalQueueSize = {}", totalQueueSize);
+//            log.info("currentOffset = {}", currentOffset);
+//            log.info("outCntInFront = {} ------- need negative value check", outCntInFront);
+//            log.info("myOrder = {}", myOrder);
+//            log.info("oldOrder = {}", oldOrder);
+//            log.info("============================ End ====================================");
+//        }
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, totalQueueSize,
                 waitingStatus.getEnterCntOfLastTime());
         result.update(oldOrder, outCntInFront, currentOffset);
