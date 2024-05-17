@@ -279,7 +279,7 @@ public class WaitingService {
             log.info("outCntInFront = {} ------- need negative value check", outCntInFront);
             log.info("myOrder = {}", myOrder);
             log.info("oldOrder = {}", oldOrder);
-            log.info("============================ End ====================================")
+            log.info("============================ End ====================================");
         }
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, totalQueueSize,
                 waitingStatus.getEnterCntOfLastTime());
