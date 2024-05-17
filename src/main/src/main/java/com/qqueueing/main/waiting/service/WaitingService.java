@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @Service
 public class WaitingService {
 
-    @Value("${servers.main}")
+    @Value("${servers.parsing}")
     private String serverUrl;
 
     private final ConsumerConnector consumerConnector;
@@ -273,8 +273,7 @@ public class WaitingService {
         Long myOrder = Math.max(oldOrder - outCntInFront - currentOffset, 1); // newOrder // myOrder가 0 이하로 표시되는 상황을 방지해야 하므로
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, waitingStatus.getTotalQueueSize(),
                 waitingStatus.getEnterCntOfLastTime());
-        // test
-        result.update(oldOrder, outCntInFront, currentOffset);
+
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
             log.info("ip addr {} requested, and return tempToken", ip);
@@ -388,16 +387,14 @@ public class WaitingService {
     public ResponseEntity<?> parsing(String address) {
 
         address = "http://" + address;
-        System.out.println("address : " + address);
 
         HttpHeaders headers = new HttpHeaders();
 
         String splitUrl = serverUrl.split("http://")[1];
 
-        String url = splitUrl.split(":3001")[0];
+        String url = splitUrl.split(":3000")[0];
 
         if(address.contains("image")) {
-
 
             String[] imageAddressSplit1 = address.split(url);
             String imageAddressSplit1result = imageAddressSplit1[1];
@@ -405,7 +402,7 @@ public class WaitingService {
             String[] imageAddressSplit2 = imageAddressSplit1result.split("/_next");
             String imageAddressSplit2result = imageAddressSplit2[0];
 
-            address = address.replace(imageAddressSplit2result, ":3001");
+            address = address.replace(imageAddressSplit2result, ":3000");
 
             String[] imageAddressSplit3 = address.split("url=");
 
@@ -449,12 +446,10 @@ public class WaitingService {
         String[] endPointSplit2 = endPointSplit[1].split("/_next");
         String endPoint = endPointSplit2[0];
 
-        String serverURL = serverUrl + ":3001" + targetUrl;
+        String serverURL = serverUrl + ":3000" + targetUrl;
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(serverURL, String.class);
-
-        log.info("response : " + response.getBody());
 
         String result = response.getBody().replace("/_next", endPoint + "/_next");
 
