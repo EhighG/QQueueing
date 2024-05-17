@@ -144,10 +144,11 @@ public class WaitingController {
        return "forwarding success!";
     }
 
-    @GetMapping(path = "/next", headers = "address")
-    public ResponseEntity<?> parsingFile(@RequestHeader("address") String address) {
+    @GetMapping(path = "/next")
+    public ResponseEntity<?> parsingFile(@RequestHeader("address") String address,
+                                         @RequestHeader("scheme") String scheme) {
 
-        ResponseEntity<?> result = waitingService.parsing(address);
+        ResponseEntity<?> result = waitingService.parsing(address, scheme);
 
         return result;
 
