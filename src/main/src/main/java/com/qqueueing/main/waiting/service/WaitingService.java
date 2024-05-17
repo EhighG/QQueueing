@@ -71,7 +71,7 @@ public class WaitingService {
                           EnterProducer enterProducer, RegistrationRepository registrationRepository, KafkaTopicManager kafkaTopicManager,
                           @Value("${servers.front}") String queuePageFront,
                           @Value("${servers.main}") String serverOrigin,
-                          @Value("${kafka.topic-names.enter}") String topicName,
+                          @Value("${kafka.topics.enter.name}") String topicName,
                           @Value("${servers.replace-url}") String replaceUrl,
                           @Value("${testing.target-url}") String testTargetUrl) {
         this.consumerConnector = consumerConnector;

@@ -5,12 +5,21 @@ import {
   useGetWaitingOut,
   useGetServiceImage,
 } from "@/features";
-import { Button, logo } from "@/shared";
-import { LinearProgress } from "@mui/material";
+import {
+  Button,
+  cls,
+  logo,
+  auto_mobile,
+  baby_chick,
+  dolphin,
+  egg,
+  flag,
+  front_chick,
+  hatching_chick,
+} from "@/shared";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-
 const WaitingPage = () => {
   const router = useRouter();
   const params = useSearchParams();
@@ -26,9 +35,46 @@ const WaitingPage = () => {
     partitionNo,
     idx
   );
+  type ProgressValue = 0 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100;
+
+  const [progress, setProgress] = useState<ProgressValue>(0);
+
   // estimate 시간 추정 쿼리
+  const processData = {
+    "0": "w-[0%]",
+    "10": "w-[10%]",
+    "20": "w-[20%]",
+    "30": "w-[30%]",
+    "40": "w-[40%]",
+    "50": "w-[50%]",
+    "60": "w-[60%]",
+    "70": "w-[70%]",
+    "80": "w-[80%]",
+    "90": "w-[90%]",
+    "100": "w-[100%]",
+  };
+
+  const opacityData = {
+    "0": "h-[100%]",
+    "10": "h-[90%]",
+    "20": "h-[80%]",
+    "30": "h-[70%]",
+    "40": "h-[60%]",
+    "50": "h-[50%]",
+    "60": "h-[40%]",
+    "70": "h-[30%]",
+    "80": "h-[20%]",
+    "90": "h-[10%]",
+    "100": "h-[0%]",
+  };
 
   const { data: imageData } = useGetServiceImage(targetUrl);
+
+  useEffect(() => {
+    return () => {
+      handleButton();
+    };
+  }, [handleButton]);
 
   // 대기 순번을 받은 순간 부터 timer 시작
   useEffect(() => {
@@ -44,7 +90,7 @@ const WaitingPage = () => {
 
   useEffect(() => {
     if (enqueueInfo) {
-      setPartitionNo(enqueueInfo?.partitionNo ?? 1);
+      setPartitionNo(enqueueInfo.partitionNo);
       setIdx(enqueueInfo.order);
       setIdVal(enqueueInfo.idVal);
     }
@@ -52,7 +98,7 @@ const WaitingPage = () => {
 
   useEffect(() => {
     if (waitingInfo?.token) {
-      window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}waiting/page-req?token=${waitingInfo.token}`;
+      window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}/waiting/page-req?token=${waitingInfo.token}`;
     }
   }, [waitingInfo]);
 
@@ -65,77 +111,139 @@ const WaitingPage = () => {
   //  estimate 추정 로직
   useEffect(() => {
     if (waitingInfo) {
-      setEstimateTime(parseInt((waitingInfo.myOrder / (waitingInfo.enterCnt + 1)) * 3));
+      console.log("waitingInfo", waitingInfo);
+      let prog = Math.round(waitingInfo.myOrder / (waitingInfo.enterCnt + 1));
+
+      setEstimateTime(prog * 3);
+      setProgress((Math.round(prog * 10) * 10) as ProgressValue);
     }
   }, [waitingInfo]);
+
+  const handleSrc = (progress: number) => {
+    if (!progress || !waitingInfo) return egg;
+
+    if (progress < 30) return egg;
+
+    if (progress < 60) return hatching_chick;
+
+    if (progress < 90) return baby_chick;
+
+    return front_chick;
+  };
 
   return (
     <div className="fixed z-0 flex inset-0 w-full h-full min-w-[700px] bg-black bg-opacity-70 items-center justify-center">
       <div className="w-[800px] h-[400px] bg-white rounded-md">
         <div className="flex flex-col justify-between h-full  p-4">
           <div className="flex w-full justify-between  items-center">
-            <Image
-              src={logo}
-              alt="큐잉"
-              className="size-[80px] object-contain"
-            />
-            <h1 className="text-[2rem] font-bold">접속 대기 중</h1>
-            <Image
-              src={imageData ? "data:image/png;base64, " + imageData : logo}
-              alt="product"
-              width={500}
-              height={500}
-              className="size-[80px]"
-            />
+            <div className="relative size-[80px]">
+              <Image src={logo} alt="큐잉" width={500} height={500} />
+              <span
+                className={cls(
+                  "absolute block z-10 bg-white w-full bottom-0 opacity-80 transition-all duration-500",
+                  opacityData[progress]
+                )}
+              ></span>
+            </div>
+            <div className="flex relative items-center gap-4">
+              <h1 className="text-[2rem] font-bold animate-pulse">
+                접속 대기 중
+              </h1>
+              <div className="absolute right-[-50px] bottom-0 size-[50px]">
+                <Image src={dolphin} alt="dolphin" width={100} height={100} />
+              </div>
+            </div>
+            <div className="relative size-[80px]">
+              <Image
+                src={imageData ? "data:image/png;base64, " + imageData : logo}
+                alt="product"
+                width={500}
+                height={500}
+              />
+              <span
+                className={cls(
+                  "absolute block z-10 bg-white w-full bottom-0 opacity-80 transition-all duration-500",
+                  opacityData[progress]
+                )}
+              ></span>
+            </div>
           </div>
           <div className="flex w-full justify-between items-center">
             <p className="font-bold">대기한 시간 : {waitingTime} 초</p>
-            <p className="font-bold">
-              나의 대기 순번 :
-              <span className="text-[2rem]">{waitingInfo?.myOrder ?? 0}</span>
-            </p>
+            <div className="flex flex-col justify-center items-center font-bold">
+              <p>나의 순서 까지</p>
+              <p className="text-[1.5rem]  truncate">
+                <span className="text-[2rem] font-bold">
+                  {waitingInfo?.myOrder ?? 0}번째
+                </span>
+              </p>
+            </div>
             <p className="font-bold">예상 시간: 약 {estimateTime} 초</p>
           </div>
-          <LinearProgress
-            className="h-[20px] rounded-full"
-            variant="determinate"
-            value={
-              (waitingInfo?.totalQueueSize && waitingInfo?.myOrder
-                ? 1 -
-                  (waitingInfo.myOrder - 1) / (waitingInfo.totalQueueSize + 1)
-                : 0) * 100
-            }
-            color="primary"
-          />
-          <div className="w-full p-2 h-[120px] rounded-md border border-black">
-            <p className="text-[1.5rem] font-bold">
-              현재 접속자가 많아 대기 중입니다!
-            </p>
-            <p className="font-bold">
-              대기 순서에 따라 자동 접속되니 조금만 기다려주세요.
-            </p>
-            <div className="flex items-center gap-2">
-              <p className="font-bold">
-                앞에
-                <span className="text-q-blue animate-blink">
-                  {waitingInfo?.myOrder ? waitingInfo.myOrder - 1 : 0}
-                </span>
-                명, 뒤에
-                <span className="text-q-blue animate-blink">
-                  {waitingInfo
-                    ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder >= 0
-                      ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder
-                      : 0
-                    : 0}
-                </span>
-                명의 대기자가 있습니다.
+          <div className="flex relative items-center w-full h-[25px] bg-white rounded-lg border">
+            <div
+              className={cls(
+                "relative flex h-full items-center z-0 rounded-lg transition-all duration-700",
+                processData[progress],
+                "bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 bg-[length:200px_100%] animate-shine"
+              )}
+            >
+              <span className="block z-10 absolute size-[40px] right-[-30px] bottom-0">
+                <Image
+                  src={auto_mobile}
+                  alt="car"
+                  width={500}
+                  height={500}
+                  style={{ transform: "scaleX(-1)" }}
+                />
+              </span>
+            </div>
+            <div className="absolute size-[40px] right-[-25px]">
+              <Image src={flag} alt="flag" width={500} height={500} />
+            </div>
+          </div>
+          <div className="flex w-full p-2 h-[120px] rounded-md border border-black">
+            <div>
+              <p className="text-[1.5rem] font-bold">
+                현재 접속자가 많아 대기 중입니다!
               </p>
-              <Button
-                onClick={() => handleButton()}
-                className="h-[30px] border rounded-md border-black bg-red-600 px-4 text-white text-center"
-              >
-                나가기
-              </Button>
+              <p className="font-bold">
+                대기 순서에 따라 자동 접속되니 조금만 기다려주세요.
+              </p>
+              <div className="flex items-center gap-2">
+                <p className="font-bold">
+                  앞에&nbsp;
+                  <span className="text-[1.5rem] text-q-blue animate-blink">
+                    {waitingInfo?.myOrder ? waitingInfo.myOrder - 1 : 0}
+                  </span>
+                  &nbsp;명, 뒤에 &nbsp;
+                  <span className="text-[1.5rem] text-q-blue animate-blink">
+                    {waitingInfo
+                      ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder >=
+                        0
+                        ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder
+                        : 0
+                      : 0}
+                  </span>
+                  &nbsp;명의 대기자가 있습니다.
+                </p>
+                <Button
+                  onClick={() => handleButton()}
+                  className="h-[30px] border rounded-md border-black bg-red-600 px-4 text-white text-center"
+                >
+                  나가기
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-1 items-center justify-center">
+              <div className="size-[80px]">
+                <Image
+                  src={handleSrc(progress)}
+                  alt="chick"
+                  width={500}
+                  height={500}
+                />
+              </div>
             </div>
           </div>
           <p className="font-bold text-center">powered by QQueueing</p>

@@ -11,7 +11,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       topic: queueing.waiting-queue.enter2 # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
-      max-poll-records: 2000
+      max-poll-records: 100
 
 logging:
   level:

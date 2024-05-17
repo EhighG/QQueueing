@@ -19,7 +19,7 @@ import {
   postWaitingImage,
 } from "./api";
 import Swal from "sweetalert2";
-import { waitingStatusType } from "@/features/manage/type";
+import { ResponseType, waitingStatusType } from "@/features/manage/type";
 
 // 대기열 등록
 const useRegistWaiting = () => {
@@ -79,13 +79,20 @@ const useGetWaitingImage = (imageId: string) => {
 };
 
 const useGetServiceImage = (targetUrl: string) => {
-  const { data } = useQuery({
+  const { data } = useQuery<
+    ResponseType<undefined | string>,
+    AxiosError,
+    ResponseType<undefined | string>,
+    [_1: string, _2: string]
+  >({
     queryKey: ["getImage", targetUrl],
     queryFn: () => getServiceImage(targetUrl),
     enabled: !!targetUrl,
   });
 
-  return { data };
+  const imageData = data?.result ? data.result : "";
+
+  return { data: imageData };
 };
 
 const usePatchWaiting = (id: string) => {
