@@ -20,6 +20,7 @@ def main():
                 print('already init executed')
                 exit(0)
 
+    # TODO: this should aim exact target server block.
     servers = []
     for item in b_http:
         if isinstance(item, Server):
