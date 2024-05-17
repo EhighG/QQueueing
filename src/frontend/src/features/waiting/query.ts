@@ -21,6 +21,7 @@ const useEnqueue = (target: string) => {
     isError,
   };
 };
+
 const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
   const { data, isLoading, isError } = useQuery<
     statusType,
@@ -31,7 +32,7 @@ const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
     queryKey: ["waitingInfo"],
     queryFn: () => getWaitingInfo(partitionNo, idx, idVal),
     refetchInterval: 3000,
-    enabled: idx > 0 && typeof window !== "undefined",
+    enabled: idx > 0 && partitionNo > -1 && typeof window !== "undefined",
   });
 
   return {

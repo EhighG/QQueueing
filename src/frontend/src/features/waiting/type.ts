@@ -1,7 +1,7 @@
 type infoType = {
   order: number;
   idVal: string;
-  partitionNo?: number;
+  partitionNo: number;
 };
 
 type statusType = {
