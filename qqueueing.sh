@@ -2,7 +2,6 @@
 ################################################################################
 ##################################PATH SETTING##################################
 ################################################################################
-URL=k10a401.p.ssafy.io
 COMPOSE_PATH=src/compose.yml
 NGINX_PATH="/etc/nginx"
 INIT_FILE="/init.conf"
@@ -32,9 +31,15 @@ make_env() {
 ####################################SETTING#####################################
 ################################################################################
 # This file is for your customization.
+# Please write only empty input parts.
+
+# Enter the domain name of your web site. 
+# e.g. URL=https:/www.ssafy.com
+URL=
 
 # This var should not be changed unless you change your project directory.
 ROOT_DIR=$(git rev-parse --show-toplevel)
+
 
 EOF
 
@@ -50,7 +55,7 @@ if [[ -z $(groups | grep docker) ]]; then
 	echo "add user in docker group to avoid additional sudo privileges"
 	sudo usermod -aG docker ${USER} 
 	sudo service docker restart
-	echo "Please enter into new terminal. "
+	echo "Please restart your terminal. "
 	exit 0
 fi
 
@@ -59,11 +64,16 @@ fi
 # need to check user set files
 case $1 in
   install|i)
+	# TODO: check if .env exists, if not make env
+
+	
 	# TODO: check if .env file is valid
 	# TODO: if not, wait for user's input
 	# TODO: if good, execute default setting
 	# TODO: default -> insert hosts to .env, application.yml
 	# TODO: default -> execute init.py
+
+  
   
 
   ;;
