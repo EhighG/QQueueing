@@ -392,7 +392,7 @@ public class WaitingService {
 
         HttpHeaders headers = new HttpHeaders();
 
-        String splitUrl = serverUrl.split("http://")[1];
+        String splitUrl = serverUrl.split(scheme + "://")[1];
 
         String url = splitUrl.split(serverPort)[0];
 
