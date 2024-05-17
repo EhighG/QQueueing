@@ -282,6 +282,7 @@ public class WaitingService {
         }
         GetMyOrderResDto result = new GetMyOrderResDto(myOrder, totalQueueSize,
                 waitingStatus.getEnterCntOfLastTime());
+        result.update(oldOrder, outCntInFront, currentOffset);
 
 //        if (doneSet.contains(ip)) { // waiting done
         if (ip.equals(TEST_IP) || doneSet.contains(ip)) { // waiting done // for test
