@@ -8,7 +8,7 @@ export default function Layout({
   return (
     <>
       <Header />
-      <main>
+      <main className="min-w-[1440px]">
         <NavMenu />
         <div className="flex flex-col flex-1">
           <div className="flex flex-col flex-1 max-2xl:m-5 m-10 gap-10">
