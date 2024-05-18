@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="ko">
       <body
         className={
-          "flex flex-1 w-screen h-screen min-h-screen justify-center " +
+          "flex flex-1 w-screen h-screen min-h-screen justify-center min-w-[360px]" +
           pretendard.className
         }
       >
