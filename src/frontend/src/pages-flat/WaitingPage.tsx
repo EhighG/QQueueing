@@ -70,12 +70,6 @@ const WaitingPage = () => {
 
   const { data: imageData } = useGetServiceImage(targetUrl);
 
-  useEffect(() => {
-    return () => {
-      handleButton();
-    };
-  }, [handleButton]);
-
   // 대기 순번을 받은 순간 부터 timer 시작
   useEffect(() => {
     // enqueueInfo가 있을 때만 인터벌 설정
@@ -131,9 +125,67 @@ const WaitingPage = () => {
     return front_chick;
   };
 
+  const handleTips = (progress: number) => {
+    if (!progress || !waitingInfo) return "곧 대기번호가 발급 됩니다.";
+
+    if (progress < 30) return "접속자가 많아 대기 중 이에요.";
+
+    if (progress < 60) return "조금만 더 기다려 주세요.";
+
+    if (progress < 90) return "곧 입장될 예정 입니다.";
+
+    return "입장 준비 완료";
+  };
+
   return (
-    <div className="fixed z-0 flex inset-0 w-full h-full min-w-[700px] bg-black bg-opacity-70 items-center justify-center">
-      <div className="w-[800px] h-[400px] bg-white rounded-md">
+    <div className="fixed z-0 flex inset-0 w-full h-full bg-black bg-opacity-70 items-center justify-center">
+      <div className=" md:hidden flex flex-1 overflow-y-scroll  w-full h-full bg-gradient-to-b from-blue-400 via-blue-700 to-blue-600">
+        <div className="relative flex flex-col flex-1 min-w-[360px] py-10">
+          <div className="flex flex-col gap-2">
+            <h1 className="font-bold max-sm:text-[1.5rem] sm:max-md:text-[2rem] text-center text-white">
+              페이지에 진입 하기 위해 <br />{" "}
+              <span className="text-amber-400">
+                {waitingInfo?.myOrder ? waitingInfo.myOrder : 0}명
+              </span>
+              이 기다리고 있어요.
+            </h1>
+            <p className="max-[400px]:text-[1rem] min-[400px]:max-sm:text-[1rem] sm:max-md:text-[1.5rem] text-center text-white">
+              조금만 더 기다려 주세요
+            </p>
+            <p className="max-[400px]:text-[1rem] min-[400px]:max-sm:text-[1rem] sm:max-md:text-[1.5rem] text-center text-white">
+              대기 순서에 따라 자동으로 접속됩니다.{" "}
+            </p>
+          </div>
+          <div className="w-full aspect-square self-center">
+            <div className="flex w-full h-full items-center justify-center p-10 animate-slowPulse">
+              <Image src={logo} alt="logo" width={500} height={500} />
+            </div>
+          </div>
+          <div className="w-full h-[8%] min-h-[60px] ">
+            <div className="flex mx-[10%] h-full bg-yellow-300 items-center justify-center rounded-md">
+              <p className="text-[1.5rem] text-blue-800 font-bold animate-pulse">
+                {handleTips(progress)}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <div className="size-[100px]">
+              <Image
+                src={handleSrc(progress)}
+                alt="chick"
+                width={500}
+                height={500}
+                className={cls(
+                  handleSrc(progress) === egg
+                    ? "animate-shaking"
+                    : "animate-fadeIn"
+                )}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="max-md:hidden w-[800px] h-[400px] bg-white rounded-md">
         <div className="flex flex-col justify-between h-full  p-4">
           <div className="flex w-full justify-between  items-center">
             <div className="relative size-[80px]">
@@ -204,9 +256,7 @@ const WaitingPage = () => {
           </div>
           <div className="flex w-full p-2 h-[120px] rounded-md border border-black">
             <div>
-              <p className="text-[1.5rem] font-bold">
-                현재 접속자가 많아 대기 중입니다!
-              </p>
+              <p className="text-[1.5rem] font-bold">{handleTips(progress)}</p>
               <p className="font-bold">
                 대기 순서에 따라 자동 접속되니 조금만 기다려주세요.
               </p>
@@ -242,6 +292,11 @@ const WaitingPage = () => {
                   alt="chick"
                   width={500}
                   height={500}
+                  className={cls(
+                    handleSrc(progress) === egg
+                      ? "animate-shaking"
+                      : "animate-fadeIn"
+                  )}
                 />
               </div>
             </div>

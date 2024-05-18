@@ -54,7 +54,7 @@ public class WaitingController {
         if (targetUrl == null) targetUrl = request.getRequestURL().toString();
 
         URI redirectUrl = waitingService.enter(targetUrl);
-        log.info("redirectUrl.toString() = {}", redirectUrl.toString());
+//        log.info("redirectUrl.toString() = {}", redirectUrl.toString());
         return ResponseEntity
                 .status(302)
                 .location(redirectUrl) // queue-page or target-page
@@ -63,8 +63,8 @@ public class WaitingController {
 
     @GetMapping("/queue-page")
     public ResponseEntity<?> getQueuePage(@RequestParam(value = "Target-URL") String targetUrl) {
-        log.info("targetUrl = {}", targetUrl);
-        log.info("queue-page 포워딩 api called");
+//        log.info("targetUrl = {}", targetUrl);
+//        log.info("queue-page 포워딩 api called");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
@@ -79,8 +79,8 @@ public class WaitingController {
     @PostMapping
     public ResponseEntity<?> enqueue(HttpServletRequest request) {
         String targetUrl = request.getHeader("Target-URL");
-        log.info("-------------------------- enqueue api called. in controller -------------------------------");
-        log.info("targetUrl = {}", targetUrl);
+//        log.info("-------------------------- enqueue api called. in controller -------------------------------");
+//        log.info("targetUrl = {}", targetUrl);
         Object result = waitingService.enqueue(targetUrl, request);
         return ResponseEntity
                 .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
@@ -105,7 +105,7 @@ public class WaitingController {
 //        headers.set("Content-Encoding", "UTF-8");
 
         String result = waitingService.forward(token);
-        log.info("target page 포워딩 api called");
+//        log.info("target page 포워딩 api called");
 
         return ResponseEntity.ok().headers(headers).body(result);
 
@@ -117,9 +117,9 @@ public class WaitingController {
     @GetMapping("/out")
     public ResponseEntity<Void> out(@RequestParam(value = "partitionNo") int partitionNo,
                                     @RequestParam(value = "order") Long order) {
-        log.info("out() called");
+//        log.info("out() called");
         waitingService.out(partitionNo, order);
-        log.info("out end. order = {} // end", order);
+//        log.info("out end. order = {} // end", order);
         return ResponseEntity
                 .ok()
                 .build();
@@ -153,40 +153,4 @@ public class WaitingController {
         return result;
 
     }
-
-//    @GetMapping("/testQueuePage")
-//    public String testQueuePage() {
-//        return "<!DOCTYPE html>\n" +
-//                "<html lang=\"en\">\n" +
-//                "<head>\n" +
-//                "    <meta charset=\"UTF-8\">\n" +
-//                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-//                "    <title>TargetUrl Response Page</title>\n" +
-//                "</head>\n" +
-//                "<body>\n" +
-//                "    \n" +
-//                "</body>\n" +
-//                "</html>";
-//    }
-
-    // 여러 대기열 테스트용 메소드들
-
-//    @PostMapping("/testlink2")
-//    public ResponseEntity<?> enter2(HttpServletRequest request, HttpServletResponse response) {
-//        Object result = waitingService.enter(request);
-//        if (result != null) {
-//            return ResponseEntity
-//                    .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
-//        }
-//        try {
-//            // 대기열 비활성화 시 -> redirect
-//            return ResponseEntity
-//                    .status(302)
-//                    .location(new URI(frontUrl))
-//                    .build();
-//        } catch (URISyntaxException e) {
-//            log.error(e.getMessage());
-//            throw new RuntimeException("리다이렉트 설정 중 에러");
-//        }
-//    }
 }

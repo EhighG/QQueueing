@@ -27,31 +27,26 @@ public class EnterProducer {
 
     public EnterProducer(KafkaTemplate<Long, String> enterMsgTemplate,
                          @Value("${kafka.topics.enter.name}") String topicName) {
-        log.info("Start -- EnterProducer constructor");
+//        log.info("Start -- EnterProducer constructor");
         this.kafkaTemplate = enterMsgTemplate;
         this.TOPIC_NAME = topicName;
         this.ids = new HashMap<>();
 //        initialize();
-        log.info("End -- EnterProducer constructor");
+//        log.info("End -- EnterProducer constructor");
     }
 
     public void initialize() {
-        log.info("Start -- EnterProducer.initialize()");
+//        log.info("Start -- EnterProducer.initialize()");
         IntStream.range(0, 20)
                 .forEach(num -> {
                     CompletableFuture<SendResult<Long, String>> sendResult = kafkaTemplate.send(TOPIC_NAME, num, (long) num, "re-init");
                     sendResult.whenComplete((response, exception) -> {
                         if (exception != null) {
                             exception.printStackTrace();
-                            System.out.println("error!");
-                        }
-                        if (response != null) {
-                            log.info("response = {}", response);
+                            log.error("partition {} initialize Error error!", num);
                         }
                     });
-                    log.info("while enterProducer.initialize... init partition {}", num);
                 });
-        log.info("End -- EnterProducer.initialize()");
     }
 
     public void activate(int partitionNo) {
@@ -66,12 +61,8 @@ public class EnterProducer {
         }
         Long curIdx = id.getAndIncrement();
         String sampleIp = message + curIdx;
-
-//        log.info("기본 토픽 : " + kafkaTemplate.getDefaultTopic());
-
         // 파티션 번호를 키로 사용하여 메시지 보냄
         kafkaTemplate.send(TOPIC_NAME, partitionNo, key, sampleIp);
-        log.info("-------------------------------------- produced. idx = {} ----------------------------", curIdx);
         return new EnterQueueResDto(partitionNo, curIdx, sampleIp);
     }
 
