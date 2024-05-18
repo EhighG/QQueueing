@@ -14,9 +14,13 @@ services:
     volumes:
       - "${ROOT_DIR}/src/pipes:/pipes"
     depends_on:
-      - qqueueing-kafka
-      - qqueueing-mongo
-      - qqueueing-consumer
+      qqueueing-kafka:
+        condition: service_started
+      qqueueing-mongo: 
+        condition: service_started
+      qqueueing-consumer:
+        condition: service_healthy
+        restart: true
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
