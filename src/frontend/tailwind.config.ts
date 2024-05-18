@@ -21,10 +21,21 @@ const config: Config = {
           "0%": { backgroundPosition: "-200px 0" },
           "100%": { backgroundPosition: "200px 0" },
         },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        shaking: {
+          "0%, 100%": { transform: "rotate(-10deg)" },
+          "50%": { transform: "rotate(10deg)" },
+        },
       },
       animation: {
         blink: "blink 1.5s linear infinite",
         shine: "shine 5s infinite linear",
+        slowPulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        fadeIn: "fadeIn 3s ease-in-out",
+        shaking: "shaking 1s ease-in-out infinite",
       },
 
       backgroundImage: {
