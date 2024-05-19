@@ -7,35 +7,24 @@ const LicensePage = () => {
       <SectionTitle title="License" />
       <div className="p-3 text-[1.5rem] ">
         <section>
-          <code className="text-[1.5rem] font-bold">
+          <code className="text-[1.2rem] font-bold">
             SSAFY GENERAL PUBLIC LICENSE Version 1.0, September 2021
           </code>
-          <p className="text-[1.5rem] font-bold">
+          <p className="text-[1.2rem] font-bold">
             Copyright (C) 2021 Samsung Software Academy For Youth, Inc.
           </p>
-          <p className="text-[1.5rem] font-bold">
+          <p className="text-[1.2rem] font-bold">
             누구든지 본 사용 허가서를 있는 그대로 복제하고 배포할 수있습니다.
             그러나 본문에 대한 수정은 허용되지 않습니다.
           </p>
         </section>
-        &nbsp;
-        <section>
-          <p className="text-[1.5rem] font-bold">
+        <br />
+        <section className="text-[1rem]">
+          <h1 className="text-[1.2rem] font-bold">
             복제와 개작 및 배포에 관한 조건과 규정
-          </p>
-          <p>
-            <strong>제 0 조.</strong> 본 라이선스는 사회 기여 활동이라는 목적을
-            갖고 참여하는 활동의 일환임을 우선적으로 고지하며, 사용 허가 계약은
-            삼성 청년 SW 아카데미 일반 공중 SSAFY GENERAL PUBLIC LICENSE Version
-            1.0, September 2021
-          </p>
-          <p> Copyright (C) 2021 Samsung Software Academy For Youth, Inc.</p>
-          <p>
-            누구든지 본 사용 허가서를 있는 그대로 복제하고 배포할 수있습니다.
-            그러나 본문에 대한 수정은 허용되지 않습니다.
-          </p>
-          <p>복제와 개작 및 배포에 관한 조건과 규정</p>
-          <p>
+          </h1>
+          <br />
+          <p className="my-2">
             <strong>제 0 조.</strong> 본 라이선스는 사회 기여 활동이라는 목적을
             갖고 참여하는 활동의 일환임을 우선적으로 고지하며, 사용 허가 계약은
             삼성 청년 SW 아카데미 일반 공중 사용 허가서(이하,
@@ -50,9 +39,9 @@ const LicensePage = () => {
             <a href="https://opensource.org/licenses/lgpl-3.0.html">
               https://opensource.org/licenses/lgpl-3.0.html
             </a>
-            ){" "}
+            )
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 1조.</strong> 본 라이선스에 따라 부여되는 모든 권리는
             프로그램에 대한 저작권 조항에 따라 부여되는 것으로, 명시된 조건을
             충족시키는 한 취소될 수 없습니다. 본 라이선스를 수정되지 않은
@@ -62,7 +51,7 @@ const LicensePage = () => {
             적용을 받습니다. 본 라이선스를 저작권법이 제공하는 바에 따라, 공정
             사용과 여타 동등한 사용방식을 인정합니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 2 조.</strong> 소스코드 또는 오픈소스내에 사용된 소스코드
             또는 프로그램을 재배포 시에 다음 사항을 준수합니다. 1) 해당 저작권
             사용을 서면을 통해 원저작자에게 고지하되, 원저작자의 수령 여부를
@@ -74,7 +63,7 @@ const LicensePage = () => {
             프로그램에 해당하는 경우 재배포 시 제 2조 1항, 제 2조 2항, 제 2조
             3항에 해당하는 고지 내용을 동봉합니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 3 조.</strong> 오픈소스의 소스코드 일부를 추가 또는
             수정하였을 경우, 다음과 같은 사항을 준수합니다. 1) 추가 또는 수정한
             부분에 SGPL 라이선스를 적용합니다. 2) 수정 사항에 대한 수정일자,
@@ -82,7 +71,7 @@ const LicensePage = () => {
             2항에 해당하는 라이브러리 또는 프로그램에 해당하는 경우 재배포 시
             고지 내용을 동봉합니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 4조.</strong> 오픈소스의 소스코드 산출물 및 프로그램
             &#39;&#39;파생 저작물&#39;&#39;에 해당하는 경우에도 SGPL 라이선스를
             동일하게 부여합니다. &#39;&#39;파생 저작물&#39;&#39;은 (1)수정 코드
@@ -93,12 +82,12 @@ const LicensePage = () => {
             Arguments로 SGPL 프로그램과 통신하는 경우는 파생 저작물로 취급하지
             않습니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 5조.</strong> 프로그램 사용자가 공개된 소스코드로 동일한
             프로그램을 만들 수 있는 빌드 환경을 제공해야 합니다. 여기에는 Tool
             chain 정보, 빌드 스크립트, 빌드 방법(README) 등의 사항이 포함됩니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 6조.</strong> 프로그램을 &#39;&#39;사용자
             제품&#39;&#39;와 함께 배포한다면 &#39;&#39;설치 정보&#39;&#39;를
             제공합니다. &#39;&#39;사용자 제품&#39;&#39;이란 전자 기기와 같은
@@ -109,21 +98,21 @@ const LicensePage = () => {
             대체가 가능하며, 면책 승인 내용을 소스코드 내의 주석과 사용자에게
             제공되는 SGPL 프로그램 내 고지 내용에 포함되어야 합니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 7조.</strong> 본 라이선스에 명시된 경우를 제외하고 SGPL
             적용 저작물을 복제, 배포 뿐만이 아니라, 일반 대중이 흭득할 수 있도록
             만드는 행위 전반을 수행할 수 없습니다. 그외의 다른 방법으로 복제,
             배포, 수정하려는 시도는 전부 무효하며, 본 라이선스가 부여하는 권리를
             박탈하게 됩니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 8조.</strong> 본 라이선스의 다른 어떤 조항들에도
             불구하고, SGPL 적용 저작물을 다른 라이선스를 적용 받는 저작물과
             결합하거나 연결하여 하나의 저작물로 만들 수 있으며, 이 경우에도 SGPL
             적용 저작물에 해당하는 부분에는 본 라이선스의 조건들이 지속적으로
             적용됩니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 9조.</strong> 기본적으로 SGPL 라이선스의 신규 버전이
             공표되었을 경우 신규 버전으로 라이선스를 갱신해야하며 그 외의 다른
             사항들은 변경할 수 없습니다. 이 경우 갱신 이전의 소스코드와
@@ -134,7 +123,7 @@ const LicensePage = () => {
           <p>
             <strong>보증 부인 (제10조, 제11조)</strong>
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 10 조.</strong> 본 라이선스를 따르는 소스코드와
             프로그램은 무상으로 양도되기 때문에 관련 법률이 허용하는 한도 내에서
             어떠한 형태의 보증도 제공되지 않습니다. 소스코드의 저작권자와
@@ -146,7 +135,7 @@ const LicensePage = () => {
             따라 발생할 수 있는 모든 위험은 피양도자에게 인수되며 이에 따른 보수
             및 복구를 위한 제반 경비 또한 피양도자가 모두 부담해야 합니다.
           </p>
-          <p>
+          <p className="my-2">
             <strong>제 11 조.</strong> 저작권자나 배포자가 소스코드 또는
             프로그램의 손상 가능성을 사전에 알고 있었다 하더라도 발생된 손실이
             관련 법규에 의해 보호되고 있거나 이에 대한 별도의 서면 보증이 설정된
