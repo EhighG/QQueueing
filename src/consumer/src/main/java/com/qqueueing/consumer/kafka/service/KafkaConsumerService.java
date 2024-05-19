@@ -160,6 +160,10 @@ public class KafkaConsumerService {
         }
     }
 
+    public boolean checkConsumerValid(int partitionNumber) {
+        return consumers.containsKey(partitionNumber);
+    }
+
     public void changeConsumerProperties(ChangeConsumerPropertiesReqDto changeConsumerPropertiesReqDto) {
         KafkaConsumer<String, String> consumer = consumers.get(changeConsumerPropertiesReqDto.getPartitionNumber());
 
