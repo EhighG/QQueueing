@@ -83,9 +83,9 @@ cd S10P31A401
 
 <img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/337ff56068974005c2bb6f73e1649a8e/%EB%8C%80%EC%8B%9C%EB%B3%B4%EB%93%9C_%ED%99%94%EB%A9%B4.PNG" width="1000" height="500">
 <br>
-<img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/494b5ba9a9706ab127ad7000bb75ac17/%EC%9A%B4%EC%98%81%EC%9E%90_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9E%90%EC%9B%90_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81.PNG" width="500" height="250">
+<img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/494b5ba9a9706ab127ad7000bb75ac17/%EC%9A%B4%EC%98%81%EC%9E%90_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9E%90%EC%9B%90_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81.PNG" width="1000" height="500">
 
-<img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/9c7cbfe5b00507b70ae92b2d53deb3ff/%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_%ED%99%94%EB%A9%B4.PNG" width="500" height="250">
+<img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/9c7cbfe5b00507b70ae92b2d53deb3ff/%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_%ED%99%94%EB%A9%B4.PNG" width="1000" height="500">
 
 <br>
 
