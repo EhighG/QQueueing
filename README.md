@@ -47,8 +47,7 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 
 <b>대기열 애플리케이션을 동작시킵니다.</b>
 
-![alt text](image.png)
-(대기열 애플리케이션 시작 화면)
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/2951ddee5f70f133d39de917b11ecee2/%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%B2%AB_%ED%99%94%EB%A9%B4.PNG" width="1000" height="500">
 
 <b>등록하기 버튼을 누르고, 대기열을 적용할 URL, 서비스 명, 대기열 대표 이미지를 등록합니다.</b>
 
@@ -56,8 +55,7 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 
 <b>대기열 리스트 버튼을 누르고, 대기열이 적용된 모습을 확인합니다.</b>
 
-![alt text](image.png)
-(대기열 화면 이미지)
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/6c1664553082d4e53386b971379b74cc/%EB%8C%80%EA%B8%B0%EC%97%B4_%EB%A6%AC%EC%8A%A4%ED%8A%B8_%ED%99%94%EB%A9%B4.PNG" width="1000" height="500">
 
 <b>등록된 url을 클릭하여 상세 정보를 학인할 수 있고, 활성/비활성화 및 설정을 변경할 수 있습니다. </b>
 
