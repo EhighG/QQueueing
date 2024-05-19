@@ -105,7 +105,6 @@ const WaitingPage = () => {
   //  estimate 추정 로직
   useEffect(() => {
     if (waitingInfo) {
-      console.log("waitingInfo", waitingInfo);
       let prog = Math.round(waitingInfo.myOrder / (waitingInfo.enterCnt + 1));
 
       setEstimateTime(prog * 3);

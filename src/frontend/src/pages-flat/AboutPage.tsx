@@ -8,7 +8,7 @@ const AboutPage = () => {
       <SectionTitle title="About" />
 
       <div className="flex flex-1 flex-col gap-10 w-full h-full p-3">
-        <div className="flex items-center">
+        <div className="flex justify-center items-center">
           <div className="size-[300px]">
             <Image src={logo} alt="logo" width={500} height={500} />
           </div>
