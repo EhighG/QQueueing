@@ -31,7 +31,7 @@ const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
   >({
     queryKey: ["waitingInfo"],
     queryFn: () => getWaitingInfo(partitionNo, idx, idVal),
-    refetchInterval: 3000,
+    refetchInterval: 1000,
     enabled: idx > 0 && partitionNo > -1 && typeof window !== "undefined",
   });
 

@@ -35,7 +35,7 @@ const WaitingPage = () => {
     partitionNo,
     idx
   );
-  type ProgressValue = 0 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100;
+  type ProgressValue = 0 | 20 | 40 | 60 | 80 | 100;
 
   const [progress, setProgress] = useState<ProgressValue>(0);
 
@@ -108,18 +108,27 @@ const WaitingPage = () => {
       let prog = Math.round(waitingInfo.myOrder / (waitingInfo.enterCnt + 1));
 
       setEstimateTime(prog * 3);
-      setProgress((Math.round(prog * 10) * 10) as ProgressValue);
+
+      let step = 0;
+      if (waitingInfo.myOrder <= 500) step = 100;
+      else if (waitingInfo.myOrder <= 1000) step = 80;
+      else if (waitingInfo.myOrder <= 1500) step = 60;
+      else if (waitingInfo.myOrder <= 2000) step = 40;
+      else if (waitingInfo.myOrder > 2000) step = 20;
+      else step = 0;
+
+      setProgress(step as ProgressValue);
     }
   }, [waitingInfo]);
 
   const handleSrc = (progress: number) => {
     if (!progress || !waitingInfo) return egg;
 
-    if (progress < 30) return egg;
+    if (progress <= 20) return egg;
 
-    if (progress < 60) return hatching_chick;
+    if (progress <= 60) return hatching_chick;
 
-    if (progress < 90) return baby_chick;
+    if (progress <= 80) return baby_chick;
 
     return front_chick;
   };
@@ -127,11 +136,11 @@ const WaitingPage = () => {
   const handleTips = (progress: number) => {
     if (!progress || !waitingInfo) return "곧 대기번호가 발급 됩니다.";
 
-    if (progress < 30) return "접속자가 많아 대기 중 이에요.";
+    if (progress <= 20) return "접속자가 많아 대기 중 이에요.";
 
-    if (progress < 60) return "조금만 더 기다려 주세요.";
+    if (progress <= 60) return "조금만 더 기다려 주세요.";
 
-    if (progress < 90) return "곧 입장될 예정 입니다.";
+    if (progress <= 80) return "곧 입장될 예정 입니다.";
 
     return "입장 준비 완료";
   };
