@@ -5,8 +5,8 @@ const ContributingPage = () => {
   return (
     <div className="flex flex-col flex-1 gap-2 bg-white rounded-md border">
       <SectionTitle title="Contribution" />
-      <div className="p-3 text-[1.5rem]">
-        <h1 className="text-[2rem] font-bold">코드 기여 지침</h1>
+      <div className="p-3 text-[1.2rem]">
+        <h1 className="text-[1.2rem] font-bold">코드 기여 지침</h1>
         <p>
           QQueueing은 무료이고 오픈된 프로젝트이며 우리는 커뮤니티에서의 기여를
           환영합니다! 여러분의 참여 방법은 다양합니다. 튜토리얼이나 블로그 글
@@ -74,7 +74,7 @@ const ContributingPage = () => {
           있습니다.
         </p>
         &nbsp;
-        <ul>
+        <ul className="list-disc ml-10">
           <li>적절한 유닛 테스트 추가</li>
           <li>적용 가능한 경우 통합 테스트 추가</li>
           <li>
@@ -92,7 +92,7 @@ const ContributingPage = () => {
         &nbsp;
         <h3 className="font-bold">변경 사항 제출</h3>
         <p>변경 사항과 테스트가 준비되었다면 다음을 제출하세요.</p>
-        <ol>
+        <ol className="list-disc ml-10">
           <li>
             <p>변경 사항을 테스트하세요</p>
             <p> 테스트 스위트를 실행하여 아무 문제가 없는지 확인하세요.</p>
@@ -100,7 +100,6 @@ const ContributingPage = () => {
           <li>
             <p>변경 사항을 리베이스하세요</p>
             <p>
-              {" "}
               로컬 저장소를 최신 QQueueing 저장소 코드로 업데이트하고, 브랜치를
               최신 마스터 브랜치 위에 리베이스하세요. 우리는 초기 변경 사항을
               하나의 커밋으로 압축하는 것을 선호합니다. 나중에 변경 사항을 요청
@@ -112,7 +111,6 @@ const ContributingPage = () => {
           <li>
             <p>풀 리퀘스트를 제출하세요</p>
             <p>
-              {" "}
               로컬 변경 사항을 포크한 저장소에 푸시하고 병합 요청을 제출하세요.
               풀 리퀘스트에서는 여러분이 한 변경 사항을 요약하는 제목을
               선택하고, 변경 사항에 대한 자세한 내용을 본문에 제공하세요. 또한
