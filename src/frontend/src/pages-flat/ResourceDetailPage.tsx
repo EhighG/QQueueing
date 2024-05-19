@@ -22,13 +22,14 @@ import {
 } from "recharts";
 
 const ResourceDetailPage = () => {
-  const { data: cpuUsage, isFetching: cpuFetching } = useGetSystemCpuUsage();
-  const { data: diskTotal } = useGetDiskTotal();
-  const { data: jvmMemoryMax } = useGetJvmMemoryMax();
+  const { data: cpuUsage, isFetching: cpuFetching } =
+    useGetSystemCpuUsage(5000);
+  const { data: diskTotal } = useGetDiskTotal(5000);
+  const { data: jvmMemoryMax } = useGetJvmMemoryMax(5000);
   const { data: jvmMemoryUsed, isFetching: memoryFetching } =
-    useGetJvmMemoryUsed();
+    useGetJvmMemoryUsed(5000);
   const { data: requestCount, isFetching: requestFetching } =
-    useGetRequestCount();
+    useGetRequestCount(5000);
 
   type logDataProps = {
     value: number;
