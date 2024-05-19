@@ -74,10 +74,10 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 ## Run Screen
 
 - PC Version
-<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/c55b304d270db2f7f64b9353b7dc1143/pc_%EB%B2%84%EC%A0%84.PNG" width="300" height="150">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/c55b304d270db2f7f64b9353b7dc1143/pc_%EB%B2%84%EC%A0%84.PNG" width="500" height="250">
 
 - Mobile Version
-<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/c5ee0642f278d339a537d5a7efb0dc72/%EB%AA%A8%EB%B0%94%EC%9D%BC_%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%A7%84%EC%9E%85_%ED%99%94%EB%A9%B4.PNG" width="200" height="250">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/c5ee0642f278d339a537d5a7efb0dc72/%EB%AA%A8%EB%B0%94%EC%9D%BC_%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%A7%84%EC%9E%85_%ED%99%94%EB%A9%B4.PNG" width="400" height="500">
 
 ## Contributing
 
