@@ -81,11 +81,11 @@ cd S10P31A401
 
 <b>대시보드 버튼을 클릭하여 대기열이 적용된 운영자의 컴퓨팅 자원과, 대기열 어플리케이션의 상태를 모니터링할 수 있습니다.</b>
 
-<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/1ee50c0c60c7a79d49ddb77c37b044b8/%EB%8C%80%EC%89%AC%EB%B3%B4%EB%93%9C_gif.gif" width="1000" height="500">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/1ee50c0c60c7a79d49ddb77c37b044b8/%EB%8C%80%EC%89%AC%EB%B3%B4%EB%93%9C_gif.gif" width="800" height="400">
 <br>
-<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/84fbc7a0ea6498a8e96a7d9ceb078e2e/%EC%82%AC%EC%9A%A9%EC%9E%90_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9E%90%EC%9B%90_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_gif.gif" width="1000" height="500">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/84fbc7a0ea6498a8e96a7d9ceb078e2e/%EC%82%AC%EC%9A%A9%EC%9E%90_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9E%90%EC%9B%90_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_gif.gif" width="800" height="400">
 
-<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/6754174cfbc880a3eccc0565ca75b2f1/%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_gif.gif" width="1000" height="500">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/6754174cfbc880a3eccc0565ca75b2f1/%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_gif.gif" width="800" height="400">
 
 <br>
 
