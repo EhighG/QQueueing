@@ -17,7 +17,7 @@ import {
 } from "recharts";
 
 const LineChartPage = () => {
-  const { data: serverLogs, isFetching } = useGetServerLogs();
+  const { data: serverLogs, isFetching } = useGetServerLogs(5000);
   const [data, setData] = useState<ServerLogsType[]>([]);
   const [memoryMax, setMemoryMax] = useState<number>(0);
   const [diskMax, setDiskMax] = useState<number>(0);

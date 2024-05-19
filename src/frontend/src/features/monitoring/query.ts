@@ -24,10 +24,10 @@ import {
 
 const queryOptions = {
   gcTime: 0,
-  refetchInterval: 5000,
+  refetchInterval: 1000,
 };
 
-const useGetServerLogs = () => {
+const useGetServerLogs = (interval?: number) => {
   const { data, isFetching } = useQuery<
     ServerLogsType,
     AxiosError,
@@ -37,13 +37,13 @@ const useGetServerLogs = () => {
     queryKey: ["serverLogs"],
     queryFn: getServerLogs,
     ...queryOptions,
-    refetchInterval: 5000,
+    refetchInterval: interval ? interval : 1000,
   });
 
   return { data, isFetching };
 };
 
-const useGetProcessCpuUsage = () => {
+const useGetProcessCpuUsage = (interval?: number) => {
   const { data, isLoading, isError } = useQuery<
     ProcessCpuUsageType,
     AxiosError,
@@ -53,13 +53,15 @@ const useGetProcessCpuUsage = () => {
     queryKey: ["cpu"],
     queryFn: getProcessCpuUsage,
     ...queryOptions,
+    refetchInterval: interval ? interval : 1000,
+
     select: (data) => data.measurements[0],
   });
 
   return { data, isLoading, isError };
 };
 
-const useGetSystemCpuUsage = () => {
+const useGetSystemCpuUsage = (interval?: number) => {
   const { data, isLoading, isError, isFetching } = useQuery<
     SystemCpuUsageType,
     AxiosError,
@@ -69,12 +71,13 @@ const useGetSystemCpuUsage = () => {
     queryKey: ["cpu"],
     queryFn: getSystemCpuUsage,
     ...queryOptions,
+    refetchInterval: interval ? interval : 1000,
     select: (data) => data.measurements[0],
   });
 
   return { data, isLoading, isError, isFetching };
 };
-const useGetDiskTotal = () => {
+const useGetDiskTotal = (interval?: number) => {
   const { data, isLoading, isError } = useQuery<
     DiskTotalType,
     AxiosError,
@@ -84,6 +87,7 @@ const useGetDiskTotal = () => {
     queryKey: ["disk_total"],
     queryFn: getDiskTotal,
     ...queryOptions,
+    refetchInterval: interval ? interval : 1000,
     select: (data) => data.measurements[0],
   });
 
@@ -106,7 +110,7 @@ const useGetDiskFree = () => {
   return { data, isLoading, isError };
 };
 
-const useGetJvmMemoryMax = () => {
+const useGetJvmMemoryMax = (interval?: number) => {
   const { data, isLoading, isError } = useQuery<
     JvmMemoryMaxType,
     AxiosError,
@@ -116,13 +120,14 @@ const useGetJvmMemoryMax = () => {
     queryKey: ["jvm_max"],
     queryFn: getJvmMemoryMax,
     ...queryOptions,
+    refetchInterval: interval ? interval : 1000,
     select: (data) => data.measurements[0],
   });
 
   return { data, isLoading, isError };
 };
 
-const useGetJvmMemoryUsed = () => {
+const useGetJvmMemoryUsed = (interval?: number) => {
   const { data, isLoading, isError, isFetching } = useQuery<
     JvmMemoryUsedType,
     AxiosError,
@@ -132,13 +137,14 @@ const useGetJvmMemoryUsed = () => {
     queryKey: ["jvm_used"],
     queryFn: getJvmMemoryUsed,
     ...queryOptions,
+    refetchInterval: interval ? interval : 1000,
     select: (data) => data.measurements[0],
   });
 
   return { data, isLoading, isError, isFetching };
 };
 
-const useGetRequestCount = () => {
+const useGetRequestCount = (interval?: number) => {
   const { data, isLoading, isError, isSuccess, isFetching } = useQuery<
     requestCountType,
     AxiosError,
@@ -148,6 +154,7 @@ const useGetRequestCount = () => {
     queryKey: ["get_request_count"],
     queryFn: getRequestCount,
     ...queryOptions,
+    refetchInterval: interval ? interval : 1000,
   });
 
   return { data, isLoading, isError, isSuccess, isFetching };

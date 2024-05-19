@@ -13,15 +13,15 @@ const WaitingTable = ({ waitingList }: waitingListType) => {
     <table className="flex flex-col flex-1 rounded-md shadow-lg border">
       <thead>
         <tr className="flex items-center w-full text-center border-b border-slate-300 text-[1.5rem] font-bold h-[60px]">
-          <th className="w-[25%]">등록 URL</th>
-          <th className="w-[25%]">최대 수용 인원</th>
-          <th className="w-[25%]">예상 수용</th>
-          <th className="w-[12.5%]">활성 여부</th>
+          <th className="w-[20%]">대기열 번호</th>
+          <th className="w-[35%]">등록 URL</th>
+          <th className="w-[30%]">서비스 명</th>
+          <th className="w-[15%]">활성 여부</th>
         </tr>
       </thead>
       <tbody>
         {waitingList && waitingList.length > 0 ? (
-          waitingList.map((item) => (
+          waitingList.map((item, index) => (
             <tr
               key={item.id}
               className="flex items-center w-full text-center border-b border-black h-[60px] cursor-pointer"
@@ -29,10 +29,10 @@ const WaitingTable = ({ waitingList }: waitingListType) => {
                 router.push(`/manage/${item.id}`);
               }}
             >
-              <td className="w-[25%]">{item.targetUrl}</td>
-              <td className="w-[25%]">{item.maxCapacity}</td>
-              <td className="w-[25%]">{item.processingPerMinute}</td>
-              <td className="w-[12.5%]">
+              <td className="w-[20%]">{index + 1}</td>
+              <td className="w-[35%]">{item.targetUrl}</td>
+              <td className="w-[30%]">{item.serviceName}</td>
+              <td className="w-[15%]">
                 {item.isActive ? "활성 중" : "비 활성"}
               </td>
             </tr>
