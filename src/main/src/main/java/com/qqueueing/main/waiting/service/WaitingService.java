@@ -217,6 +217,10 @@ public class WaitingService {
         } else { // 대기 불필요
 //            log.info("대기 불필요 - 타겟 페이지로 redirect 응답 반환");
             String tempToken = createTempToken(targetUrl); // 토큰 생성
+            log.info("tempToken = {}", tempToken);
+            log.info("mapped targetUrl = {}", targetUrlMapper.get(tempToken));
+            log.info("targetUrl = {}", targetUrl);
+
             uriBuilder = UriComponentsBuilder.fromUriString(SERVER_ORIGIN + TARGET_PAGE_URI)
                     .queryParam("token", tempToken);
             return uriBuilder.build().toUri();
@@ -319,6 +323,9 @@ public class WaitingService {
      */
     public String forward(String token) {
         String targetUrl = targetUrlMapper.get(token);
+        log.info("in forward()..........");
+        log.info("token = {}", token);
+        log.info("mapped targetUrl = {}", targetUrl);
         // for test
         if (token.equals(TEST_TOKEN)) {
             targetUrl = TEST_TARGET_URL;
@@ -328,6 +335,7 @@ public class WaitingService {
         if (targetUrl == null) {
             throw new IllegalArgumentException("invalid token");
         }
+        log.info("success! mapping url exist");
         targetUrlMapper.remove(token);
 
         // get target page
