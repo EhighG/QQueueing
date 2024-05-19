@@ -14,22 +14,34 @@ CONTAINER_NAME=$(docker ps -a | grep ">80/tcp"| awk '{print $NF}')
 ################################################################################
 
 usage() {
-    printf "\n"
-	printf "\tIf this is first time using qqueueing, please command install.\n"
-    printf "Usage: \n\t QQueueuing [command]"
-    printf "\n\nAvailable Commands:"
-    printf "\n\ninstall | i \t\t\t initialize"
-    printf "\n\tstart\t\t\tStart all services"
-    printf "\n\tstop\t\t\tStop all services"
-    printf "\n\trestart\t\t\tRestart all stopped and running services"
-    printf "\n\tlogs [-f]\t\tShow openvidu logs."
-    printf "\n\tversion\t\t\tShow version of Openvidu Server"
-    printf "\n\thelp\t\t\tShow help for openvidu command"
-    printf "\n"
+  printf "\033[34m" 
+
+  echo ' $$$$$$\   $$$$$$\                                          $$\                     ';
+  echo '$$  __$$\ $$  __$$\                                         \__|                    ';
+  echo '$$ /  $$ |$$ /  $$ |$$\   $$\  $$$$$$\  $$\   $$\  $$$$$$\  $$\ $$$$$$$\   $$$$$$\  ';
+  echo '$$ |  $$ |$$ |  $$ |$$ |  $$ |$$  __$$\ $$ |  $$ |$$  __$$\ $$ |$$  __$$\ $$  __$$\ ';
+  echo '$$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$$$ |$$ |  $$ |$$$$$$$$ |$$ |$$ |  $$ |$$ /  $$ |';
+  echo '$$ $$\$$ |$$ $$\$$ |$$ |  $$ |$$   ____|$$ |  $$ |$$   ____|$$ |$$ |  $$ |$$ |  $$ |';
+  echo '\$$$$$$ / \$$$$$$ / \$$$$$$  |\$$$$$$$\ \$$$$$$  |\$$$$$$$\ $$ |$$ |  $$ |\$$$$$$$ |';
+  echo ' \___$$$\  \___$$$\  \______/  \_______| \______/  \_______|\__|\__|  \__| \____$$ |';
+  echo '     \___|     \___|                                                      $$\   $$ |';
+  echo '                                                                          \$$$$$$  |';
+  echo '                                                                           \______/ ';
+  printf "\033[0m\n"
+  printf "\t\033[31mNOTICE: If this is the first time using QQueueing, please input command install.\033[0m\n"
+  printf "Usage: \n\tQQueueuing [command]"
+  printf "\n\nAvailable Commands:"
+  printf "\n\t\033[0;32m(i)nstall\t\tIntialize before start service\033[0m"
+  printf "\n\t\033[0;32mstart\t\t\tStart all services\033[0m"
+  printf "\n\t\033[0;32mstop\t\t\tStop all services\033[0m"
+  printf "\n\t\033[0;32m(r)estart\t\tRestart all stopped and running services\033[0m"
+  printf "\n\thelp\t\t\tShow help for QQueueing command\n"
+  printf "\n"
 }
 
 make_env() {
-	echo "Please enter your url, e.g. https://www.ssafy.com"
+	printf "\033[42m CREATE ENV FILE\033[0m\n" 
+	echo "Please enter your url, e.g. \033[0;34mhttps://www.ssafy.com\033[0m"
 	read url
 
 	tee .env << EOF
@@ -52,15 +64,37 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 
 
 EOF
+	printf "\033[42m ENV FILE CREATED\033[0m\n" 
+}
 
-	echo "initial env created"
+stop_service() {
+  docker compose --env-file .env -f $COMPOSE_PATH down
+  sudo kill $(cat src/pipes/id.txt)
+  sudo rm src/pipes/id.txt src/pipes/pipe
+}
 
+start_service() {
+  if [[ -e src/pipes/id.txt ]];then
+	  echo "reconnect pipe"
+	  sudo kill $(cat src/pipes/id.txt)
+	  sudo rm src/pipes/id.txt src/pipes/pipe
+  fi
+  mkfifo src/pipes/pipe
+  sudo -s source src/pipes/listen.sh &
+  echo $! > src/pipes/id.txt
 
+  docker compose --env-file .env -f $COMPOSE_PATH build
+  docker compose --env-file .env -f $COMPOSE_PATH up -d
+
+  sudo docker exec $CONTAINER_NAME nginx -t
+  sudo docker exec $CONTAINER_NAME nginx -s reload
 }
 
 # need to verify docker, compose exists
-docker -v && docker compose version ||\
+docker -v > /dev/null && docker compose version > /dev/null ||\
 	echo "Make sure you installed docker and compose"
+
+# If user not in docker group, add in group.
 if [[ -z $(groups | grep docker) ]]; then
 	echo "add user in docker group to avoid additional sudo privileges"
 	sudo usermod -aG docker ${USER} 
@@ -109,26 +143,13 @@ case $1 in
   ;;
 
   start)
-	if [[ -e src/pipes/id.txt ]];then
-		echo "reconnect pipe"
-		sudo kill $(cat src/pipes/id.txt)
-		sudo rm src/pipes/id.txt src/pipes/pipe
-	fi
-
-	mkfifo src/pipes/pipe
-	sudo -s source src/pipes/listen.sh &
-	echo $! > src/pipes/id.txt
-    docker compose --env-file .env -f $COMPOSE_PATH build
-    docker compose --env-file .env -f $COMPOSE_PATH up -d
-
-	sudo docker exec $CONTAINER_NAME nginx -t
-	sudo docker exec $CONTAINER_NAME nginx -s reload
+	# TODO: check if user already started service
+	start_service
     ;;
 
   stop)
-    docker compose --env-file .env -f $COMPOSE_PATH down
-	sudo kill $(cat src/pipes/id.txt)
-	sudo rm src/pipes/id.txt src/pipes/pipe
+	# TODO: check if user already stopped service
+	stop_service
     ;;
 
   ps)
@@ -144,12 +165,9 @@ case $1 in
 	echo "build images to run containers"
 	;;
 
-  restart)
-    docker compose --env-file .env -f $COMPOSE_PATH down
-    docker-compose up -d
-    if [[ "${FOLLOW_OPENVIDU_LOGS}" == "true" ]]; then
-      docker-compose logs -f --tail 10 openvidu-server
-    fi
+  restart|r)
+	stop_service
+	start_service
     ;;
 
   logs)
