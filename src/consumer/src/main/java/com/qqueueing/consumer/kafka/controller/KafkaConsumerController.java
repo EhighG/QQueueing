@@ -39,6 +39,13 @@ public class KafkaConsumerController {
 
         System.out.println("start");
         kafkaConsumerService.deleteDatasOfPartition(partitionNumber);
+        boolean initSuccess = kafkaConsumerService.checkConsumerValid(partitionNumber);
+
+        if (!initSuccess) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body(partitionNumber + "번 파티션 초기화 실패");
+        }
 
         return ResponseEntity.ok().body(new SuccessResponse(HttpStatus.OK.value(), "대기열을 시작하였습니다. 새로운 partition이 할당되었습니다.", null));
     }

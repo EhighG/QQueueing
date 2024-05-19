@@ -146,10 +146,27 @@ public class WaitingService {
         registration.setIsActive(true);
         registrationRepository.save(registration);
 //        // re-init partition
-        consumerConnector.clearPartition(partitionNo);
+        boolean initSuccess = consumerConnector.clearPartition(partitionNo);
+        if (!initSuccess) {
+            removeInMemoryQueueInfo(partitionNo);
+            log.error("activation failed!! marked as needRestart partition. partitionNumber {}", partitionNo);
+            return;
+        }
         log.info("partitionNumber {} ....activation end.", partitionNo);
         // re-init auto increment client order
         enterProducer.activate(partitionNo);
+    }
+
+    @Async
+    @Scheduled(cron = "0/10 * * * * *") // 10초마다
+    public void checkPartitionsValid() {
+        registrationRepository.findAll()
+                .forEach(p -> {
+                    if (p.getIsActive() && !queues.containsKey(p.getPartitionNo())) {
+                        log.info("invalid partition exist! re-init... partitionNo = {}", p.getPartitionNo());
+                        activate(p);
+                    }
+                });
     }
 
     public void activate(int partitionNo) {

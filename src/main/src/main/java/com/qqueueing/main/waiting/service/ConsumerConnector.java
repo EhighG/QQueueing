@@ -43,7 +43,7 @@ public class ConsumerConnector {
         }
     }
 
-    public void clearPartition(int partitionNo) {
+    public boolean clearPartition(int partitionNo) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
         HttpEntity<?> requestEntity = new HttpEntity<>(partitionNo, headers);
@@ -51,7 +51,8 @@ public class ConsumerConnector {
         ResponseEntity<?> response = restTemplate.postForEntity(CONSUMER_ORIGIN + "/consume/start", requestEntity, Object.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("error clearing partition! message = {}", response.getBody());
-            throw new RuntimeException();
+            return false;
         }
+        return true;
     }
 }
