@@ -11,16 +11,16 @@ public class CommonControllerAdvice {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntimeException(RuntimeException e) {
-        log.error("에러 발생");
-        e.printStackTrace();
+//        log.error("에러 발생");
+//        e.printStackTrace();
         return ResponseEntity
                 .ok(new FailResponse(200, e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleAllException(Exception e) {
-        log.error("에러 발생");
-        e.printStackTrace();
+//        log.error("에러 발생");
+//        e.printStackTrace();
         return ResponseEntity
                 .ok(new FailResponse(500, e.getMessage()));
     }
