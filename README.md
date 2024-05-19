@@ -81,22 +81,22 @@ cd S10P31A401
 
 <b>대시보드 버튼을 클릭하여 대기열이 적용된 운영자의 컴퓨팅 자원과, 대기열 어플리케이션의 상태를 모니터링할 수 있습니다.</b>
 
-<img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/337ff56068974005c2bb6f73e1649a8e/%EB%8C%80%EC%8B%9C%EB%B3%B4%EB%93%9C_%ED%99%94%EB%A9%B4.PNG" width="1000" height="500">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/1ee50c0c60c7a79d49ddb77c37b044b8/%EB%8C%80%EC%89%AC%EB%B3%B4%EB%93%9C_gif.gif" width="1000" height="500">
 <br>
-<img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/494b5ba9a9706ab127ad7000bb75ac17/%EC%9A%B4%EC%98%81%EC%9E%90_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9E%90%EC%9B%90_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81.PNG" width="1000" height="500">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/84fbc7a0ea6498a8e96a7d9ceb078e2e/%EC%82%AC%EC%9A%A9%EC%9E%90_%EC%BB%B4%ED%93%A8%ED%8C%85_%EC%9E%90%EC%9B%90_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_gif.gif" width="1000" height="500">
 
-<img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/9c7cbfe5b00507b70ae92b2d53deb3ff/%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_%ED%99%94%EB%A9%B4.PNG" width="1000" height="500">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/6754174cfbc880a3eccc0565ca75b2f1/%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_gif.gif" width="1000" height="500">
 
 <br>
 
 ## Run Screen
 
 - PC Version
-<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/c55b304d270db2f7f64b9353b7dc1143/pc_%EB%B2%84%EC%A0%84.PNG" width="500" height="250">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/e149235f5cc637a6bee1ee74592e40f5/pc_%EB%8C%80%EA%B8%B0%EC%97%B4_gif.gif" width="600" height="300">
 <br><br><br><br>
 
 - Mobile Version
-<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/c5ee0642f278d339a537d5a7efb0dc72/%EB%AA%A8%EB%B0%94%EC%9D%BC_%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%A7%84%EC%9E%85_%ED%99%94%EB%A9%B4.PNG" width="400" height="500">
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/2dc85a5e78875063699ef98a5e85418f/%EB%AA%A8%EB%B0%94%EC%9D%BC_%EB%8C%80%EA%B8%B0%EC%97%B4_gif.gif" width="400" height="500">
 
 <br>
 
