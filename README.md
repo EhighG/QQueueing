@@ -35,9 +35,8 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 git clone https://lab.ssafy.com/s10-final/S10P31A401.git
 cd S10P31A401
 ```
-2. `qqueueing.sh`를 통해 서비스를 조작할 수 있습니다. 
- 
-명령어 실행 사진    
+2. `qqueueing.sh`를 통해 서비스를 조작할 수 있습니다.   
+![command](./.asset/qqu-command.png)      
 3. `install`을 통해 대기열 시스템 초기 설정을 진행합니다.
 ```sh
 ./qqueueing.sh install
