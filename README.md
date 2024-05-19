@@ -43,6 +43,8 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 
 (다운로드 ~ 설치 부분 생략, 실행부터)
 
+## User's Guide
+
 <b>대기열 애플리케이션을 동작시킵니다.</b>
 
 ![alt text](image.png)
@@ -69,6 +71,13 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 
 <img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/9c7cbfe5b00507b70ae92b2d53deb3ff/%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98_%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81_%ED%99%94%EB%A9%B4.PNG" width="500" height="250">
 
+## Run Screen
+
+- PC Version
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/c55b304d270db2f7f64b9353b7dc1143/pc_%EB%B2%84%EC%A0%84.PNG" width="300" height="150">
+
+- Mobile Version
+<img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/c5ee0642f278d339a537d5a7efb0dc72/%EB%AA%A8%EB%B0%94%EC%9D%BC_%EB%8C%80%EA%B8%B0%EC%97%B4_%EC%A7%84%EC%9E%85_%ED%99%94%EB%A9%B4.PNG" width="200" height="250">
 
 ## Contributing
 
