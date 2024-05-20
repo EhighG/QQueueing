@@ -34,8 +34,8 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 ## Terminal Settings
 1. 레포지토리를 클론 받은 후, 해당 레포지토리로 이동합니다.
 ```sh
-git clone https://lab.ssafy.com/s10-final/S10P31A401.git
-cd S10P31A401
+git clone https://lab.ssafy.com/s10-final/S10P31A401.git qqueueing
+cd qqueueing
 ```
 2. `qqueueing.sh`를 통해 서비스를 조작할 수 있습니다.   
 ![command](./.asset/qqu-command.png)      
@@ -74,7 +74,7 @@ cd S10P31A401
 <img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/6c1664553082d4e53386b971379b74cc/%EB%8C%80%EA%B8%B0%EC%97%B4_%EB%A6%AC%EC%8A%A4%ED%8A%B8_%ED%99%94%EB%A9%B4.PNG" width="1000" height="500">
 <br><br><br><br>
 
-<b>등록된 url을 클릭하여 상세 정보를 학인할 수 있고, 활성/비활성화 및 설정을 변경할 수 있습니다. </b>
+<b>등록된 url을 클릭하여 상세 정보를 확인할 수 있고, 활성/비활성화 및 설정을 변경할 수 있습니다. </b>
 
 <img src="https://lab.ssafy.com/s10-bigdata-recom-sub2/S10P22A706/uploads/1032df0f0fdeb394a00428af18b1c95f/url_%EC%83%81%EC%84%B8_%EC%A0%95%EB%B3%B4_%ED%99%94%EB%A9%B4.PNG" width="1000" height="500">
 <br><br><br><br>
