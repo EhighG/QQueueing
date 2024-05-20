@@ -1,0 +1,19 @@
+###batch-dev
+server.port: 8082
+
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: qqueueing-kafka:9092 # Kafka ???? ?? ?? ??? ??? ??? : ?? ??
+      group-id: consumer_group01 # Group Id
+      auto-offset-reset: latest # offset ? ??? ? ?? ?? ?? ??? ???? ?? ??
+      #      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      topic: queueing.waiting-queue.enter2 # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
+      max-poll-records: 100
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+

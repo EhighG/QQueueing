@@ -1,0 +1,142 @@
+name: qqueueing
+services:
+
+  qqueueing-main:
+    build:
+      context: .
+      dockerfile: build/main/Dockerfile
+    ports:
+      - "8081:8081"
+    image: qqueueing-main
+    #    privileged: true
+    networks:
+      - qqueueing-network
+    volumes:
+      - "${ROOT_DIR}/src/pipes:/pipes"
+    depends_on:
+      qqueueing-kafka:
+        condition: service_started
+      qqueueing-mongo: 
+        condition: service_started
+      qqueueing-consumer:
+        condition: service_healthy
+        restart: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  qqueueing-mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - qqueueing-network
+
+
+  qqueueing-consumer:
+    build:
+      context: .
+      dockerfile: build/consumer/Dockerfile
+    image: qqueueing-consumer
+    networks:
+      - qqueueing-network
+    ports:
+      - "8082:8082"
+    depends_on:
+      qqueueing-kafka:
+        condition: service_healthy
+      qqueueing-rdbms:
+        condition: service_started
+
+  qqueueing-frontend:
+    build:
+      context: .
+      dockerfile: build/frontend/Dockerfile
+    image: qqueueing-frontend
+    ports:
+      - 3001:3000
+    networks:
+      - qqueueing-network
+
+
+  qqueueing-zookeeper:
+    image: bitnami/zookeeper:3.9
+    ports:
+      - "2181:2181"
+    volumes:
+      - "zookeeper_data:/bitnami"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - qqueueing-network
+
+  qqueueing-kafka:
+    image: bitnami/kafka:3.4
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: opt/bitnami/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 || exit 1
+      interval: 1s
+      timeout: 60s
+      retries: 60
+    volumes:
+      - "kafka_data:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=qqueueing-zookeeper:2181
+    depends_on:
+      - qqueueing-zookeeper
+    networks:
+      - qqueueing-network
+
+  qqueueing-rdbms:
+    image: mysql:8.0.36
+    environment:
+      MYSQL_DATABASE: queing
+      MYSQL_USER: hak
+      MYSQL_PASSWORD: hak
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysqldb-backup:/backup
+    networks:
+      - qqueueing-network
+
+  qqueueing-prometheus:
+    build: ./build/prometheus
+    depends_on:
+      - qqueueing-node-exporter
+    ports:
+      - 3003:9090
+    volumes:
+      - /opt/bitnami/prometheus/data:/opt/bitnami/prometheus/data
+    command:
+      - "--web.enable-lifecycle"
+    user: root
+    networks:
+      - qqueueing-network
+
+  qqueueing-node-exporter:
+    image: bitnami/node-exporter:1.7.0
+    networks:
+      - qqueueing-network
+    ports:
+      - "8100:9100"
+
+  qqueueing-grafana:
+    image: grafana/grafana:main
+    ports:
+      - 3002:3000
+    networks:
+      - qqueueing-network
+
+volumes:
+  zookeeper_data:
+    driver: local
+  kafka_data:
+    driver: local
+  mysqldb-backup: {}
+
+networks:
+  qqueueing-network:
+    external: true

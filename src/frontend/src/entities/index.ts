@@ -1,0 +1,1 @@
+export { WaitingTable } from "./waitingList";

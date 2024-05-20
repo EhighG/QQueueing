@@ -1,0 +1,6 @@
+**/*.swp
+*.swp
+.vim
+.env
+start.sh
+
