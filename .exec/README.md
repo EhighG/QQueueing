@@ -1,15 +1,3 @@
-<br>
-![QQueueing](../.asset/queueing.png)  
-
-<br>
-
-<div align="left">
-    <h1>QQueueing</h1>
-</div>
-
-QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열 서비스입니다. 서버 프로그램이 실행 중인 곳에 설치해서, 추가 비용 없이 대기열 기능을 사용할 수 있습니다.
-
-<br>
 
 ## Features
 
@@ -99,24 +87,3 @@ cd qqueueing
 - Mobile Version
 <img src="https://lab.ssafy.com/s10-final/S10P31A401/uploads/2dc85a5e78875063699ef98a5e85418f/%EB%AA%A8%EB%B0%94%EC%9D%BC_%EB%8C%80%EA%B8%B0%EC%97%B4_gif.gif" width="400" height="500">
 
-<br>
-
-## 👩 Contributers
-
-| [지인성](https://github.com/JIINSUNG)                                                     | [이상학](https://github.com/yee950419)                                                             | [손영훈](https://github.com/syhuni)                                                       | [신문영](https://github.com/ztrl)                                                         | [김동건](https://github.com/Zerotay)                                                      | [강이규](https://github.com/EhighG)                                                              |
-| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| <img src="https://avatars.githubusercontent.com/u/49591292?v=4" width="150" height="150"> | <img src="https://avatars.githubusercontent.com/u/65946607?v=4" width="150" height="150">          | <img src="https://avatars.githubusercontent.com/u/74291750?v=4" width="150" height="150"> | <img src="https://avatars.githubusercontent.com/u/88647858?v=4" width="150" height="150"> | <img src="https://avatars.githubusercontent.com/u/67823010?v=4" width="150" height="150"> | <img src="https://avatars.githubusercontent.com/u/71206505?v=4" width="150" height="150">        |
-
-<br>
-
-## Contributing
-
-[CONTRIBUTING](../CONTRIBUTING_KOR.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
-See the [CONTRIBUTING](../CONTRIBUTING.md) for Code Contribution Guidelines.
-
-<br>
-
-## License
-
-[LICENSE](../LICENSE)에서 라이센스 저작권과 제한사항을 확인하십시오.  
-See the [LICENSE](../LICENSE) for license rights and limitations.
