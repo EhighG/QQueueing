@@ -1,5 +1,5 @@
 <br>
-![QQueueing](./.asset/queueing.png)  
+![QQueueing](../.asset/queueing.png)  
 
 <br>
 
@@ -39,7 +39,7 @@ git clone https://lab.ssafy.com/s10-final/S10P31A401.git qqueueing
 cd qqueueing
 ```
 2. `qqueueing.sh`를 통해 서비스를 조작할 수 있습니다.   
-![command](./.asset/qqu-command.png)      
+![command](../.asset/qqu-command.png)      
 3. `install`을 통해 대기열 시스템 초기 설정을 진행합니다.
 ```sh
 ./qqueueing.sh install
@@ -111,12 +111,12 @@ cd qqueueing
 
 ## Contributing
 
-[CONTRIBUTING](./CONTRIBUTING_KOR.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
-See the [CONTRIBUTING](./CONTRIBUTING.md) for Code Contribution Guidelines.
+[CONTRIBUTING](../CONTRIBUTING_KOR.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
+See the [CONTRIBUTING](../CONTRIBUTING.md) for Code Contribution Guidelines.
 
 <br>
 
 ## License
 
-[LICENSE](./LICENSE)에서 라이센스 저작권과 제한사항을 확인하십시오.  
-See the [LICENSE](./LICENSE) for license rights and limitations.
+[LICENSE](../LICENSE)에서 라이센스 저작권과 제한사항을 확인하십시오.  
+See the [LICENSE](../LICENSE) for license rights and limitations.
