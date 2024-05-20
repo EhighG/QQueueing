@@ -1,17 +1,4 @@
 
-## Features
-
-- 소스코드 변경 없이 다운로드를 통해 적용 가능한 대기열 기능
-  - [대기열 기능 자세히 보기](https://lab.ssafy.com/s10-final/S10P31A401/-/wikis/features/queueing)
-- 대기열 타깃 url 설정 및 활성/비활성화 기능 제공
-- 타깃 url 별로 대기 및 통과 인원 현황 모니터링 화면 제공
-- 운영자의 컴퓨팅 자원과 대기열 어플리케이션의 모니터링 지표 제공
-  - [모니터링 기능 자세히 보기](https://lab.ssafy.com/s10-final/S10P31A401/-/wikis/features/monitoring)
-- 모바일, PC 호환 지원
-
-
-<br>
-
 ## Getting Started
 #### 구동 환경
  - 도커, 도커 컴포즈(2.17이상), 파이썬3(3.8이상)
