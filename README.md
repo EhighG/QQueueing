@@ -62,41 +62,43 @@ cd qqueueing
 
 <b>대기열 애플리케이션을 동작시킵니다.</b>
 
-<img src="./.assets/대기열_첫_화면.PNG" width="1000" height="500">
+![QQueueing](./.asset/대기열_첫_화면.PNG) 
 <br><br><br><br>
 
 <b>등록하기 버튼을 누르고, 대기열을 적용할 URL, 서비스 명, 대기열 대표 이미지를 등록합니다.</b>
 
-<img src="./.assets/대기열_등록_화면.PNG" width="1000" height="500">
+![QQueueing](./.asset/대기열_등록_화면.PNG) 
 <br><br><br><br>
 
 <b>대기열 리스트 버튼을 누르고, 대기열이 적용된 모습을 확인합니다.</b>
 
-<img src="./.assets/대기열_리스트_화면.PNG" width="1000" height="500">
+![QQueueing](./.asset/대기열_리스트_화면.PNG) 
 <br><br><br><br>
 
 <b>등록된 url을 클릭하여 상세 정보를 확인할 수 있고, 활성/비활성화 및 설정을 변경할 수 있습니다. </b>
 
-<img src="./.assets/url_상세_정보_화면.PNG" width="1000" height="500">
+![QQueueing](./.asset/url_상세_정보_화면.PNG) 
 <br><br><br><br>
 
 <b>대시보드 버튼을 클릭하여 대기열이 적용된 운영자의 컴퓨팅 자원과, 대기열 어플리케이션의 상태를 모니터링할 수 있습니다.</b>
-<img src="./.assets/대쉬보드_gif.gif" width="800" height="400">
+![QQueueing](./.asset/대쉬보드_gif.gif) 
 <br>
-<img src="./.assets/사용자_컴퓨팅_자원_모니터링_gif.gif" width="800" height="400">
+![QQueueing](./.asset/사용자_컴퓨팅_자원_모니터링_gif.gif) 
 
-<img src="./.assets/대기열_애플리케이션_모니터링_gif.gif" width="800" height="400">
+![QQueueing](./.asset/대기열_애플리케이션_모니터링_gif.gif) 
 
 <br>
 
 ## Run Screen
 
-- PC Version
-<img src="./.assets/pc_대기열_gif.gif" width="600" height="300">
+- PC Version <br>
+
+![QQueueing](./.asset/pc_대기열_gif.gif) 
 <br><br><br><br>
 
-- Mobile Version
-<img src="./.assets/모바일_대기열_gif.gif" width="400" height="500">
+- Mobile Version <br>
+
+![QQueueing](./.asset/모바일_대기열_gif.gif) 
 
 <br>
 
