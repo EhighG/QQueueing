@@ -1,5 +1,6 @@
 jwt:
-  key: 94fb6d2d7c74a2bd820a55ad5ef89c2ff6a6da2d4df01a4dff7e5ae0a74b2032
+  # HS256 서명 키. Base64 문자열이고, 디코딩했을 때 32바이트 이상이어야 한다.
+  key: ${DEMO_JWT_KEY}
   access-expiration: 15
   refresh-expiration: 60
 
@@ -17,16 +18,17 @@ allowed-url:
     - /member/signup
 
 qqueue:
-  server-url: k10a401.p.ssafy.io
+  # 대기 상태를 물어볼 QQueueing main. compose의 qqueueing-network에서 서비스 이름으로 찾는다.
+  server-url: qqueueing-main
   server-port: 8081
 
 spring:
   datasource:
     hikari:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      jdbc-url: jdbc:mysql://localhost:3306/test?serverTimezone=UTC&useUniCode=yes&characterEncoding=UTF-8
-      username: SMY
-      password: 1049139
+      jdbc-url: jdbc:mysql://demo-mysql:3306/demo?serverTimezone=UTC&useUniCode=yes&characterEncoding=UTF-8
+      username: ${DEMO_MYSQL_USER}
+      password: ${DEMO_MYSQL_PASSWORD}
   jpa:
     properties:
       hibernate:
