@@ -1,242 +1,79 @@
 #!/bin/bash
+# 대상 nginx 컨테이너의 설정을 고친다. qqueueing-agent 컨테이너 안에서 agent.sh가 부른다.
+#   bash conf.sh init            /qqueueingAPI·/waiting location과 host.docker.internal 서버 블록을 넣는다. 이미 있으면 건너뛴다.
+#   bash conf.sh register <url>  등록 URL의 location을 넣는다.
+#   bash conf.sh delete <url>    등록 URL의 location을 뺀다.
+# 흐름: 대상 컨테이너의 /etc/nginx를 이 컨테이너의 /etc/nginx로 복사 → 파이썬 스크립트로 새 nginx.conf를 만든다
+#       → 대상 컨테이너에 넣는다 → nginx -t가 통과하면 reload하고, 실패하면 원래 nginx.conf로 되돌린다.
+# URL 형식 검사는 agent.sh가 한다. 이 스크립트는 인자를 셸 코드로 실행하지 않는다.
+set -uo pipefail
 
-# test
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET="${TARGET_NGINX_CONTAINER:-demo-nginx}"
+# init.py, register.py, delete.py가 /etc/nginx를 읽고 쓰며, 데모 nginx.conf의 include도 /etc/nginx 절대 경로다.
+# 그래서 이 컨테이너의 /etc/nginx를 작업 디렉터리로 쓴다.
+WORK_DIR=/etc/nginx
+BACKUP=/tmp/qqueueing-agent/nginx.conf.orig
 
-if [[ -z $2 ]];then
-	echo "needed exact 2 arguements"
-	exit 1
-fi
-#0 set variable
-NGINX_PID=$(ps -ef | grep "nginx: master"| head -1 | awk '{print $2 }')
-DIFF=$(diff <(sudo ls -Al /proc/1/ns | awk '{ print $11 }')  <(sudo ls -Al /proc/$NGINX_PID/ns | awk '{ print $11 }'))
-if [[ -z $DIFF ]];then
-	echo "Your nginx is in your host condition"
-else
-	echo "Your nginx is in container"
-	IS_NGNIX_CTNR=1
-fi
-CONTAINER_NAME=$(docker ps -a | grep ">80/tcp"| awk '{print $NF}')
-sudo docker network connect qqueueing_qqueueing-network $CONTAINER_NAME 2> /dev/null
-NGINX_PATH="/etc/nginx"
-URL_PATH=$2
-INIT_FILE="/init.conf"
-COMPLETE_FILE="/complete.conf"
-DETETE_FILE="/del.conf"
-SAVE_FILE="/nginx.conf.save"
-ROOT_DIR=$(git rev-parse --show-toplevel)
+log() {
+	printf '%s [conf.sh] %s\n' "$(date '+%F %T')" "$*"
+}
 
+usage() {
+	echo "usage: conf.sh init | register <url> | delete <url>" >&2
+	exit 2
+}
 
+# 대상 컨테이너의 /etc/nginx를 WORK_DIR로 복사하고 nginx.conf를 BACKUP에 남긴다.
+pull_config() {
+	rm -rf "$WORK_DIR"
+	# WORK_DIR가 없을 때 docker cp는 원본 디렉터리를 WORK_DIR 이름으로 만든다(있으면 그 안에 nginx/를 만든다).
+	if ! docker cp "$TARGET:/etc/nginx" "$WORK_DIR"; then
+		log "$TARGET 컨테이너에서 /etc/nginx를 복사하지 못했다."
+		return 1
+	fi
+	mkdir -p "$(dirname "$BACKUP")"
+	cp "$WORK_DIR/nginx.conf" "$BACKUP"
+}
 
-case $1 in
+# $1 파일을 대상 컨테이너의 /etc/nginx/nginx.conf로 넣고 검사한다. 통과하면 reload, 실패하면 되돌린다.
+apply_config() {
+	local new=$1
+	if cmp -s "$new" "$BACKUP"; then
+		log "바뀐 내용이 없어 반영하지 않는다."
+		return 0
+	fi
+	if docker cp "$new" "$TARGET:/etc/nginx/nginx.conf" && docker exec "$TARGET" nginx -t; then
+		docker exec "$TARGET" nginx -s reload || return 1
+		log "$TARGET 에 반영하고 reload했다."
+		return 0
+	fi
+	log "nginx -t가 실패해서 $TARGET 의 nginx.conf를 원래대로 되돌린다."
+	docker cp "$BACKUP" "$TARGET:/etc/nginx/nginx.conf" || log "되돌리기도 실패했다. $TARGET 설정을 직접 확인해야 한다."
+	return 1
+}
+
+case "${1:-}" in
+	init)
+		[[ $# -eq 1 ]] || usage
+		pull_config || exit 1
+		# 이미 초기화돼 있으면 init.py가 파일을 고치지 않고 끝나므로 apply_config가 건너뛴다.
+		python3 "$SCRIPT_DIR/init.py" || exit 1
+		apply_config "$WORK_DIR/nginx.conf"
+		;;
 	register)
-		echo "set nginx!!"
-
-		if [[ -n $IS_NGNIX_CTNR ]];then
-			#1 copy nginx files from container
-			# todo: if user have nginx in host, need to handle that
-			if [[ -d $NGINX_PATH ]];then
-				sudo rm -rf $NGINX_PATH
-			fi
-			sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
-			sudo touch $NGINX_PATH$COMPLETE_FILE
-
-
-			#2 execute python script
-			echo "REGISTERING $URL_PATH"
-			sudo python3 $ROOT_DIR/src/pipes/register.py $URL_PATH
-			sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
-
-			#3 copy completed file to contianer 
-			sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
-
-			sudo rm -rf $NGINX_PATH
-
-			sudo docker exec $CONTAINER_NAME nginx -t 
-
-			#4 restart nginx
-			sudo docker exec $CONTAINER_NAME nginx -s reload
-		else
-			sudo rm -rf $NGINX_PATH$COMPLETE_FILE 2> /dev/null
-			sudo touch $NGINX_PATH$COMPLETE_FILE
-			sudo python3 $ROOT_DIR/register.py $URL_PATH
-			sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
-			sudo cat $NGINX_PATH$COMPLETE_FILE | grep $URL_PATH
-
-			sudo mv $NGINX_PATH/nginx.conf $NGINX_PATH/nginx.conf.save
-			sudo mv $NGINX_PATH$COMPLETE_FILE $NGINX_PATH/nginx.conf
-
-			sudo nginx -s reload
-		fi
+		[[ $# -eq 2 ]] || usage
+		pull_config || exit 1
+		python3 "$SCRIPT_DIR/register.py" "$2" || exit 1
+		apply_config "$WORK_DIR/complete.conf"
 		;;
 	delete)
-		echo "delete"
-		if [[ -n $IS_NGNIX_CTNR ]];then
-			#1 copy nginx files from container
-			# todo: if user have nginx in host, need to handle that
-			if [[ -d $NGINX_PATH ]];then
-				sudo rm -rf $NGINX_PATH
-			fi
-			sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
-			sudo touch $NGINX_PATH$DETETE_FILE
-
-
-			#2 execute python script
-			echo "DELETING $URL_PATH"
-			sudo python3 $ROOT_DIR/src/pipes/delete.py $URL_PATH
-			sudo chmod 664 $NGINX_PATH$DETETE_FILE
-
-			#3 copy completed file to contianer 
-			sudo docker cp $NGINX_PATH$DETETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
-
-			sudo rm -rf $NGINX_PATH
-
-			sudo docker exec $CONTAINER_NAME nginx -t 
-
-			#4 restart nginx
-			sudo docker exec $CONTAINER_NAME nginx -s reload
-		else
-			sudo python3 $ROOT_DIR/src/pipes//delete.py $URL_PATH
-			sudo chmod 664 $NGINX_PATH$DETETE_FILE
-			sudo cat $NGINX_PATH$DETETE_FILE | grep $URL_PATH
-
-			sudo mv $NGINX_PATH/nginx.conf $NGINX_PATH/nginx.conf.save
-			sudo mv $NGINX_PATH$DETETE_FILE $NGINX_PATH/nginx.conf
-
-			sudo nginx -s reload
-		fi
-		;;
-	modify)
-		echo "modify"
-		;;
-	dr-test)
-		echo "test for delete"
-		if [[ -d $NGINX_PATH ]];then
-			sudo rm -rf $NGINX_PATH
-		fi
-		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
-
-
-		#2 execute python script
-		echo "DELETING $URL_PATH"
-		sudo python3 delete.py $URL_PATH
-		sudo chmod 664 $NGINX_PATH$DETETE_FILE
-		sudo cat $NGINX_PATH$DETETE_FILE 
-
-		#3 copy completed file to contianer 
-		sudo docker cp $NGINX_PATH$DETETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
-
-		sudo rm -rf $NGINX_PATH
-
-		sudo docker exec $CONTAINER_NAME nginx -t 
-
-
-		echo "test for register"
-		if [[ -d $NGINX_PATH ]];then
-			sudo rm -rf $NGINX_PATH
-		fi
-		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
-
-
-		#2 execute python script
-		echo "REGITSTERING $URL_PATH"
-		sudo python3 /src/pipes/register.py $URL_PATH
-		sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
-		sudo cat $NGINX_PATH$COMPLETE_FILE 
-
-		#3 copy completed file to contianer 
-		sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
-
-		sudo rm -rf $NGINX_PATH
-
-		sudo docker exec $CONTAINER_NAME nginx -t 
-		;;
-
-	rd-test)
-		if [[ -n $IS_NGNIX_CTNR ]];then
-			#1 copy nginx files from container
-			# todo: if user have nginx in host, need to handle that
-			if [[ -d $NGINX_PATH ]];then
-				sudo rm -rf $NGINX_PATH
-			fi
-			sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
-			sudo touch $NGINX_PATH$COMPLETE_FILE
-
-
-			#2 execute python script
-			echo "REGITSTERING $URL_PATH"
-			sudo python3 register.py $URL_PATH
-			sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
-			sudo cat $NGINX_PATH$COMPLETE_FILE | grep $URL_PATH
-
-			#3 copy completed file to contianer 
-			sudo docker exec $CONTAINER_NAME mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.save
-			sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
-
-			sudo rm -rf $NGINX_PATH
-
-			sudo docker exec $CONTAINER_NAME nginx -t 
-			#exit 1
-
-			#4 restart nginx
-			sudo docker exec $CONTAINER_NAME nginx -s reload
-		else
-			sudo rm -rf $NGINX_PATH$COMPLETE_FILE 2> /dev/null
-			sudo touch $NGINX_PATH$COMPLETE_FILE
-			sudo python3 register.py $URL_PATH
-			sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
-			sudo cat $NGINX_PATH$COMPLETE_FILE | grep $URL_PATH
-
-			sudo mv $NGINX_PATH/nginx.conf $NGINX_PATH/nginx.conf.save
-			sudo mv $NGINX_PATH$COMPLETE_FILE $NGINX_PATH/nginx.conf
-
-			sudo nginx -s reload
-		fi
-		echo "test for register"
-		if [[ -d $NGINX_PATH ]];then
-			sudo rm -rf $NGINX_PATH
-		fi
-		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
-
-
-		#2 execute python script
-		echo "REGITSTERING $URL_PATH"
-		sudo python3 register.py $URL_PATH
-		sudo chmod 664 $NGINX_PATH$COMPLETE_FILE
-		sudo cat $NGINX_PATH$COMPLETE_FILE 
-
-		#3 copy completed file to contianer 
-		sudo docker cp $NGINX_PATH$COMPLETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
-
-		sudo rm -rf $NGINX_PATH
-
-		sudo docker exec $CONTAINER_NAME nginx -t 
-
-		echo "test for delete"
-		if [[ -d $NGINX_PATH ]];then
-			sudo rm -rf $NGINX_PATH
-		fi
-		sudo docker cp $CONTAINER_NAME:/etc/nginx $NGINX_PATH
-
-
-		#2 execute python script
-		echo "DELETING $URL_PATH"
-		sudo python3 delete.py $URL_PATH
-		sudo chmod 664 $NGINX_PATH$DETETE_FILE
-		sudo cat $NGINX_PATH$DETETE_FILE 
-
-		#3 copy completed file to contianer 
-		sudo docker cp $NGINX_PATH$DETETE_FILE $CONTAINER_NAME:/etc/nginx/nginx.conf
-
-		sudo rm -rf $NGINX_PATH
-
-		sudo docker exec $CONTAINER_NAME nginx -t 
+		[[ $# -eq 2 ]] || usage
+		pull_config || exit 1
+		python3 "$SCRIPT_DIR/delete.py" "$2" || exit 1
+		apply_config "$WORK_DIR/del.conf"
 		;;
 	*)
-		echo "Not valid arguement"
-		exit 1
+		usage
 		;;
 esac
-
-
-
-

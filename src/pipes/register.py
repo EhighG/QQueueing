@@ -12,15 +12,18 @@ def main(url):
 
     conf_string = Block.merge_files(path=path)
     b_nginx = Block.parse_string(conf_file=conf_string)
-    print(b_nginx.export())
     for item in b_nginx:
         if isinstance(item, Http):
             b_http = item
 
+    ssl_server = None
     for item in b_http:
         if isinstance(item, Server):
             if '443' in item.ports and host in item.hosts:
                 ssl_server = item
+    if ssl_server is None:
+        print(f'no server block that listens 443 with server_name {host}', file=sys.stderr)
+        exit(1)
 
     top = -1
     for i, item in enumerate(ssl_server):
@@ -35,7 +38,6 @@ def main(url):
             Statement(f'proxy_set_header Target-URL {url} ;')
         ])
     )
-    print(b_nginx.export())
 
 
     b_nginx.save_file(path=path+'/complete.conf')

@@ -91,10 +91,12 @@ info:
     name: qqueueing
     company: 4EVERY1
 
-#shell script 실행 관련. 컨테이너의 /pipes 마운트 기준이다.
+# URL 등록·삭제 요청을 qqueueing-agent에 넘긴다(ScriptExecService).
+# main은 path 디렉터리의 FIFO(pipe)에 "bash <fileNm> register|delete <url>" 한 줄을 쓰고,
+# 에이전트(src/pipes/agent.sh)는 fileNm 자리가 conf.sh인 줄만 실행한다. path는 compose의 pipes 볼륨 마운트 위치다.
 shell:
   path: /pipes
-  fileNm: src/pipes/conf.sh
+  fileNm: conf.sh
 
 testing:
   # 대기열 테스트용 대상 URL. servers.main(컨테이너에서는 PUBLIC_ORIGIN)을 따른다.

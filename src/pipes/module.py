@@ -157,7 +157,7 @@ class Block:
         conf_dir = os.path.dirname(path)
         if len(conf_dir) != 0: os.chdir(conf_dir)
 
-        include_directives = '^\s*include\s*(.*);'
+        include_directives = r'^\s*include\s*(.*);'
         tmptext=''
         with open(path+'/nginx.conf', 'r') as f:
             for line in f.readlines():
