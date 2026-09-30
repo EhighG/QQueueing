@@ -11,8 +11,8 @@ services:
     networks:
       - qqueueing-network
     volumes:
-      # URL 등록 요청을 파이프(src/pipes)로 넘긴다.
-      - ./pipes:/pipes
+      # URL 등록·삭제 요청을 FIFO(/pipes/pipe)로 qqueueing-agent에 넘긴다(pipes 볼륨 공유).
+      - pipes:/pipes
     depends_on:
       qqueueing-kafka:
         condition: service_healthy
@@ -21,6 +21,9 @@ services:
       qqueueing-consumer:
         condition: service_healthy
         restart: true
+      # main은 등록 요청을 FIFO에 동기로 쓴다. 에이전트가 FIFO를 만든 뒤에 띄운다.
+      qqueueing-agent:
+        condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
     # application.yml의 기본값은 IDE 실행용(localhost)이다. 컨테이너에서는 아래 환경변수로 덮어쓴다.
@@ -35,6 +38,30 @@ services:
       SERVERS_MAIN: ${PUBLIC_ORIGIN:-https://localhost}
       SERVERS_REPLACEURL: http://host.docker.internal
       PROMETHEUS_MONITORING: http://qqueueing-prometheus:9090
+
+  # URL 등록 에이전트. main이 FIFO(/pipes/pipe)에 쓴 등록·삭제 요청을 읽어 대상 nginx 컨테이너의 설정을 고치고 reload한다.
+  # 시작할 때와 대상 컨테이너가 새로 뜰 때 초기 설정(/qqueueingAPI, /waiting location, host.docker.internal 서버 블록)을 넣는다.
+  # docker.sock을 마운트하므로 Docker 호스트의 root 권한과 같다. 로컬 전용 구성이다.
+  qqueueing-agent:
+    build:
+      context: .
+      dockerfile: build/agent/Dockerfile
+    image: qqueueing-agent
+    restart: unless-stopped
+    # docker.sock만 쓰므로 네트워크가 필요 없다.
+    network_mode: none
+    environment:
+      # 설정을 고치고 reload할 nginx 컨테이너 이름(기본은 데모 nginx)
+      TARGET_NGINX_CONTAINER: ${TARGET_NGINX_CONTAINER:-demo-nginx}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - pipes:/pipes
+    healthcheck:
+      # FIFO가 있으면 main이 요청을 쓸 수 있다. 에이전트가 열기 전에 쓴 요청은 열릴 때까지 기다렸다가 전달된다.
+      test: ["CMD", "test", "-p", "/pipes/pipe"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
 
   qqueueing-mongo:
     image: mongo:5.0
@@ -144,6 +171,8 @@ services:
 volumes:
   kafka_data:
   prometheus_data:
+  # main과 qqueueing-agent가 FIFO(pipe)를 주고받는 볼륨. 저장소 폴더를 마운트하지 않으므로 작업 트리에 pipe 파일이 생기지 않는다.
+  pipes:
 
 networks:
   # compose가 만든다. 다른 compose 프로젝트(데모 nginx 등)가 이 이름으로 붙을 수 있게 이름을 고정한다.
