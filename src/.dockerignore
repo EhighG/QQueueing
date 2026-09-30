@@ -1,0 +1,9 @@
+# 빌드 컨텍스트(src/)에서 로컬 빌드 산출물과 로컬 환경 파일을 뺀다. 이미지 빌드 안에서 새로 만든다.
+# compose의 main·consumer·frontend 빌드가 모두 이 파일을 쓴다(Dockerfile 옆에 <이름>.dockerignore가 없으면 컨텍스트 루트의 이 파일이 적용된다).
+main/build
+main/.gradle
+consumer/build
+consumer/.gradle
+frontend/node_modules
+frontend/.next
+frontend/.env*
