@@ -468,25 +468,3 @@ class Nginx(Block):
         for item in self.body:
             string += item.export(indent=indent+1) 
         return string
-
-
-
-
-
-
-if __name__ == '__main__':
-
-    b_nginx = None
-    with open("./tmp.txt", 'r') as f:
-        b_nginx = Block.parse_string(f.read())
-
-    #print(b_nginx.export())
-    save_file = './nginx.pkl'
-    #b_nginx.save_pkl(path=save_file)
-    c_nginx = Block.load_pkl(save_file)
-    print(c_nginx.export())
-
-
-#    print(http_block.export())
-#    print(nginx_block.bodies)
-#    print(nginx_block.find_by_type(type='server'))
