@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export async function GET() {
-  return redirect("https://github.com/EhighG/QQueueing");
+  return redirect("https://github.com/EhighG/QQueueing#readme");
 }

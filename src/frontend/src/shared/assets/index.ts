@@ -7,7 +7,6 @@ export { default as flag } from "./flag.png";
 export { default as front_chick } from "./Front-Facing Baby Chick.png";
 export { default as hatching_chick } from "./Hatching Chick.png";
 export { default as auto_mobile } from "./Automobile.png";
-export { default as q_docs2 } from "./q_docs_2.png";
 export { default as example_1 } from "./Example1.png";
 export { default as example_2 } from "./Example2.png";
 export { default as example_3 } from "./Example3.png";

@@ -10,7 +10,6 @@ export {
   flag,
   front_chick,
   hatching_chick,
-  q_docs2,
   example_1,
   example_2,
   example_3,
