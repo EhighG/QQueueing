@@ -4,3 +4,5 @@
 .env
 start.sh
 .idea/
+# 서브에이전트가 저장소 안에 만드는 worktree
+.claude/worktrees/
