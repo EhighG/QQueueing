@@ -1,0 +1,16 @@
+# /etc/grafana/dashboards(저장소의 src/build/grafana/dashboards)에 있는 JSON을 QQueueing 폴더의 대시보드로 올린다.
+# allowUiUpdates가 false라서 UI에서는 저장할 수 없다. 고친 대시보드는 JSON으로 내보내 저장소 파일에 반영한다.
+apiVersion: 1
+
+providers:
+  - name: qqueueing
+    orgId: 1
+    folder: QQueueing
+    folderUid: qqueueing
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: false
