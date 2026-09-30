@@ -1,3 +1,7 @@
+# 기본값은 IDE나 gradlew bootRun으로 호스트에서 실행하는 기준이다(localhost와 루트 .env.example의 기본 호스트 포트).
+# 컨테이너에서는 src/compose.yml이 환경변수로 덮어쓴다. 환경변수 이름은 Spring relaxed binding 규칙을 따른다.
+# 점(.)은 _로 바꾸고 대시(-)는 빼고 대문자로 쓴다. 예: servers.main → SERVERS_MAIN, servers.replace-url → SERVERS_REPLACEURL
+# 루트 .env에서 호스트 포트를 바꿨다면 IDE 실행 때도 같은 이름의 환경변수로 덮어쓴다.
 server:
   #  tomcat:
   #    accept-count: 500
@@ -28,8 +32,9 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://root:example@k10a401.p.ssafy.io:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1
-#      uri: mongodb://localhost:27017/qqueueing
+      # 계정은 루트 .env.example의 MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD 기본값과 같다.
+      # 컨테이너에서는 compose가 루트 .env 값으로 SPRING_DATA_MONGODB_URI를 만든다.
+      uri: mongodb://root:example@localhost:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1
       auto-index-creation: true  # 자동 인덱스
 
 
@@ -39,38 +44,40 @@ spring:
 #      enabled: false
 
 servers: # 타 서버들의 정보 기록
-  consumer: k10a401.p.ssafy.io:8082
-#  consumer: localhost:8082
-  front: qqueueing-frontend:3000/waiting
-  main: http://k10a401.p.ssafy.io # Nginx 거치도록 포트번호 제거
-  parsing: http://qqueueing-frontend
+  consumer: localhost:8082
+  front: localhost:3001/waiting
+  # 브라우저가 접속하는 공개 origin(루트 .env의 PUBLIC_ORIGIN). 대기 페이지 리다이렉트 주소를 만든다.
+  main: https://localhost
+  # WaitingService.parsing()이 이 값 뒤에 :3000을 붙인다.
+  parsing: http://localhost
 
-
-  replace-url: http://host.docker.internal # replace url value for forwarding to target
-
-#  front: http://localhost:8081/waiting/testQueuePage
+  replace-url: http://localhost # replace url value for forwarding to target
 
 kafka:
-  broker: k10a401.p.ssafy.io:9092
+  # 호스트용 Kafka listener(루트 .env의 KAFKA_HOST_PORT)
+  broker: localhost:9094
   topics:
     enter:
-      name: test3
+      # consumer의 spring.kafka.consumer.topic과 같아야 한다.
+      name: queueing.waiting-queue.enter2 # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
       retention-ms: 259200000 # 3 days
   partition:
     max-index: 20
 
-# actuator
+# actuator. Prometheus가 /monitoring/prometheus를 스크랩한다(src/build/prometheus/prometheus.yml).
 management:
   endpoint:
     health:
       show-details: always
-
   endpoints:
     web:
       exposure:
         include: "*"
       base-path: "/monitoring"
-
+      cors:
+        allowed-origins: "*"
+        allowed-headers: "*"
+        allowed-methods: GET, POST, PATCH, DELETE, OPTIONS
   info:
     java:
       enabled: true
@@ -84,14 +91,14 @@ info:
     name: qqueueing
     company: 4EVERY1
 
-#shell script 실행 관련
+#shell script 실행 관련. 컨테이너의 /pipes 마운트 기준이다.
 shell:
-  path:
-    C:/Users/SSAFY/Desktop/qqueueing/tmp
-  fileNm: test.bat
+  path: /pipes
+  fileNm: src/pipes/conf.sh
 
 testing:
-  target-url: http://k10a401.p.ssafy.io/product/1
+  # 대기열 테스트용 대상 URL. servers.main(컨테이너에서는 PUBLIC_ORIGIN)을 따른다.
+  target-url: ${servers.main}/product/1
 
 prometheus:
-  monitoring: http://k10a401.p.ssafy.io:3003
+  monitoring: http://localhost:3003
