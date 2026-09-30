@@ -1,0 +1,104 @@
+# 데모 대상 사이트(대기열을 걸어 볼 예제 쇼핑몰)다. 저장소 루트의 compose.yml이 include한다.
+# 처음 한 번은 자체 서명 인증서를 만든다: docker compose run --rm demo-cert
+name: qqueueing
+services:
+
+  demo-nginx:
+    build: ./nginx
+    image: demo-nginx
+    # URL 등록 에이전트가 이 컨테이너 이름으로 설정을 고치고 reload한다.
+    container_name: demo-nginx
+    depends_on:
+      - demo-frontend
+      - demo-backend
+    ports:
+      # 대기를 통과한 요청은 main이 host.docker.internal:80으로 다시 보내므로 포트를 바꾸지 않는다.
+      - "80:80"
+      - "443:443"
+    volumes:
+      # /etc/nginx 밖에 마운트한다. 설정 디렉터리를 docker cp로 복사할 때 사용자 마운트가 섞이지 않게 하려는 것이다.
+      - ./nginx/cert:/etc/ssl/demo:ro
+    networks:
+      - demo-network
+      # 등록된 URL의 location이 proxy_pass http://qqueueing-main:8081을 쓴다.
+      - qqueueing-network
+
+  demo-frontend:
+    build:
+      context: ./frontend
+      args:
+        # NEXT_PUBLIC_* 값은 next build 때 번들에 박힌다.
+        NEXT_PUBLIC_BASE_URL: ${PUBLIC_ORIGIN:-https://localhost}/api
+    image: demo-frontend
+    networks:
+      - demo-network
+
+  demo-backend:
+    build: ./backend
+    image: demo-backend
+    environment:
+      DEMO_JWT_KEY: ${DEMO_JWT_KEY:-ycWlgZR3xgLD5qsSg5ecwrmVH7RQcAGxzmgrA6kOgvbLXrFilhurm7qTrygVrtpa}
+      DEMO_MYSQL_USER: ${DEMO_MYSQL_USER:-demo}
+      DEMO_MYSQL_PASSWORD: ${DEMO_MYSQL_PASSWORD:-demo}
+    depends_on:
+      demo-mysql:
+        condition: service_healthy
+    networks:
+      - demo-network
+      # 대기 상태 조회(qqueue.server-url)가 qqueueing-main을 부른다.
+      - qqueueing-network
+
+  demo-mysql:
+    image: mysql:8.0.36
+    environment:
+      MYSQL_DATABASE: demo
+      MYSQL_USER: ${DEMO_MYSQL_USER:-demo}
+      MYSQL_PASSWORD: ${DEMO_MYSQL_PASSWORD:-demo}
+      MYSQL_ROOT_PASSWORD: ${DEMO_MYSQL_ROOT_PASSWORD:-root}
+    healthcheck:
+      # 초기화 중에 뜨는 임시 서버는 TCP를 열지 않는다. 127.0.0.1(TCP)로 확인해야 초기화 스크립트가 끝난 뒤에 healthy가 된다.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    volumes:
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+      - demo_mysql_data:/var/lib/mysql
+    networks:
+      - demo-network
+
+  # 자체 서명 인증서를 demo/nginx/cert/에 만드는 원샷 서비스다. profiles 때문에 up으로는 뜨지 않는다.
+  # 실행: docker compose run --rm demo-cert
+  # 이미 인증서가 있으면 건너뛴다. 인증서를 바꾼 뒤에는 docker compose restart demo-nginx로 반영한다.
+  # 브라우저 경고 없이 쓰려면 mkcert(https://github.com/FiloSottile/mkcert)로 만든 인증서를 같은 파일 이름으로 둔다.
+  # (demo/nginx/cert 폴더가 없으면 먼저 만든다)
+  #   mkcert -install
+  #   mkcert -cert-file demo/nginx/cert/fullchain.pem -key-file demo/nginx/cert/privkey.pem localhost 127.0.0.1 ::1
+  demo-cert:
+    image: nginx:1.25.4
+    profiles: ["cert"]
+    network_mode: none
+    volumes:
+      - ./nginx/cert:/cert
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        if [ -f /cert/fullchain.pem ] && [ -f /cert/privkey.pem ]; then
+          echo "demo/nginx/cert/에 인증서가 이미 있어 건너뛴다. 다시 만들려면 두 파일을 지우고 실행한다."
+          exit 0
+        fi
+        openssl req -x509 -newkey rsa:2048 -noenc -days 365 \
+          -subj "/CN=localhost" \
+          -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1" \
+          -keyout /cert/privkey.pem -out /cert/fullchain.pem
+        echo "demo/nginx/cert/fullchain.pem, privkey.pem을 만들었다."
+
+volumes:
+  demo_mysql_data:
+
+networks:
+  demo-network: {}
+  # src/compose.yml과 같은 정의로 둔다. include는 같은 키의 네트워크를 먼저 포함한 파일의 정의로 합친다.
+  qqueueing-network:
+    name: qqueueing-network

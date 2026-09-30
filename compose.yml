@@ -6,3 +6,5 @@ name: qqueueing
 
 include:
   - src/compose.yml
+  # 데모 대상 사이트. 처음 한 번은 인증서를 만든다: docker compose run --rm demo-cert
+  - demo/compose.yml
