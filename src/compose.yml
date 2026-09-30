@@ -167,6 +167,18 @@ services:
       - "${GRAFANA_PORT:-3002}:3000"
     networks:
       - qqueueing-network
+    depends_on:
+      - qqueueing-prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+    # 데이터소스와 대시보드는 프로비저닝 파일로 만든다. Grafana 데이터는 볼륨에 두지 않으므로
+    # 컨테이너를 새로 만들면 UI에서 바꾼 내용은 사라지고 이 파일들로 다시 만들어진다.
+    # provisioning 폴더 전체를 덮으면 이미지의 빈 alerting·plugins 폴더가 사라져 오류 로그가 남으므로 하위 폴더만 마운트한다.
+    volumes:
+      - ./build/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./build/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./build/grafana/dashboards:/etc/grafana/dashboards:ro
 
 volumes:
   kafka_data:
