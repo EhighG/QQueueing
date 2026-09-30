@@ -23,6 +23,18 @@ services:
         restart: true
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    # application.yml의 기본값은 IDE 실행용(localhost)이다. 컨테이너에서는 아래 환경변수로 덮어쓴다.
+    # 이름은 Spring relaxed binding 규칙을 따른다: 점(.)은 _로, 대시(-)는 빼고, 대문자로. 예: servers.replace-url → SERVERS_REPLACEURL
+    environment:
+      SPRING_DATA_MONGODB_URI: "mongodb://${MONGO_ROOT_USERNAME:-root}:${MONGO_ROOT_PASSWORD:-example}@qqueueing-mongo:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1"
+      KAFKA_BROKER: qqueueing-kafka:9092
+      SERVERS_CONSUMER: qqueueing-consumer:8082
+      SERVERS_FRONT: qqueueing-frontend:3000/waiting
+      SERVERS_PARSING: http://qqueueing-frontend
+      # 대기 페이지 리다이렉트 주소의 기준이다. testing.target-url도 이 값을 따른다.
+      SERVERS_MAIN: ${PUBLIC_ORIGIN:-https://localhost}
+      SERVERS_REPLACEURL: http://host.docker.internal
+      PROMETHEUS_MONITORING: http://qqueueing-prometheus:9090
 
   qqueueing-mongo:
     image: mongo:5.0
@@ -46,11 +58,18 @@ services:
     depends_on:
       qqueueing-kafka:
         condition: service_healthy
+    # application.yml의 기본값은 IDE 실행용(localhost:9094)이다. 컨테이너에서는 환경변수로 덮어쓴다.
+    environment:
+      SPRING_KAFKA_CONSUMER_BOOTSTRAPSERVERS: qqueueing-kafka:9092
 
   qqueueing-frontend:
     build:
       context: .
       dockerfile: build/frontend/Dockerfile
+      # NEXT_PUBLIC_* 값은 next build 때 번들에 박힌다. PUBLIC_ORIGIN을 바꾸면 --build로 다시 빌드해야 반영된다.
+      args:
+        NEXT_PUBLIC_BASE_URL: ${PUBLIC_ORIGIN:-https://localhost}/qqueueingAPI
+        NEXT_PUBLIC_MONITORING_URL: ${PUBLIC_ORIGIN:-https://localhost}/qqueueingAPI
     image: qqueueing-frontend
     ports:
       - "${ADMIN_PORT:-3001}:3000"
