@@ -15,11 +15,9 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 ## Features
 
 - 소스코드 변경 없이 다운로드를 통해 적용 가능한 대기열 기능
-  - [대기열 기능 자세히 보기](https://lab.ssafy.com/s10-final/S10P31A401/-/wikis/features/queueing)
 - 대기열 타깃 url 설정 및 활성/비활성화 기능 제공
 - 타깃 url 별로 대기 및 통과 인원 현황 모니터링 화면 제공
 - 운영자의 컴퓨팅 자원과 대기열 어플리케이션의 모니터링 지표 제공
-  - [모니터링 기능 자세히 보기](https://lab.ssafy.com/s10-final/S10P31A401/-/wikis/features/monitoring)
 - 모바일, PC 호환 지원
 
 
@@ -36,7 +34,7 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 ## Terminal Settings
 1. 레포지토리를 클론 받은 후, 해당 레포지토리로 이동합니다.
 ```sh
-git clone https://lab.ssafy.com/s10-final/S10P31A401.git qqueueing
+git clone https://github.com/EhighG/QQueueing.git qqueueing
 cd qqueueing
 ```
 2. `qqueueing.sh`를 통해 서비스를 조작할 수 있습니다.   
@@ -108,13 +106,6 @@ cd qqueueing
 | [지인성](https://github.com/JIINSUNG)                                                     | [이상학](https://github.com/yee950419)                                                             | [손영훈](https://github.com/syhuni)                                                       | [신문영](https://github.com/ztrl)                                                         | [김동건](https://github.com/Zerotay)                                                      | [강이규](https://github.com/EhighG)                                                              |
 | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | <img src="https://avatars.githubusercontent.com/u/49591292?v=4" width="150" height="150"> | <img src="https://avatars.githubusercontent.com/u/65946607?v=4" width="150" height="150">          | <img src="https://avatars.githubusercontent.com/u/74291750?v=4" width="150" height="150"> | <img src="https://avatars.githubusercontent.com/u/88647858?v=4" width="150" height="150"> | <img src="https://avatars.githubusercontent.com/u/67823010?v=4" width="150" height="150"> | <img src="https://avatars.githubusercontent.com/u/71206505?v=4" width="150" height="150">        |
-
-<br>
-
-## Contributing
-
-[CONTRIBUTING](./CONTRIBUTING_KOR.md)에서 코드 기여에 관한 가이던스를 확인하십시오.  
-See the [CONTRIBUTING](./CONTRIBUTING.md) for Code Contribution Guidelines.
 
 <br>
 
