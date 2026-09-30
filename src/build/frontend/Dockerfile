@@ -1,11 +1,11 @@
-FROM bitnami/node:20 as builder
+FROM node:20 AS builder
 ARG app=frontend
 WORKDIR /$app
 COPY $app /$app
 RUN npm i
 RUN npm run build
 
-FROM bitnami/node:20
+FROM node:20
 ARG app=frontend
 ENV TZ=Asia/Seoul
 EXPOSE 3000
