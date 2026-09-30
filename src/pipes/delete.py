@@ -17,10 +17,14 @@ def main(url):
         if isinstance(item, Http):
             b_http = item
     
+    ssl_server = None
     for item in b_http:
         if isinstance(item, Server):
             if '443' in item.ports and host in item.hosts:
                 ssl_server = item
+    if ssl_server is None:
+        print(f'no server block that listens 443 with server_name {host}', file=sys.stderr)
+        exit(1)
     for i, item in enumerate(ssl_server):
         if isinstance(item, Location) and item.condition == endpoint:
             ssl_server.pop(ind=i)
