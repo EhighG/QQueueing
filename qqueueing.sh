@@ -135,7 +135,6 @@ case $1 in
 	fi
 
 	# inital config
-	sudo python3 src/scripts/insert_domain.py $URL
 	# In current, all server blocks get initial setting
 	sudo python3 src/pipes/init.py
 	sudo docker cp $NGINX_PATH/nginx.conf $CONTAINER_NAME:/etc/nginx/nginx.conf
