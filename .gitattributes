@@ -1,0 +1,4 @@
+# 컨테이너(Linux) 안에서 실행되는 파일이 Windows 체크아웃에서 CRLF로 바뀌지 않도록 작업 트리도 LF로 맞춘다.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
