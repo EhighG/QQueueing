@@ -5,7 +5,7 @@ import { ResponseType } from "..";
 
 const instance: AxiosInstance = axiosInstance();
 
-// 대기열 입장
+// 줄 서기
 const postEnqueue = async (target: string): Promise<infoType> => {
   return await instance
     .post<ResponseType<infoType>>(
@@ -22,25 +22,20 @@ const postEnqueue = async (target: string): Promise<infoType> => {
 };
 
 // 현재 나의 순번 조회
-const getWaitingInfo = async (
-  partitionNo: number,
-  order: number,
-  idVal: string
-) => {
+const getWaitingInfo = async (partitionNo: number, waiterId: string) => {
   return await instance
     .post<statusType>(`/waiting/order`, {
       partitionNo,
-      order,
-      idVal,
+      waiterId,
     })
     .then(({ data }) => data);
 };
 
-// 대기열 나가기
-const getWaitingOut = async (partitionNo: number, order: number) => {
+// 이탈
+const postWaitingOut = async (partitionNo: number, waiterId: string) => {
   return await instance
-    .get(`/waiting/out?partitionNo=${partitionNo}&order=${order}`)
+    .post(`/waiting/out`, null, { params: { partitionNo, waiterId } })
     .then(({ data }) => data);
 };
 
-export { postEnqueue, getWaitingInfo, getWaitingOut };
+export { postEnqueue, getWaitingInfo, postWaitingOut };

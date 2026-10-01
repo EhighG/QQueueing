@@ -2,7 +2,7 @@
 import {
   useEnqueue,
   useGetWaitingInfo,
-  useGetWaitingOut,
+  usePostWaitingOut,
   useGetServiceImage,
 } from "@/features";
 import {
@@ -24,16 +24,20 @@ const WaitingPage = () => {
   const router = useRouter();
   const params = useSearchParams();
   const targetUrl = params.get("Target-URL") ?? "";
-  const [idx, setIdx] = useState<number>(-1);
-  const [idVal, setIdVal] = useState<string>("");
+  const [waiterId, setWaiterId] = useState<string>("");
   const [partitionNo, setPartitionNo] = useState<number>(-1);
+  // "나가기"를 누른 뒤에는 순번 조회와 자동 이동을 멈춘다
+  const [leaving, setLeaving] = useState<boolean>(false);
   const [estimateTime, setEstimateTime] = useState<number>(0);
   const [waitingTime, setWaitingTime] = useState<number>(0);
   const { data: enqueueInfo } = useEnqueue(targetUrl);
-  const { data: waitingInfo } = useGetWaitingInfo(partitionNo, idx, idVal);
-  const { refetch: handleButton, isSuccess } = useGetWaitingOut(
+  const { data: waitingInfo } = useGetWaitingInfo(
     partitionNo,
-    idx
+    leaving ? "" : waiterId
+  );
+  const { mutate: leaveQueue, isSuccess } = usePostWaitingOut(
+    partitionNo,
+    waiterId
   );
   type ProgressValue = 0 | 20 | 40 | 60 | 80 | 100;
 
@@ -85,16 +89,24 @@ const WaitingPage = () => {
   useEffect(() => {
     if (enqueueInfo) {
       setPartitionNo(enqueueInfo.partitionNo);
-      setIdx(enqueueInfo.order);
-      setIdVal(enqueueInfo.idVal);
+      setWaiterId(enqueueInfo.waiterId);
     }
   }, [enqueueInfo]);
 
   useEffect(() => {
-    if (waitingInfo?.token) {
+    if (leaving || !waitingInfo) return;
+    if (waitingInfo.status === "ENTERED" && waitingInfo.token) {
       window.location.href = `${process.env.NEXT_PUBLIC_BASE_URL}/waiting/page-req?token=${waitingInfo.token}`;
+    } else if (waitingInfo.status === "NOT_FOUND") {
+      // 줄에도 입장 기록에도 없다(대기열이 다시 활성화되었거나 삭제됨). 대상 URL로 다시 들어가 새로 줄을 서거나 바로 입장한다.
+      window.location.replace(targetUrl);
     }
-  }, [waitingInfo]);
+  }, [waitingInfo, leaving, targetUrl]);
+
+  const handleLeave = () => {
+    setLeaving(true);
+    leaveQueue();
+  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -276,17 +288,15 @@ const WaitingPage = () => {
                   </span>
                   &nbsp;명, 뒤에 &nbsp;
                   <span className="text-[1.5rem] text-q-blue animate-blink">
-                    {waitingInfo
-                      ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder >=
-                        0
-                        ? waitingInfo.totalQueueSize + 1 - waitingInfo.myOrder
-                        : 0
+                    {waitingInfo &&
+                    waitingInfo.totalQueueSize - waitingInfo.myOrder > 0
+                      ? waitingInfo.totalQueueSize - waitingInfo.myOrder
                       : 0}
                   </span>
                   &nbsp;명의 대기자가 있습니다.
                 </p>
                 <Button
-                  onClick={() => handleButton()}
+                  onClick={handleLeave}
                   className="h-[30px] border rounded-md border-black bg-red-600 px-4 text-white text-center"
                 >
                   나가기

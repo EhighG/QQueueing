@@ -184,7 +184,7 @@ const ManagePage = ({ id }: ManagePageProps) => {
                         </p>
                       </div>
                       <div className="flex flex-col items-center">
-                        <h1 className="text-[2rem] font-bold">통과 인원</h1>
+                        <h1 className="text-[2rem] font-bold">입장 인원</h1>
                         <p className="text-[2.5rem] font-bold">
                           {waitingStatus?.enterCnt}
                         </p>
