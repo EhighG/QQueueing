@@ -160,9 +160,9 @@ const useGetWaitingList = () => {
 };
 
 // 대기열 활성화
-const usePostWaitingActivate = (partitionNo: number) => {
+const usePostWaitingActivate = (id: string) => {
   const { mutate, data } = useMutation({
-    mutationFn: () => postWaitingActivate(partitionNo),
+    mutationFn: () => postWaitingActivate(id),
     onSuccess: () => {
       Swal.fire({
         title: "활성화 성공",
@@ -185,9 +185,9 @@ const usePostWaitingActivate = (partitionNo: number) => {
 };
 
 // 대기열 비활성화
-const usePostWaitingDeActivate = (partitionNo: number) => {
+const usePostWaitingDeActivate = (id: string) => {
   const { mutate, data } = useMutation({
-    mutationFn: () => postWaitingDeActivate(partitionNo),
+    mutationFn: () => postWaitingDeActivate(id),
     onSuccess: () => {
       Swal.fire({
         title: "비활성화 성공",

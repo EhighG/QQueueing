@@ -25,18 +25,18 @@ const WaitingPage = () => {
   const params = useSearchParams();
   const targetUrl = params.get("Target-URL") ?? "";
   const [waiterId, setWaiterId] = useState<string>("");
-  const [partitionNo, setPartitionNo] = useState<number>(-1);
+  const [queueId, setQueueId] = useState<string>("");
   // "나가기"를 누른 뒤에는 순번 조회와 자동 이동을 멈춘다
   const [leaving, setLeaving] = useState<boolean>(false);
   const [estimateTime, setEstimateTime] = useState<number>(0);
   const [waitingTime, setWaitingTime] = useState<number>(0);
   const { data: enqueueInfo } = useEnqueue(targetUrl);
   const { data: waitingInfo } = useGetWaitingInfo(
-    partitionNo,
+    queueId,
     leaving ? "" : waiterId
   );
   const { mutate: leaveQueue, isSuccess } = usePostWaitingOut(
-    partitionNo,
+    queueId,
     waiterId
   );
   type ProgressValue = 0 | 20 | 40 | 60 | 80 | 100;
@@ -88,7 +88,7 @@ const WaitingPage = () => {
 
   useEffect(() => {
     if (enqueueInfo) {
-      setPartitionNo(enqueueInfo.partitionNo);
+      setQueueId(enqueueInfo.queueId);
       setWaiterId(enqueueInfo.waiterId);
     }
   }, [enqueueInfo]);

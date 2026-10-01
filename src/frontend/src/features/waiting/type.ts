@@ -1,6 +1,6 @@
 // 줄 서기 응답(POST /waiting의 result)
 type infoType = {
-  partitionNo: number;
+  queueId: string;
   waiterId: string;
   myOrder: number;
 };

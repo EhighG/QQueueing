@@ -25,27 +25,20 @@ const ManagePage = ({ id }: ManagePageProps) => {
   const [waitingInfo, setWaitingInfo] = useState<WaitingListType>(
     {} as WaitingListType
   );
-  const [partitionNo, setPartitionNo] = useState<number>(0);
   const { data: waitingStatus, isLoading: statusLoading } =
     useGetWaitingStatus(id);
   const { data: waitingDetail } = useGetWaitingDetail(id);
   const { data: imageData } = useGetWaitingImage(id);
   const { mutate: handleDelete } = useDeleteWaiting(id);
 
-  const { mutate: activate } = usePostWaitingActivate(partitionNo);
-  const { mutate: deActivate } = usePostWaitingDeActivate(partitionNo);
+  const { mutate: activate } = usePostWaitingActivate(id);
+  const { mutate: deActivate } = usePostWaitingDeActivate(id);
   const { mutate: handlePatch } = usePatchWaiting(id);
   const {
     mutate: handlePostImage,
     isSuccess,
     data: imageResponse,
   } = usePostWaitingImage(imageFile);
-
-  useEffect(() => {
-    if (waitingDetail) {
-      setPartitionNo(waitingDetail.partitionNo);
-    }
-  }, [waitingDetail]);
 
   const handleButton = () => {
     if (imageFile.name) {

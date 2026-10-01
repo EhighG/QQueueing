@@ -22,19 +22,19 @@ const postEnqueue = async (target: string): Promise<infoType> => {
 };
 
 // 현재 나의 순번 조회
-const getWaitingInfo = async (partitionNo: number, waiterId: string) => {
+const getWaitingInfo = async (queueId: string, waiterId: string) => {
   return await instance
     .post<statusType>(`/waiting/order`, {
-      partitionNo,
+      queueId,
       waiterId,
     })
     .then(({ data }) => data);
 };
 
 // 이탈
-const postWaitingOut = async (partitionNo: number, waiterId: string) => {
+const postWaitingOut = async (queueId: string, waiterId: string) => {
   return await instance
-    .post(`/waiting/out`, null, { params: { partitionNo, waiterId } })
+    .post(`/waiting/out`, null, { params: { queueId, waiterId } })
     .then(({ data }) => data);
 };
 
