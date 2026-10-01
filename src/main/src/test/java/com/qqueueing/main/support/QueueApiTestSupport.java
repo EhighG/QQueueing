@@ -2,8 +2,11 @@ package com.qqueueing.main.support;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.qqueueing.main.registration.model.Registration;
+import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.registration.service.ScriptExecService;
 import com.qqueueing.main.waiting.service.AdmissionService;
+import com.qqueueing.main.waiting.service.OrphanQueueCleaner;
 import com.qqueueing.main.waiting.service.TargetApiConnector;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * main을 프로세스 안에서 띄우고(MockMvc), MongoDB와 Redis는 Testcontainers로 띄운다.
  * 가짜로 바꾸는 것은 바깥 세계와 닿는 두 곳뿐이다: 대상 사이트 포워딩(TargetApiConnector)과 에이전트 FIFO 쓰기(ScriptExecService).
  * 1초마다 도는 입장 처리는 끄고, 테스트가 admit()으로 직접 부른다. 현재 시각은 MutableClock으로 정한다.
+ * main이 기동할 때 하는 정리도 테스트가 runStartupCleanup()으로 다시 부를 수 있다.
  * 대기열은 등록 정보 id(대기열 id)로 부른다.
  */
 @SpringBootTest(properties = "admission.scheduler.enabled=false")
@@ -63,6 +67,12 @@ public abstract class QueueApiTestSupport {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private OrphanQueueCleaner orphanQueueCleaner;
+
+    @Autowired
+    private RegistrationRepository registrationRepository;
+
     @MockBean
     protected TargetApiConnector targetApiConnector;
 
@@ -87,7 +97,11 @@ public abstract class QueueApiTestSupport {
     // ---- 관리자 API ----
 
     protected RegisteredQueue registerQueue() throws Exception {
-        String targetUrl = "https://localhost/test/" + UUID.randomUUID();
+        return registerQueue("https://localhost/test/" + UUID.randomUUID());
+    }
+
+    /** 대상 URL을 정해 등록한다(삭제 후 같은 대상 URL로 다시 등록할 때). */
+    protected RegisteredQueue registerQueue(String targetUrl) throws Exception {
         String body = objectMapper.writeValueAsString(Map.of("targetUrl", targetUrl, "serviceName", "test"));
         JsonNode result = json(mockMvc.perform(post("/queue")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -106,6 +120,10 @@ public abstract class QueueApiTestSupport {
     protected JsonNode registration(RegisteredQueue queue) throws Exception {
         return json(mockMvc.perform(get("/queue/{id}", queue.id())).andExpect(status().isOk()).andReturn())
                 .get("result");
+    }
+
+    protected void deleteQueue(RegisteredQueue queue) throws Exception {
+        mockMvc.perform(delete("/queue/{id}", queue.id())).andExpect(status().isOk());
     }
 
     protected void activate(RegisteredQueue queue) throws Exception {
@@ -189,6 +207,28 @@ public abstract class QueueApiTestSupport {
     protected void admit() {
         clock.advance(Duration.ofSeconds(1));
         admissionService.admitAll();
+    }
+
+    // ---- 기동 정리 ----
+
+    /** main이 기동할 때 하는 정리(등록 정보가 없는 대기열의 Redis 상태 삭제)를 한 번 돌린다. */
+    protected void runStartupCleanup() {
+        orphanQueueCleaner.cleanUp();
+    }
+
+    /**
+     * MongoDB에서 등록 정보만 지운다. docker compose down으로 MongoDB만 비워진 상황을 흉내 낸다.
+     * main의 캐시와 Redis 상태는 그대로 둔다. 지운 등록 정보를 돌려준다.
+     */
+    protected Registration dropRegistrationDocument(RegisteredQueue queue) {
+        Registration registration = registrationRepository.findById(queue.id()).orElseThrow();
+        registrationRepository.deleteById(queue.id());
+        return registration;
+    }
+
+    /** dropRegistrationDocument로 지운 등록 정보를 같은 id로 되살린다. 정리 결과를 HTTP API로 보기 위해서만 쓴다. */
+    protected void restoreRegistrationDocument(Registration registration) {
+        registrationRepository.save(registration);
     }
 
     private JsonNode json(MvcResult result) throws Exception {

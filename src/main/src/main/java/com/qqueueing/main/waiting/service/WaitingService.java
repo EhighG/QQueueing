@@ -85,28 +85,33 @@ public class WaitingService {
     }
 
     /**
-     * 비활성에서 활성으로 바뀔 때만 줄과 대기 번호를 비운다. 이미 활성이면 아무것도 바꾸지 않는다.
+     * 비활성에서 활성으로 바뀔 때만 그 대기열의 Redis 상태(줄, 대기 번호, 입장 기록, 통과 토큰, 누적 입장 인원)를 모두 비운다.
+     * 그래서 이전 기간의 입장 자격과 비활성 기간에 발급된 통과 토큰은 넘어오지 않는다. 이미 활성이면 아무것도 바꾸지 않는다.
+     * Redis를 먼저 비우고 상태를 바꾼다. 비우다 실패하면 비활성으로 남으므로 다시 활성화하면 된다.
      */
     public void activate(String queueId) {
         Registration registration = findRegistration(queueId);
         if (Boolean.TRUE.equals(registration.getIsActive())) {
             return;
         }
-        queueStore.resetLine(registration.getId());
+        queueStore.deleteAll(registration.getId());
         registration.setIsActive(true);
         queueRegistry.put(registrationRepository.save(registration));
     }
 
     /**
-     * 비활성으로 바꾼다. 줄에 남은 대기자는 그대로 둔다(입장 처리는 활성 대기열만 한다).
+     * 줄에 남은 대기자를 한 번에(원자적으로) 모두 입장 기록으로 옮긴 뒤 비활성으로 바꾼다.
+     * 옮겨진 대기자는 다음 순번 조회에서 통과 토큰을 받는다. 이미 비활성이면 아무것도 바꾸지 않는다.
      */
     public void deactivate(String queueId) {
         Registration registration = findRegistration(queueId);
         if (!Boolean.TRUE.equals(registration.getIsActive())) {
             return;
         }
+        long admitted = queueStore.admitAllWaiting(registration.getId());
         registration.setIsActive(false);
         queueRegistry.put(registrationRepository.save(registration));
+        log.info("대기열 비활성화: 줄에 남은 대기자 {}명을 입장시켰다. queueId={}", admitted, registration.getId());
     }
 
     /**
@@ -161,6 +166,8 @@ public class WaitingService {
 
     /**
      * 순번 조회. 대기열이나 대기자를 찾지 못하면 NOT_FOUND(대기자 없음)를 돌려준다.
+     * 비활성 대기열에서는 줄에 남은 대기자를 이 조회에서 바로 입장시킨다. 비활성화와 거의 같은 때에 줄을 선 대기자가
+     * 대기 페이지에 갇히지 않게 하기 위해서다(입장 처리는 활성 대기열만 한다).
      */
     public WaitingOrderResponse getMyOrder(String queueId, String waiterId) {
         Registration registration = queueRegistry.findById(queueId).orElse(null);
@@ -170,7 +177,8 @@ public class WaitingService {
         if (waiterId == null || waiterId.isBlank()) {
             return WaitingOrderResponse.notFound(queueStore.waitingCount(registration.getId()));
         }
-        return queueStore.status(registration.getId(), waiterId);
+        boolean inactive = !Boolean.TRUE.equals(registration.getIsActive());
+        return queueStore.status(registration.getId(), waiterId, inactive);
     }
 
     /**
