@@ -22,8 +22,8 @@ const useEnqueue = (target: string) => {
   };
 };
 
-// waiterId가 빈 문자열이면 순번 조회를 멈춘다
-const useGetWaitingInfo = (partitionNo: number, waiterId: string) => {
+// queueId나 waiterId가 빈 문자열이면 순번 조회를 멈춘다
+const useGetWaitingInfo = (queueId: string, waiterId: string) => {
   const { data, isLoading, isError } = useQuery<
     statusType,
     AxiosError,
@@ -31,10 +31,10 @@ const useGetWaitingInfo = (partitionNo: number, waiterId: string) => {
     [_1: string]
   >({
     queryKey: ["waitingInfo"],
-    queryFn: () => getWaitingInfo(partitionNo, waiterId),
+    queryFn: () => getWaitingInfo(queueId, waiterId),
     refetchInterval: 1000,
     enabled:
-      waiterId.length > 0 && partitionNo > -1 && typeof window !== "undefined",
+      waiterId.length > 0 && queueId.length > 0 && typeof window !== "undefined",
   });
 
   return {
@@ -44,9 +44,9 @@ const useGetWaitingInfo = (partitionNo: number, waiterId: string) => {
   };
 };
 
-const usePostWaitingOut = (partitionNo: number, waiterId: string) => {
+const usePostWaitingOut = (queueId: string, waiterId: string) => {
   const { mutate, isSuccess } = useMutation({
-    mutationFn: () => postWaitingOut(partitionNo, waiterId),
+    mutationFn: () => postWaitingOut(queueId, waiterId),
   });
 
   return { mutate, isSuccess };

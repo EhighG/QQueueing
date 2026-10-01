@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * main을 프로세스 안에서 띄우고(MockMvc), MongoDB와 Redis는 Testcontainers로 띄운다.
  * 가짜로 바꾸는 것은 바깥 세계와 닿는 두 곳뿐이다: 대상 사이트 포워딩(TargetApiConnector)과 에이전트 FIFO 쓰기(ScriptExecService).
  * 1초마다 도는 입장 처리는 끄고, 테스트가 admit()으로 직접 부른다. 현재 시각은 MutableClock으로 정한다.
+ * 대기열은 등록 정보 id(대기열 id)로 부른다.
  */
 @SpringBootTest(properties = "admission.scheduler.enabled=false")
 @AutoConfigureMockMvc
@@ -73,8 +74,7 @@ public abstract class QueueApiTestSupport {
         clock.setInstant(TestClockConfig.START);
         when(targetApiConnector.forward(anyString())).thenReturn(ResponseEntity.ok(TARGET_PAGE));
         // 등록 정보는 API로 지워 main의 캐시와 함께 비우고, 남은 Redis 데이터는 통째로 비운다.
-        JsonNode registrations = json(mockMvc.perform(get("/queue")).andExpect(status().isOk()).andReturn());
-        for (JsonNode registration : registrations.get("result")) {
+        for (JsonNode registration : registrations()) {
             mockMvc.perform(delete("/queue/{id}", registration.get("id").asText()))
                     .andExpect(status().isOk());
         }
@@ -94,15 +94,26 @@ public abstract class QueueApiTestSupport {
                         .content(body))
                 .andExpect(status().isCreated())
                 .andReturn()).get("result");
-        return new RegisteredQueue(result.get("id").asText(), result.get("partitionNo").asInt(), targetUrl);
+        return new RegisteredQueue(result.get("id").asText(), targetUrl);
+    }
+
+    /** 등록 정보 목록(GET /queue의 result 배열). */
+    protected JsonNode registrations() throws Exception {
+        return json(mockMvc.perform(get("/queue")).andExpect(status().isOk()).andReturn()).get("result");
+    }
+
+    /** 등록 정보 상세(GET /queue/{id}의 result). */
+    protected JsonNode registration(RegisteredQueue queue) throws Exception {
+        return json(mockMvc.perform(get("/queue/{id}", queue.id())).andExpect(status().isOk()).andReturn())
+                .get("result");
     }
 
     protected void activate(RegisteredQueue queue) throws Exception {
-        mockMvc.perform(post("/waiting/{partitionNo}/activate", queue.partitionNo())).andExpect(status().isOk());
+        mockMvc.perform(post("/waiting/{queueId}/activate", queue.id())).andExpect(status().isOk());
     }
 
     protected void deactivate(RegisteredQueue queue) throws Exception {
-        mockMvc.perform(post("/waiting/{partitionNo}/deactivate", queue.partitionNo())).andExpect(status().isOk());
+        mockMvc.perform(post("/waiting/{queueId}/deactivate", queue.id())).andExpect(status().isOk());
     }
 
     protected WaitingInfo waitingInfo(RegisteredQueue queue) throws Exception {
@@ -114,11 +125,16 @@ public abstract class QueueApiTestSupport {
 
     // ---- 대기 페이지 API ----
 
-    protected Enqueued enqueue(RegisteredQueue queue) throws Exception {
-        JsonNode result = json(mockMvc.perform(post("/waiting").header("Target-URL", queue.targetUrl()))
+    /** 줄 서기 응답(POST /waiting의 result)을 그대로 돌려준다. */
+    protected JsonNode enqueueResult(RegisteredQueue queue) throws Exception {
+        return json(mockMvc.perform(post("/waiting").header("Target-URL", queue.targetUrl()))
                 .andExpect(status().isOk())
                 .andReturn()).get("result");
-        return new Enqueued(result.get("partitionNo").asInt(), result.get("waiterId").asText(),
+    }
+
+    protected Enqueued enqueue(RegisteredQueue queue) throws Exception {
+        JsonNode result = enqueueResult(queue);
+        return new Enqueued(result.get("queueId").asText(), result.get("waiterId").asText(),
                 result.get("myOrder").asLong());
     }
 
@@ -131,7 +147,7 @@ public abstract class QueueApiTestSupport {
     }
 
     protected OrderStatus order(RegisteredQueue queue, String waiterId) throws Exception {
-        String body = objectMapper.writeValueAsString(Map.of("partitionNo", queue.partitionNo(), "waiterId", waiterId));
+        String body = objectMapper.writeValueAsString(Map.of("queueId", queue.id(), "waiterId", waiterId));
         JsonNode result = json(mockMvc.perform(post("/waiting/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
@@ -144,7 +160,7 @@ public abstract class QueueApiTestSupport {
 
     protected void leave(RegisteredQueue queue, String waiterId) throws Exception {
         mockMvc.perform(post("/waiting/out")
-                        .param("partitionNo", String.valueOf(queue.partitionNo()))
+                        .param("queueId", queue.id())
                         .param("waiterId", waiterId))
                 .andExpect(status().isOk());
     }
@@ -179,10 +195,11 @@ public abstract class QueueApiTestSupport {
         return objectMapper.readTree(result.getResponse().getContentAsString(StandardCharsets.UTF_8));
     }
 
-    public record RegisteredQueue(String id, int partitionNo, String targetUrl) {
+    /** 등록한 대기열. id는 등록 정보 id이고, 대기열 API는 이 값으로 대기열을 부른다. */
+    public record RegisteredQueue(String id, String targetUrl) {
     }
 
-    public record Enqueued(int partitionNo, String waiterId, long myOrder) {
+    public record Enqueued(String queueId, String waiterId, long myOrder) {
     }
 
     public record OrderStatus(String status, long myOrder, long totalQueueSize, String token) {

@@ -5,13 +5,10 @@ import com.qqueueing.main.registration.model.RegistrationUpdateRequest;
 import com.qqueueing.main.registration.model.GetWaitingInfoResDto;
 import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.waiting.service.WaitingService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class RegistrationService {
@@ -20,19 +17,14 @@ public class RegistrationService {
     private RegistrationRepository registrationRepository;
     private final WaitingService waitingService;
     private final ScriptExecService scriptExecService;
-    private final int MAX_PARTITION_INDEX;
-    public RegistrationService(RegistrationRepository registrationRepository, ScriptExecService scriptExecService, WaitingService waitingService,
-                               @Value("${kafka.partition.max-index}") int maxPartitionIndex) {
+    public RegistrationService(RegistrationRepository registrationRepository, ScriptExecService scriptExecService, WaitingService waitingService) {
         this.registrationRepository = registrationRepository;
         this.scriptExecService = scriptExecService;
         this.waitingService = waitingService;
-        this.MAX_PARTITION_INDEX = maxPartitionIndex;
     }
 
     public Registration createRegistration(Registration registration) {
-        // 카프카에 저장할 빈 공간(=파티션) 키를 찾는다.
-        registration.setPartitionNo(findEmptyPartitionNo());
-        // 등록하면 대기열이 바로 활성 상태가 된다
+        // 등록하면 대기열이 바로 활성 상태가 된다. 대기열은 저장할 때 MongoDB가 만든 id로 부른다.
         registration.setIsActive(true);
         // DB 저장
         Registration savedRegistration = registrationRepository.save(registration);
@@ -90,19 +82,5 @@ public class RegistrationService {
             return null;
         }
         return registration.getQueueImageUrl();
-    }
-
-
-    private int findEmptyPartitionNo() {
-        Set<Integer> assigned = registrationRepository.findAll().stream()
-                .map(Registration::getPartitionNo)
-                .collect(Collectors.toSet());
-        for (int i = 0; i < MAX_PARTITION_INDEX; i++) {
-            if (!assigned.contains(i)) {
-                return i;
-            }
-        }
-        // 모든 파티션이 사용중일 때
-        throw new RuntimeException("url을 더 이상 추가할 수 없습니다.");
     }
 }

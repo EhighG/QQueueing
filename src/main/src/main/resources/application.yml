@@ -65,8 +65,6 @@ kafka:
       # consumer의 spring.kafka.consumer.topic과 같아야 한다.
       name: queueing.waiting-queue.enter2 # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
       retention-ms: 259200000 # 3 days
-  partition:
-    max-index: 20
 
 # actuator. Prometheus가 /monitoring/prometheus를 스크랩한다(src/build/prometheus/prometheus.yml).
 management:

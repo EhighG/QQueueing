@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * MongoDB 등록 정보의 메모리 캐시. 대상 URL·파티션 번호로 대기열을 찾는 데 쓴다.
+ * MongoDB 등록 정보의 메모리 캐시. 대기열 id(등록 정보 id)나 대상 URL로 대기열을 찾는 데 쓴다.
  * MongoDB에서 다시 읽어 올 수 있는 값만 둔다. 대기열 상태는 QueueStore(Redis)에 있다.
  * 등록 정보를 바꾸는 쪽은 저장한 뒤 put/remove로 이 캐시를 맞춘다.
  */
@@ -40,22 +40,17 @@ public class QueueRegistry {
         registrations.remove(queueId);
     }
 
+    /** 대기열 id로 찾는다. id가 null이면 빈 값을 돌려준다(ConcurrentHashMap은 null 키를 받지 않는다). */
     public Optional<Registration> findById(String queueId) {
+        if (queueId == null) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(registrations.get(queueId));
     }
 
     public Optional<Registration> findByTargetUrl(String targetUrl) {
         return registrations.values().stream()
                 .filter(r -> Objects.equals(r.getTargetUrl(), targetUrl))
-                .findFirst();
-    }
-
-    public Optional<Registration> findByPartitionNo(Integer partitionNo) {
-        if (partitionNo == null) {
-            return Optional.empty();
-        }
-        return registrations.values().stream()
-                .filter(r -> Objects.equals(r.getPartitionNo(), partitionNo))
                 .findFirst();
     }
 

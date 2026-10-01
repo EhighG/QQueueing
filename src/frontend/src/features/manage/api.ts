@@ -58,17 +58,17 @@ const getWaitingDetail = async (id: string) => {
   return await instance.get(`/queue/${id}`).then(({ data }) => data.result);
 };
 
-// 대기열 활성화
-const postWaitingActivate = async (partitionNo: number) => {
+// 대기열 활성화. id는 대기열 id(등록 정보 id)다.
+const postWaitingActivate = async (id: string) => {
   return await instance
-    .post<ResponseType<null>>(`/waiting/${partitionNo}/activate`)
+    .post<ResponseType<null>>(`/waiting/${id}/activate`)
     .then(({ data }) => data);
 };
 
-// 대기열 비활성화
-const postWaitingDeActivate = async (partitionNo: number) => {
+// 대기열 비활성화. id는 대기열 id(등록 정보 id)다.
+const postWaitingDeActivate = async (id: string) => {
   return await instance
-    .post<ResponseType<null>>(`/waiting/${partitionNo}/deactivate`)
+    .post<ResponseType<null>>(`/waiting/${id}/deactivate`)
     .then(({ data }) => data);
 };
 
