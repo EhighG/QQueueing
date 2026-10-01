@@ -118,7 +118,6 @@ mkcert는 Windows에서 Firefox의 인증서 저장소를 지원하지 않으므
 - 공백, `;`, `{`, `}`, 따옴표, `$`, `#`, `\` 같은 문자는 쓸 수 없습니다.
 - 형식이 틀렸거나 호스트가 `localhost`가 아닌 URL도 관리자 화면 목록에는 들어가지만 데모 nginx에는 반영되지 않습니다. 에이전트 로그에 `형식에 맞지 않는 입력이라 실행하지 않고 버린다`나 `no server block that listens 443 with server_name ...`이 남습니다. 이런 등록은 상세 화면에서 삭제하고 다시 등록합니다.
 - 경로가 데모 nginx에 이미 있는 경로(`/`, `/api`, `/waiting`, `/qqueueingAPI`)와 같으면 안 됩니다. 이런 URL은 nginx 설정 검사(`duplicate location`)에서 걸려 반영되지 않지만, 목록에서 삭제하면 같은 경로의 원래 `location`이 빠져 데모 사이트가 깨집니다. 잘못 등록했다면 삭제하지 말고 `docker compose down` 후 `docker compose up -d`로 초기화합니다(등록한 대기열이 모두 사라집니다). 이미 삭제해서 깨졌을 때도 같은 방법으로 되돌립니다.
-- 대기열은 최대 20개까지 등록할 수 있습니다.
 
 ### 모니터링 보기
 
@@ -249,7 +248,7 @@ flowchart LR
 
 ### URL 등록 흐름
 
-1. 관리자 화면에서 URL을 등록하면 main(`POST /queue`)이 비어 있는 Kafka 파티션을 배정해 MongoDB에 등록 정보를 저장합니다. 등록한 대기열은 바로 활성 상태가 됩니다.
+1. 관리자 화면에서 URL을 등록하면 main(`POST /queue`)이 MongoDB에 등록 정보를 저장합니다. 대기열은 이 등록 정보의 id(대기열 id)로 부르고, 등록한 대기열은 바로 활성 상태가 됩니다.
 2. main은 에이전트와 함께 쓰는 볼륨의 FIFO(`/pipes/pipe`)에 `bash conf.sh register <URL>` 한 줄을 씁니다. 삭제(`DELETE /queue/{id}`)할 때는 `delete`를 씁니다.
 3. 에이전트(`qqueueing-agent`)는 FIFO를 계속 읽다가, 이 형식과 URL 규칙에 맞는 줄만 `conf.sh`에 인자로 넘깁니다. 그 밖의 입력은 실행하지 않고 로그만 남깁니다.
 4. `conf.sh`는 docker.sock으로 대상 nginx 컨테이너(`TARGET_NGINX_CONTAINER`, 기본 `demo-nginx`)의 `/etc/nginx`를 복사해 옵니다. 443을 listen하는 server 블록 가운데 `server_name`이 URL의 호스트와 같은 블록에 아래와 같은 `location`을 넣습니다(삭제할 때는 뺍니다). 새 설정을 넣은 뒤 `nginx -t`가 통과하면 reload하고, 실패하면 원래 설정으로 되돌립니다.
