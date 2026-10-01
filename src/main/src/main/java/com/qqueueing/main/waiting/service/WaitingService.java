@@ -87,8 +87,8 @@ public class WaitingService {
     /**
      * 비활성에서 활성으로 바뀔 때만 줄과 대기 번호를 비운다. 이미 활성이면 아무것도 바꾸지 않는다.
      */
-    public void activate(int partitionNo) {
-        Registration registration = findRegistration(partitionNo);
+    public void activate(String queueId) {
+        Registration registration = findRegistration(queueId);
         if (Boolean.TRUE.equals(registration.getIsActive())) {
             return;
         }
@@ -100,8 +100,8 @@ public class WaitingService {
     /**
      * 비활성으로 바꾼다. 줄에 남은 대기자는 그대로 둔다(입장 처리는 활성 대기열만 한다).
      */
-    public void deactivate(int partitionNo) {
-        Registration registration = findRegistration(partitionNo);
+    public void deactivate(String queueId) {
+        Registration registration = findRegistration(queueId);
         if (!Boolean.TRUE.equals(registration.getIsActive())) {
             return;
         }
@@ -109,12 +109,12 @@ public class WaitingService {
         queueRegistry.put(registrationRepository.save(registration));
     }
 
-    private Registration findRegistration(int partitionNo) {
-        Registration registration = registrationRepository.findByPartitionNo(partitionNo);
-        if (registration == null) {
-            throw new IllegalArgumentException("wrong partitionNo");
-        }
-        return registration;
+    /**
+     * 활성 상태를 바꿀 등록 정보를 MongoDB에서 새로 읽는다. 캐시(QueueRegistry)의 객체는 바꾸지 않는다.
+     */
+    private Registration findRegistration(String queueId) {
+        return registrationRepository.findById(queueId)
+                .orElseThrow(() -> new IllegalArgumentException("wrong queueId"));
     }
 
     /**
@@ -156,14 +156,14 @@ public class WaitingService {
                 .orElseThrow(() -> new IllegalArgumentException("wrong targetUrl"));
         String waiterId = UUID.randomUUID().toString();
         long myOrder = queueStore.enqueue(registration.getId(), waiterId);
-        return new EnqueueResponse(registration.getPartitionNo(), waiterId, myOrder);
+        return new EnqueueResponse(registration.getId(), waiterId, myOrder);
     }
 
     /**
      * 순번 조회. 대기열이나 대기자를 찾지 못하면 NOT_FOUND(대기자 없음)를 돌려준다.
      */
-    public WaitingOrderResponse getMyOrder(Integer partitionNo, String waiterId) {
-        Registration registration = queueRegistry.findByPartitionNo(partitionNo).orElse(null);
+    public WaitingOrderResponse getMyOrder(String queueId, String waiterId) {
+        Registration registration = queueRegistry.findById(queueId).orElse(null);
         if (registration == null) {
             return WaitingOrderResponse.notFound(0);
         }
@@ -176,11 +176,11 @@ public class WaitingService {
     /**
      * 이탈. 줄에 있는 대기자만 뺀다. 입장 기록과 통과 토큰은 그대로 둔다.
      */
-    public void out(Integer partitionNo, String waiterId) {
+    public void out(String queueId, String waiterId) {
         if (waiterId == null || waiterId.isBlank()) {
             return;
         }
-        queueRegistry.findByPartitionNo(partitionNo)
+        queueRegistry.findById(queueId)
                 .ifPresent(registration -> queueStore.leave(registration.getId(), waiterId));
     }
 

@@ -1,9 +1,11 @@
 package com.qqueueing.main.waiting;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.qqueueing.main.support.QueueApiTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +37,7 @@ class WaitingQueueApiTest extends QueueApiTestSupport {
         assertThat(List.of(first.waiterId(), second.waiterId(), third.waiterId()))
                 .allMatch(id -> id.matches(UUID_PATTERN))
                 .doesNotHaveDuplicates();
-        assertThat(first.partitionNo()).isEqualTo(queue.partitionNo());
+        assertThat(first.queueId()).isEqualTo(queue.id());
     }
 
     @Test
@@ -156,5 +158,59 @@ class WaitingQueueApiTest extends QueueApiTestSupport {
         String token = tokenOf(location);
         assertThat(pass(token)).isEqualTo(TARGET_PAGE);
         assertThat(pass(token)).contains("invalid token").doesNotContain(TARGET_PAGE);
+    }
+
+    @Test
+    @DisplayName("대기열 식별자: 등록 정보와 줄 서기 응답은 대기열을 등록 정보 id로 부르고 파티션 번호·토픽 이름을 담지 않는다")
+    void queueIsCalledByRegistrationId() throws Exception {
+        RegisteredQueue queue = registerQueue();
+
+        JsonNode detail = registration(queue);
+        JsonNode listed = registrations().get(0);
+        for (JsonNode node : List.of(detail, listed)) {
+            assertThat(node.get("id").asText()).isEqualTo(queue.id());
+            assertThat(node.has("partitionNo")).isFalse();
+            assertThat(node.has("topicName")).isFalse();
+        }
+
+        JsonNode enqueued = enqueueResult(queue);
+        assertThat(enqueued.get("queueId").asText()).isEqualTo(queue.id());
+        assertThat(enqueued.has("partitionNo")).isFalse();
+        String waiterId = enqueued.get("waiterId").asText();
+
+        // 등록되지 않은 대기열 id로 물으면 대기자 없음이다
+        RegisteredQueue unknown = new RegisteredQueue("000000000000000000000000", queue.targetUrl());
+        assertThat(order(unknown, waiterId)).isEqualTo(new OrderStatus("NOT_FOUND", 0, 0, null));
+        // 다른 대기열 id로 보낸 이탈은 이 대기열의 줄을 바꾸지 않는다
+        leave(unknown, waiterId);
+        assertThat(order(queue, waiterId)).isEqualTo(new OrderStatus("WAITING", 1, 1, null));
+        // 대기열 id로 이탈한다
+        leave(queue, waiterId);
+        assertThat(order(queue, waiterId)).isEqualTo(new OrderStatus("NOT_FOUND", 0, 0, null));
+    }
+
+    @Test
+    @DisplayName("대기열 수: 21개 이상 등록할 수 있고, 21번째 이후 대기열도 대기열 id로 줄 서기·입장·비활성화가 동작한다")
+    void registersMoreThanTwentyQueues() throws Exception {
+        List<RegisteredQueue> queues = new ArrayList<>();
+        for (int i = 0; i < 25; i++) {
+            queues.add(registerQueue());
+        }
+
+        assertThat(registrations().size()).isEqualTo(25);
+        assertThat(queues.stream().map(RegisteredQueue::id).toList()).doesNotHaveDuplicates();
+
+        RegisteredQueue last = queues.get(24);
+        Enqueued waiter = enqueue(last);
+        assertThat(waiter.queueId()).isEqualTo(last.id());
+        assertThat(order(last, waiter.waiterId())).isEqualTo(new OrderStatus("WAITING", 1, 1, null));
+
+        admit();
+        assertThat(order(last, waiter.waiterId()).status()).isEqualTo("ENTERED");
+
+        deactivate(last);
+        assertThat(enter(last)).contains("/waiting/page-req?token=");
+        // 다른 대기열은 그대로 활성이다
+        assertThat(enter(queues.get(0))).contains("/waiting/queue-page?Target-URL=");
     }
 }

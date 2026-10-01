@@ -83,7 +83,7 @@ public class WaitingController {
 
     @PostMapping("/order")
     public ResponseEntity<WaitingOrderResponse> getMyOrder(@RequestBody WaitingOrderRequest request) {
-        WaitingOrderResponse myOrderRes = waitingService.getMyOrder(request.partitionNo(), request.waiterId());
+        WaitingOrderResponse myOrderRes = waitingService.getMyOrder(request.queueId(), request.waiterId());
         return ResponseEntity
                 .ok(myOrderRes);
     }
@@ -108,24 +108,24 @@ public class WaitingController {
 
     // 이탈. 대기 페이지가 창을 닫을 때 sendBeacon으로도 보낼 수 있게 POST와 요청 파라미터(쿼리 문자열이나 form 본문)로 받는다.
     @PostMapping("/out")
-    public ResponseEntity<Void> out(@RequestParam(value = "partitionNo") int partitionNo,
+    public ResponseEntity<Void> out(@RequestParam(value = "queueId") String queueId,
                                     @RequestParam(value = "waiterId") String waiterId) {
-        waitingService.out(partitionNo, waiterId);
+        waitingService.out(queueId, waiterId);
         return ResponseEntity
                 .ok()
                 .build();
     }
 
-    @PostMapping("/{partitionNo}/activate")
-    public ResponseEntity<?> activateQueue(@PathVariable("partitionNo") int partitionNo) {
-        waitingService.activate(partitionNo);
+    @PostMapping("/{queueId}/activate")
+    public ResponseEntity<?> activateQueue(@PathVariable("queueId") String queueId) {
+        waitingService.activate(queueId);
         return ResponseEntity
                 .ok(new SuccessResponse(HttpStatus.OK.value(), "활성화되었습니다."));
     }
 
-    @PostMapping("/{partitionNo}/deactivate")
-    public ResponseEntity<?> deactivateQueue(@PathVariable("partitionNo") int partitionNo) {
-        waitingService.deactivate(partitionNo);
+    @PostMapping("/{queueId}/deactivate")
+    public ResponseEntity<?> deactivateQueue(@PathVariable("queueId") String queueId) {
+        waitingService.deactivate(queueId);
         return ResponseEntity
                 .ok(new SuccessResponse(HttpStatus.OK.value(), "비활성화되었습니다."));
     }
