@@ -10,6 +10,7 @@ GitHub 이슈를 구현할 때는 `docs/agents/orchestration.md`의 절차를 �
 
 - Git Bash에서 `docker`에 `/`로 시작하는 컨테이너 안 경로를 넘길 때는 `MSYS_NO_PATHCONV=1`을 붙인다. 그래야 Windows 경로로 바뀌지 않는다.
 - 컨테이너 안에서 실행되는 파일(`.sh`, `gradlew`, `.py`, nginx 설정)은 LF로 쓴다. `.gitattributes`가 체크아웃을 LF로 맞춘다.
+- Windows 파일 시스템은 대소문자를 구분하지 않는다. 대소문자만 다른 경로(`a.PNG`와 `a.png`)를 추적하지 않는다.
 
 ## Agent skills
 
