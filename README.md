@@ -33,7 +33,7 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 - Git
 - 비어 있는 호스트 포트
   - **80, 443**: 데모 사이트의 nginx가 씁니다. 대기를 통과한 요청을 main이 `host.docker.internal:80`으로 다시 보내므로 바꿀 수 없습니다. IIS나 다른 웹 서버, 다른 compose 프로젝트가 쓰고 있으면 먼저 끕니다.
-  - 3001, 3002, 3003, 8081, 8082, 8100, 27017, 9094: 기본값입니다. 겹치면 `.env`에서 바꿉니다(아래 "설정" 참고).
+  - 3001, 3002, 3003, 6379, 8081, 8082, 8100, 27017, 9094: 기본값입니다. 겹치면 `.env`에서 바꿉니다(아래 "설정" 참고).
 
 PowerShell에서 80·443 포트를 확인하는 방법입니다. 아무것도 출력되지 않으면 비어 있습니다.
 
@@ -58,7 +58,7 @@ docker compose up -d --build
 
 1. `cp .env.example .env`: 설정 파일을 만듭니다. 기본값을 그대로 쓴다면 복사만 하면 됩니다(`.env`가 없어도 같은 기본값으로 뜹니다). `.env`는 커밋하지 않습니다.
 2. `docker compose run --rm demo-cert`: 데모 nginx가 쓸 자체 서명 인증서(`localhost`, `127.0.0.1`, `::1`용, 유효기간 365일)를 `demo/nginx/cert/`에 만듭니다. 처음 한 번만 하면 되고, 인증서가 이미 있으면 건너뜁니다. 브라우저 경고 없이 쓰려면 아래 "인증서 경고와 mkcert"를 봅니다.
-3. `docker compose up -d --build`: 이미지를 빌드하고 서비스 13개를 띄웁니다. 처음에는 Gradle·npm·apt 다운로드 때문에 10분 넘게 걸릴 수 있습니다.
+3. `docker compose up -d --build`: 이미지를 빌드하고 서비스 14개를 띄웁니다. 처음에는 Gradle·npm·apt 다운로드 때문에 10분 넘게 걸릴 수 있습니다.
 
 `up`이 끝난 뒤에도 main이 뜨고 데모 nginx에 초기 설정이 들어가기까지 1~2분이 더 걸립니다. 에이전트 로그에 `demo-nginx 초기 설정 완료`가 나오면 준비된 것입니다. 로그 보기는 Ctrl+C로 끝냅니다.
 
@@ -78,7 +78,7 @@ docker compose logs -f qqueueing-agent
 | Prometheus | http://localhost:3003 | |
 | main API | http://localhost:8081 | 상태 확인 `/monitoring/health` |
 
-consumer(8082), node-exporter(8100), MongoDB(27017), Kafka 호스트용 listener(9094)도 호스트에 열립니다. `.env`에서 포트를 바꿨다면 바꾼 값으로 접속합니다.
+consumer(8082), node-exporter(8100), MongoDB(27017), Redis(6379), Kafka 호스트용 listener(9094)도 호스트에 열립니다. `.env`에서 포트를 바꿨다면 바꾼 값으로 접속합니다.
 
 ### 인증서 경고와 mkcert
 
@@ -138,8 +138,8 @@ docker compose down      # 컨테이너와 네트워크를 지웁니다
 docker compose down -v   # 볼륨까지 지웁니다
 ```
 
-- `docker compose down` 뒤 다시 `docker compose up -d`로 올리면 등록한 대기열이 사라집니다. MongoDB 데이터를 볼륨에 두지 않고, 데모 nginx도 이미지의 설정으로 새로 뜨기 때문입니다. 초기 설정은 에이전트가 다시 넣으므로 대기열만 다시 등록하면 됩니다. Kafka·Prometheus·데모 MySQL 데이터는 남습니다.
-- `docker compose down -v`는 Kafka·Prometheus·데모 MySQL 데이터가 든 볼륨까지 지웁니다. 인증서(`demo/nginx/cert/`)와 `.env`는 지우지 않습니다.
+- `docker compose down` 뒤 다시 `docker compose up -d`로 올리면 등록한 대기열이 사라집니다. MongoDB 데이터를 볼륨에 두지 않고, 데모 nginx도 이미지의 설정으로 새로 뜨기 때문입니다. 초기 설정은 에이전트가 다시 넣으므로 대기열만 다시 등록하면 됩니다. Kafka·Redis·Prometheus·데모 MySQL 데이터는 남습니다.
+- `docker compose down -v`는 Kafka·Redis·Prometheus·데모 MySQL 데이터가 든 볼륨까지 지웁니다. 인증서(`demo/nginx/cert/`)와 `.env`는 지우지 않습니다.
 - Grafana는 데이터를 볼륨에 두지 않습니다. 컨테이너를 새로 만들 때마다 저장소의 프로비저닝 파일로 데이터소스와 대시보드가 다시 만들어집니다.
 
 <br>
@@ -290,6 +290,7 @@ docker exec demo-nginx nginx -T
 | `PROMETHEUS_PORT` | `3003` | Prometheus 호스트 포트 |
 | `NODE_EXPORTER_PORT` | `8100` | node-exporter 호스트 포트 |
 | `MONGO_PORT` | `27017` | MongoDB 호스트 포트 |
+| `REDIS_PORT` | `6379` | Redis 호스트 포트. IDE에서 main을 실행할 때 `localhost:<이 포트>`로 붙습니다 |
 | `KAFKA_HOST_PORT` | `9094` | 호스트용 Kafka listener. IDE에서 main·consumer를 실행할 때 `localhost:<이 포트>`로 붙습니다. 컨테이너끼리는 `qqueueing-kafka:9092`를 씁니다 |
 | `MONGO_ROOT_USERNAME`, `MONGO_ROOT_PASSWORD` | `root`, `example` | MongoDB 루트 계정. main의 접속 URI에 그대로 들어가므로 `@ : / ? # %`는 쓰지 않습니다. MongoDB 데이터가 새로 만들어질 때만 적용되므로, 바꾼 뒤에는 `docker compose down` 후 다시 올립니다 |
 | `PUBLIC_ORIGIN` | `https://localhost` | 브라우저가 데모 사이트에 접속하는 주소. 아래 설명 참고 |
@@ -310,13 +311,13 @@ docker exec demo-nginx nginx -T
 
 ### main·consumer를 IDE에서 실행하기
 
-MongoDB와 Kafka만 compose로 띄우고, main과 consumer는 IDE(IntelliJ 등)나 `gradlew bootRun`으로 호스트에서 실행합니다. 두 서버의 `application.yml` 기본값이 이 방식(`localhost`와 `.env.example`의 기본 호스트 포트)을 기준으로 합니다.
+MongoDB, Redis, Kafka만 compose로 띄우고, main과 consumer는 IDE(IntelliJ 등)나 `gradlew bootRun`으로 호스트에서 실행합니다. 두 서버의 `application.yml` 기본값이 이 방식(`localhost`와 `.env.example`의 기본 호스트 포트)을 기준으로 합니다.
 
 - JDK 21이 필요합니다(main은 Java 21, consumer는 Java 17을 대상으로 빌드합니다).
 - 전체 스택이 떠 있다면 포트가 겹치지 않게 컨테이너 main·consumer를 먼저 멈춥니다: `docker compose stop qqueueing-main qqueueing-consumer`
 
 ```bash
-docker compose up -d qqueueing-mongo qqueueing-kafka
+docker compose up -d qqueueing-mongo qqueueing-redis qqueueing-kafka
 ```
 
 터미널 두 개에서 consumer, main 순서로 실행합니다. IntelliJ에서는 `src/consumer`와 `src/main`을 각각 Gradle 프로젝트로 열고 `ConsumerApplication`, `ApiServerApplication`을 실행합니다.
@@ -336,6 +337,7 @@ cd src/main
 | 대상 | 기본값 | 환경변수 |
 |---|---|---|
 | MongoDB | `mongodb://root:example@localhost:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1` | main: `SPRING_DATA_MONGODB_URI` |
+| Redis | `localhost:6379` | main: `SPRING_DATA_REDIS_HOST`, `SPRING_DATA_REDIS_PORT` |
 | Kafka | `localhost:9094` | main: `KAFKA_BROKER`, consumer: `SPRING_KAFKA_CONSUMER_BOOTSTRAPSERVERS` |
 | consumer | `localhost:8082` | main: `SERVERS_CONSUMER` |
 | 대기 페이지(관리자 프론트) | `localhost:3001/waiting` | main: `SERVERS_FRONT` |
@@ -345,6 +347,17 @@ IDE로 띄운 main은 다음을 할 수 없습니다. 대기열 흐름 전체는
 
 - URL 등록이 데모 nginx에 반영되지 않습니다. FIFO와 에이전트는 컨테이너에만 있습니다(등록 정보는 MongoDB에 저장됩니다).
 - 데모 nginx는 `qqueueing-main` 컨테이너로 요청을 보내므로 `https://localhost`를 거친 요청은 IDE의 main에 닿지 않습니다. IDE의 main에는 `http://localhost:8081`로 바로 요청합니다.
+
+### main 테스트 실행하기
+
+main의 테스트는 대기열 HTTP API를 프로세스 안에서 띄운 main에 보내 확인합니다. MongoDB와 Redis는 Testcontainers가 컨테이너로 띄우므로 Docker Desktop이 켜져 있어야 합니다. compose 스택을 띄우지 않아도 되고, 떠 있어도 포트가 겹치지 않습니다.
+
+```bash
+cd src/main
+./gradlew test           # PowerShell: .\gradlew.bat test
+```
+
+결과 보고서는 `src/main/build/reports/tests/test/index.html`에 생깁니다.
 
 ### 관리자 프론트를 `npm run dev`로 실행하기
 
