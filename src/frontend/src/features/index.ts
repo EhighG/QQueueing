@@ -18,9 +18,9 @@ export {
 } from "./manage";
 export type { ResponseType } from "./manage";
 
-export { postEnqueue, getWaitingInfo, getWaitingOut } from "./waiting";
-export { useEnqueue, useGetWaitingInfo, useGetWaitingOut } from "./waiting";
-export type { infoType, statusType } from "./waiting";
+export { postEnqueue, getWaitingInfo, postWaitingOut } from "./waiting";
+export { useEnqueue, useGetWaitingInfo, usePostWaitingOut } from "./waiting";
+export type { infoType, statusType, waitingStatus } from "./waiting";
 
 export {
   getVirtualThread,

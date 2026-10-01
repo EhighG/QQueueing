@@ -36,7 +36,11 @@ spring:
       # 컨테이너에서는 compose가 루트 .env 값으로 SPRING_DATA_MONGODB_URI를 만든다.
       uri: mongodb://root:example@localhost:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1
       auto-index-creation: true  # 자동 인덱스
-
+    redis:
+      # 대기열 상태(줄, 대기 번호, 입장 기록, 통과 토큰, 누적 입장 인원)를 둔다. 포트는 루트 .env.example의 REDIS_PORT 기본값과 같다.
+      # 컨테이너에서는 compose가 SPRING_DATA_REDIS_HOST, SPRING_DATA_REDIS_PORT로 덮어쓴다.
+      host: localhost
+      port: 6379
 
   threads:
     virtual:
@@ -97,10 +101,6 @@ info:
 shell:
   path: /pipes
   fileNm: conf.sh
-
-testing:
-  # 대기열 테스트용 대상 URL. servers.main(컨테이너에서는 PUBLIC_ORIGIN)을 따른다.
-  target-url: ${servers.main}/product/1
 
 prometheus:
   monitoring: http://localhost:3003

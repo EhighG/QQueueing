@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getWaitingInfo, getWaitingOut, postEnqueue } from "./api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getWaitingInfo, postWaitingOut, postEnqueue } from "./api";
 import { infoType, statusType } from "./type";
 import { AxiosError } from "axios";
 
@@ -22,7 +22,8 @@ const useEnqueue = (target: string) => {
   };
 };
 
-const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
+// waiterId가 빈 문자열이면 순번 조회를 멈춘다
+const useGetWaitingInfo = (partitionNo: number, waiterId: string) => {
   const { data, isLoading, isError } = useQuery<
     statusType,
     AxiosError,
@@ -30,9 +31,10 @@ const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
     [_1: string]
   >({
     queryKey: ["waitingInfo"],
-    queryFn: () => getWaitingInfo(partitionNo, idx, idVal),
+    queryFn: () => getWaitingInfo(partitionNo, waiterId),
     refetchInterval: 1000,
-    enabled: idx > 0 && partitionNo > -1 && typeof window !== "undefined",
+    enabled:
+      waiterId.length > 0 && partitionNo > -1 && typeof window !== "undefined",
   });
 
   return {
@@ -42,14 +44,12 @@ const useGetWaitingInfo = (partitionNo: number, idx: number, idVal: string) => {
   };
 };
 
-const useGetWaitingOut = (partitionNo: number, order: number) => {
-  const { data, refetch, isSuccess } = useQuery({
-    queryKey: ["waitingOut"],
-    queryFn: () => getWaitingOut(partitionNo, order),
-    enabled: false && typeof window !== "undefined",
+const usePostWaitingOut = (partitionNo: number, waiterId: string) => {
+  const { mutate, isSuccess } = useMutation({
+    mutationFn: () => postWaitingOut(partitionNo, waiterId),
   });
 
-  return { data, refetch, isSuccess };
+  return { mutate, isSuccess };
 };
 
-export { useEnqueue, useGetWaitingInfo, useGetWaitingOut };
+export { useEnqueue, useGetWaitingInfo, usePostWaitingOut };
