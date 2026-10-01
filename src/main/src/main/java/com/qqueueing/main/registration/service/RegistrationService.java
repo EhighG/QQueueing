@@ -32,13 +32,13 @@ public class RegistrationService {
     public Registration createRegistration(Registration registration) {
         // 카프카에 저장할 빈 공간(=파티션) 키를 찾는다.
         registration.setPartitionNo(findEmptyPartitionNo());
+        // 등록하면 대기열이 바로 활성 상태가 된다
+        registration.setIsActive(true);
         // DB 저장
         Registration savedRegistration = registrationRepository.save(registration);
         // 등록 스크립트 실행
-        scriptExecService.execShell(registration.getTargetUrl(), "register");
-        // 대기열 활성화
-        waitingService.addUrlPartitionMapping(registration);
-        waitingService.activate(registration);
+        scriptExecService.execShell(savedRegistration.getTargetUrl(), "register");
+        waitingService.onRegistrationSaved(savedRegistration);
         return savedRegistration;
     }
 
@@ -55,7 +55,9 @@ public class RegistrationService {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
         registration.update(request.getTargetUrl(), request.getMaxCapacity(), request.getProcessingPerMinute(), request.getServiceName(), request.getQueueImageUrl());
-        return registrationRepository.save(registration);
+        Registration savedRegistration = registrationRepository.save(registration);
+        waitingService.onRegistrationSaved(savedRegistration);
+        return savedRegistration;
     }
 
     public void deleteRegistrationById(String id) throws ChangeSetPersister.NotFoundException {
@@ -65,15 +67,15 @@ public class RegistrationService {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
         scriptExecService.execShell(registration.getTargetUrl(), "delete");
-        // needed when remove/deactivate queue
-        waitingService.removeInMemoryQueueInfo(registration.getPartitionNo());
         registrationRepository.deleteById(id);
+        // 등록 정보를 지운 뒤 그 대기열의 Redis 상태를 지운다
+        waitingService.onRegistrationDeleted(id);
     }
 
     public GetWaitingInfoResDto getWaitingInfo(String id) throws ChangeSetPersister.NotFoundException {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(ChangeSetPersister.NotFoundException::new);
-        return waitingService.getWaitingInfo(registration.getPartitionNo());
+        return waitingService.getWaitingInfo(registration.getId());
     }
 
     public String getImageById(String id) throws ChangeSetPersister.NotFoundException {

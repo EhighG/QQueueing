@@ -21,9 +21,14 @@ repositories {
 	mavenCentral()
 }
 
+// Spring Boot 3.2.4가 고르는 Testcontainers 1.19.7은 Docker Engine 29(Docker Desktop 4.66)에 붙지 못한다
+// (Docker API 버전이 낮다는 400 응답). spring-boot-testcontainers 3.2와 호환되는 1.x 마지막 버전으로 올린다.
+ext['testcontainers.version'] = '1.21.4'
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.kafka:spring-kafka'
 	compileOnly 'org.projectlombok:lombok'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -31,8 +36,9 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:mongodb'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
-	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.6'
 	testImplementation 'org.junit.jupiter:junit-jupiter-api'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 	implementation 'org.apache.commons:commons-lang3:3.12.0'
@@ -40,6 +46,10 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	testLogging {
+		events 'passed', 'skipped', 'failed'
+		exceptionFormat 'full'
+	}
 }
 
 springBoot {

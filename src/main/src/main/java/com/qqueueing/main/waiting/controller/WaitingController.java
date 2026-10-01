@@ -2,8 +2,9 @@ package com.qqueueing.main.waiting.controller;
 
 
 import com.qqueueing.main.common.SuccessResponse;
-import com.qqueueing.main.waiting.model.GetMyOrderReqDto;
-import com.qqueueing.main.waiting.model.GetMyOrderResDto;
+import com.qqueueing.main.waiting.model.EnqueueResponse;
+import com.qqueueing.main.waiting.model.WaitingOrderRequest;
+import com.qqueueing.main.waiting.model.WaitingOrderResponse;
 import com.qqueueing.main.waiting.service.WaitingService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +42,6 @@ public class WaitingController {
                 .build();
     }
 
-    @GetMapping("/write")
-    public Object produceTest(@RequestParam(value = "partitionNo") Integer partitionNo,
-                              @RequestParam(value = "key") Long key,
-                              @RequestParam(value = "message") String message) {
-        return waitingService.send(partitionNo, key, message);
-    }
-
     @GetMapping("/enter")
     public ResponseEntity<?> enter(HttpServletRequest request) {
         String targetUrl = request.getHeader("Target-URL");
@@ -81,17 +75,15 @@ public class WaitingController {
         String targetUrl = request.getHeader("Target-URL");
 //        log.info("-------------------------- enqueue api called. in controller -------------------------------");
 //        log.info("targetUrl = {}", targetUrl);
-        Object result = waitingService.enqueue(targetUrl, request);
+        EnqueueResponse result = waitingService.enqueue(targetUrl);
         return ResponseEntity
-                .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 입장되었습니다.", result));
+                .ok(new SuccessResponse(HttpStatus.OK.value(), "대기열에 줄을 섰습니다.", result));
     }
 
 
     @PostMapping("/order")
-    public ResponseEntity<?> getMyOrder(@RequestBody GetMyOrderReqDto getMyOrderReqDto) {
-        GetMyOrderResDto myOrderRes = waitingService.getMyOrder(getMyOrderReqDto.getPartitionNo(),
-                getMyOrderReqDto.getOrder(),
-                getMyOrderReqDto.getIdVal());
+    public ResponseEntity<WaitingOrderResponse> getMyOrder(@RequestBody WaitingOrderRequest request) {
+        WaitingOrderResponse myOrderRes = waitingService.getMyOrder(request.partitionNo(), request.waiterId());
         return ResponseEntity
                 .ok(myOrderRes);
     }
@@ -114,12 +106,11 @@ public class WaitingController {
 //                .ok(waitingService.forward(token, request));
     }
 
-    @GetMapping("/out")
+    // 이탈. 대기 페이지가 창을 닫을 때 sendBeacon으로도 보낼 수 있게 POST와 요청 파라미터(쿼리 문자열이나 form 본문)로 받는다.
+    @PostMapping("/out")
     public ResponseEntity<Void> out(@RequestParam(value = "partitionNo") int partitionNo,
-                                    @RequestParam(value = "order") Long order) {
-//        log.info("out() called");
-        waitingService.out(partitionNo, order);
-//        log.info("out end. order = {} // end", order);
+                                    @RequestParam(value = "waiterId") String waiterId) {
+        waitingService.out(partitionNo, waiterId);
         return ResponseEntity
                 .ok()
                 .build();
