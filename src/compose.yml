@@ -18,6 +18,8 @@ services:
         condition: service_healthy
       qqueueing-mongo:
         condition: service_started
+      qqueueing-redis:
+        condition: service_healthy
       qqueueing-consumer:
         condition: service_healthy
         restart: true
@@ -30,11 +32,13 @@ services:
     # 이름은 Spring relaxed binding 규칙을 따른다: 점(.)은 _로, 대시(-)는 빼고, 대문자로. 예: servers.replace-url → SERVERS_REPLACEURL
     environment:
       SPRING_DATA_MONGODB_URI: "mongodb://${MONGO_ROOT_USERNAME:-root}:${MONGO_ROOT_PASSWORD:-example}@qqueueing-mongo:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1"
+      SPRING_DATA_REDIS_HOST: qqueueing-redis
+      SPRING_DATA_REDIS_PORT: "6379"
       KAFKA_BROKER: qqueueing-kafka:9092
       SERVERS_CONSUMER: qqueueing-consumer:8082
       SERVERS_FRONT: qqueueing-frontend:3000/waiting
       SERVERS_PARSING: http://qqueueing-frontend
-      # 대기 페이지 리다이렉트 주소의 기준이다. testing.target-url도 이 값을 따른다.
+      # 대기 페이지 리다이렉트 주소의 기준이다.
       SERVERS_MAIN: ${PUBLIC_ORIGIN:-https://localhost}
       SERVERS_REPLACEURL: http://host.docker.internal
       PROMETHEUS_MONITORING: http://qqueueing-prometheus:9090
@@ -70,6 +74,23 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-root}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-example}
+    networks:
+      - qqueueing-network
+
+  # 대기열 상태(줄, 대기 번호, 입장 기록, 통과 토큰, 누적 입장 인원)를 둔다.
+  # AOF(appendfsync everysec)로 redis_data 볼륨에 기록하므로 main이나 Redis를 재시작해도 대기 상태가 남는다.
+  qqueueing-redis:
+    image: redis:8.10.2-alpine
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
     networks:
       - qqueueing-network
 
@@ -182,6 +203,8 @@ services:
 
 volumes:
   kafka_data:
+  # Redis AOF 파일. docker compose down으로는 지워지지 않고 down -v로 지워진다.
+  redis_data:
   prometheus_data:
   # main과 qqueueing-agent가 FIFO(pipe)를 주고받는 볼륨. 저장소 폴더를 마운트하지 않으므로 작업 트리에 pipe 파일이 생기지 않는다.
   pipes:
