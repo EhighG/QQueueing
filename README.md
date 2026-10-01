@@ -33,7 +33,7 @@ QQueueing은 서버에 직접 설치해서 사용할 수 있는 무료 대기열
 - Git
 - 비어 있는 호스트 포트
   - **80, 443**: 데모 사이트의 nginx가 씁니다. 대기를 통과한 요청을 main이 `host.docker.internal:80`으로 다시 보내므로 바꿀 수 없습니다. IIS나 다른 웹 서버, 다른 compose 프로젝트가 쓰고 있으면 먼저 끕니다.
-  - 3001, 3002, 3003, 6379, 8081, 8082, 8100, 27017, 9094: 기본값입니다. 겹치면 `.env`에서 바꿉니다(아래 "설정" 참고).
+  - 3001, 3002, 3003, 6379, 8081, 8100, 27017: 기본값입니다. 겹치면 `.env`에서 바꿉니다(아래 "설정" 참고).
 
 PowerShell에서 80·443 포트를 확인하는 방법입니다. 아무것도 출력되지 않으면 비어 있습니다.
 
@@ -58,7 +58,7 @@ docker compose up -d --build
 
 1. `cp .env.example .env`: 설정 파일을 만듭니다. 기본값을 그대로 쓴다면 복사만 하면 됩니다(`.env`가 없어도 같은 기본값으로 뜹니다). `.env`는 커밋하지 않습니다.
 2. `docker compose run --rm demo-cert`: 데모 nginx가 쓸 자체 서명 인증서(`localhost`, `127.0.0.1`, `::1`용, 유효기간 365일)를 `demo/nginx/cert/`에 만듭니다. 처음 한 번만 하면 되고, 인증서가 이미 있으면 건너뜁니다. 브라우저 경고 없이 쓰려면 아래 "인증서 경고와 mkcert"를 봅니다.
-3. `docker compose up -d --build`: 이미지를 빌드하고 서비스 14개를 띄웁니다. 처음에는 Gradle·npm·apt 다운로드 때문에 10분 넘게 걸릴 수 있습니다.
+3. `docker compose up -d --build`: 이미지를 빌드하고 서비스 12개를 띄웁니다. 처음에는 Gradle·npm·apt 다운로드 때문에 10분 넘게 걸릴 수 있습니다.
 
 `up`이 끝난 뒤에도 main이 뜨고 데모 nginx에 초기 설정이 들어가기까지 1~2분이 더 걸립니다. 에이전트 로그에 `demo-nginx 초기 설정 완료`가 나오면 준비된 것입니다. 로그 보기는 Ctrl+C로 끝냅니다.
 
@@ -78,7 +78,7 @@ docker compose logs -f qqueueing-agent
 | Prometheus | http://localhost:3003 | |
 | main API | http://localhost:8081 | 상태 확인 `/monitoring/health` |
 
-consumer(8082), node-exporter(8100), MongoDB(27017), Redis(6379), Kafka 호스트용 listener(9094)도 호스트에 열립니다. `.env`에서 포트를 바꿨다면 바꾼 값으로 접속합니다.
+node-exporter(8100), MongoDB(27017), Redis(6379)도 호스트에 열립니다. `.env`에서 포트를 바꿨다면 바꾼 값으로 접속합니다.
 
 ### 인증서 경고와 mkcert
 
@@ -110,7 +110,7 @@ mkcert는 Windows에서 Firefox의 인증서 저장소를 지원하지 않으므
    docker compose logs qqueueing-agent
    ```
 4. 새 탭에서 `https://localhost/product/1`을 엽니다. "접속 대기 중" 대기 페이지가 뜨고, 차례가 되면 원래 상품 페이지가 보입니다. 혼자 접속하면 대기 페이지는 잠깐 보였다가 바로 넘어갑니다. 통과한 뒤 주소창에는 `/qqueueingAPI/waiting/page-req?token=...`이 보입니다(main이 원래 페이지를 가져와 보여 주기 때문입니다).
-5. 왼쪽 메뉴 "대기열 리스트"에서 등록한 URL을 누르면 상세 화면이 열립니다. "비 활성"을 누르면 대기 없이 바로 들어가고, "삭제"를 누르면 데모 nginx에서 설정이 빠져 원래 페이지로 바로 들어갑니다.
+5. 왼쪽 메뉴 "대기열 리스트"에서 등록한 URL을 누르면 상세 화면이 열립니다. "현재 대기 중 인원"은 지금 줄에 있는 대기자 수이고, "입장 인원"은 지금까지 입장한 누적 인원입니다(4에서 통과했다면 1 이상입니다). "비 활성"을 누르면 대기 없이 바로 들어가고, "삭제"를 누르면 데모 nginx에서 설정이 빠져 원래 페이지로 바로 들어갑니다.
 
 등록 URL 규칙은 다음과 같습니다.
 
@@ -137,8 +137,9 @@ docker compose down      # 컨테이너와 네트워크를 지웁니다
 docker compose down -v   # 볼륨까지 지웁니다
 ```
 
-- `docker compose down` 뒤 다시 `docker compose up -d`로 올리면 등록한 대기열이 사라집니다. MongoDB 데이터를 볼륨에 두지 않고, 데모 nginx도 이미지의 설정으로 새로 뜨기 때문입니다. 초기 설정은 에이전트가 다시 넣으므로 대기열만 다시 등록하면 됩니다. Kafka·Redis·Prometheus·데모 MySQL 데이터는 남습니다.
-- `docker compose down -v`는 Kafka·Redis·Prometheus·데모 MySQL 데이터가 든 볼륨까지 지웁니다. 인증서(`demo/nginx/cert/`)와 `.env`는 지우지 않습니다.
+- `docker compose down` 뒤 다시 `docker compose up -d`로 올리면 등록한 대기열이 사라집니다. MongoDB 데이터를 볼륨에 두지 않고, 데모 nginx도 이미지의 설정으로 새로 뜨기 때문입니다. 초기 설정은 에이전트가 다시 넣으므로 대기열만 다시 등록하면 됩니다. Redis·Prometheus·데모 MySQL 데이터는 남습니다. Redis에 남은 대기 상태는 사라진 대기열의 것이라, 다시 등록한 대기열(새 대기열 id)과 섞이지 않습니다.
+- `docker compose down -v`는 Redis·Prometheus·데모 MySQL 데이터가 든 볼륨까지 지웁니다. 인증서(`demo/nginx/cert/`)와 `.env`는 지우지 않습니다.
+- main이나 Redis 컨테이너를 재시작해도 기다리던 대기자의 순번은 그대로입니다. 대기열 상태를 main 밖의 Redis에 두고, Redis는 AOF(1초마다 디스크에 반영)로 `redis_data` 볼륨에 기록하기 때문입니다. Redis가 비정상 종료되면 직전 1초 사이의 변경은 잃을 수 있습니다.
 - Grafana는 데이터를 볼륨에 두지 않습니다. 컨테이너를 새로 만들 때마다 저장소의 프로비저닝 파일로 데이터소스와 대시보드가 다시 만들어집니다.
 
 <br>
@@ -202,9 +203,8 @@ flowchart LR
   end
   subgraph qq[QQueueing]
     main["qqueueing-main :8081"]
-    consumer[qqueueing-consumer]
     admin["qqueueing-frontend :3001"]
-    kafka[(kafka KRaft)]
+    redis[(redis)]
     mongo[(mongo)]
     agent[qqueueing-agent]
   end
@@ -219,9 +219,8 @@ flowchart LR
   nginx -->|"/"| dfront
   nginx -->|"/api"| dback --> mysql
   nginx -->|"등록된 URL, /waiting, /qqueueingAPI"| main
-  main --> kafka --> consumer
-  main -.->|HTTP| consumer
-  main --> mongo
+  main -->|"대기열 상태"| redis
+  main -->|"등록 정보"| mongo
   main -->|"대기 페이지 화면"| admin
   main -->|"통과 후 원본 요청<br/>host.docker.internal:80"| nginx
   main -->|"FIFO /pipes"| agent
@@ -232,7 +231,7 @@ flowchart LR
   grafana -->|조회| prom
 ```
 
-- QQueueing(`src/`): main(API 서버), consumer, 관리자 프론트(관리자 화면과 대기 페이지), Kafka(KRaft 단일 노드), MongoDB(대기열 등록 정보), URL 등록 에이전트
+- QQueueing(`src/`): main(API 서버. 1초마다 입장 처리도 합니다), 관리자 프론트(관리자 화면과 대기 페이지), Redis(대기열 상태), MongoDB(대기열 등록 정보), URL 등록 에이전트
 - 데모 대상 사이트(`demo/`): 대기열을 걸어 볼 예제 쇼핑몰입니다. nginx가 앞단 리버스 프록시이고, QQueueing은 이 nginx에 `location`을 넣어 대기열을 겁니다.
 - 모니터링: Prometheus, node-exporter, Grafana
 
@@ -241,15 +240,35 @@ flowchart LR
 1. 사용자가 등록된 URL(예: `https://localhost/product/1`)에 접속하면, 데모 nginx에 등록된 `location`이 요청을 main의 `/waiting/enter`로 보냅니다. 원래 URL은 `Target-URL` 헤더에 실립니다.
 2. main은 그 URL의 대기열이 활성 상태면 대기 페이지(`<PUBLIC_ORIGIN>/waiting/queue-page?Target-URL=...`)로 리다이렉트합니다. 비활성이면 한 번만 쓸 수 있는 통과 토큰을 만들어 `<PUBLIC_ORIGIN>/waiting/page-req?token=...`로 바로 보냅니다.
 3. 대기 페이지는 관리자 프론트(`qqueueing-frontend`)의 `/waiting` 화면입니다. main이 이 화면을 가져와 데모 nginx의 `/waiting` 경로로 내줍니다.
-4. 대기 페이지가 `POST /qqueueingAPI/waiting`으로 대기열에 들어가면, main은 순번을 매긴 접속자 식별값을 Kafka 토픽 `queueing.waiting-queue.enter2`에 넣습니다. 등록 URL마다 파티션 하나를 씁니다.
-5. main은 1초마다 consumer에 활성 대기열 목록을 HTTP로 보냅니다. consumer는 대기열(파티션)마다 Kafka에서 최대 `max-poll-records`(기본 100)건을 읽어, 차례가 된 접속자 목록과 남은 대기 인원을 돌려줍니다.
-6. 대기 페이지는 `POST /qqueueingAPI/waiting/order`로 자기 순번을 계속 묻습니다. 차례가 되면 main이 통과 토큰을 줍니다.
-7. 대기 페이지가 `/qqueueingAPI/waiting/page-req?token=...`로 이동하면, main은 토큰을 확인하고 원래 페이지를 `http://host.docker.internal/<경로>`에서 가져와 돌려줍니다. 이 요청은 호스트 80 포트를 거쳐 데모 nginx의 `host.docker.internal` 서버 블록으로 들어가 데모 프론트에 닿습니다. 그래서 데모 nginx는 호스트 80 포트를 써야 합니다.
+4. 대기 페이지가 `POST /qqueueingAPI/waiting`으로 줄을 서면, main은 추측할 수 없는 대기자 ID(UUID)를 발급해 그 대기열의 줄(Redis Sorted Set)에 넣습니다. 응답에는 대기열 id, 대기자 ID, 처음 순번이 들어 있습니다.
+5. main은 1초마다 활성 대기열을 돌며 줄 앞에서 대기자를 꺼내 입장 기록으로 옮깁니다(입장). 지금은 대기열마다 1초에 최대 100명을 입장시킵니다.
+6. 대기 페이지는 1초마다 `POST /qqueueingAPI/waiting/order`에 대기열 id와 대기자 ID를 보내 순번과 대기 인원을 묻습니다. 순번은 앞에 남은 대기자 수 + 1이라, 앞사람이 입장하거나 이탈하면 바로 줄어듭니다. 입장한 대기자는 다음 조회 응답에서 통과 토큰을 한 번만 받습니다. "나가기"를 누르면 `POST /qqueueingAPI/waiting/out`으로 줄에서 빠집니다(이탈).
+7. 대기 페이지가 `/qqueueingAPI/waiting/page-req?token=...`로 이동하면, main은 토큰을 확인해 지우고 원래 페이지를 `http://host.docker.internal/<경로>`에서 가져와 돌려줍니다. 같은 토큰은 다시 쓸 수 없습니다. 이 요청은 호스트 80 포트를 거쳐 데모 nginx의 `host.docker.internal` 서버 블록으로 들어가 데모 프론트에 닿습니다. 그래서 데모 nginx는 호스트 80 포트를 써야 합니다.
+
+대기열 상태(줄, 대기 번호, 입장 기록, 통과 토큰, 누적 입장 인원)는 모두 Redis에 두고 대기열 id로 구분합니다. main 메모리에는 MongoDB에서 다시 읽어 올 수 있는 등록 정보만 둡니다. 대기열 저장소로 Redis Sorted Set을 고른 이유는 [ADR-0001](docs/adr/0001-redis-sorted-set-for-waiting-queue.md)에, 용어 정의는 [CONTEXT.md](CONTEXT.md)에 있습니다.
+
+### API로 따라가 보기
+
+대기 페이지가 보내는 요청을 Git Bash에서 직접 보내 볼 수 있습니다. "대기열 걸어 보기"의 1~3으로 `https://localhost/product/1`을 등록한 뒤 실행합니다. `-k`는 자체 서명 인증서를 검사하지 않는 옵션입니다. `<queueId>`처럼 꺾쇠로 감싼 자리에는 앞 응답의 값을 옮겨 적습니다.
+
+```bash
+# 줄 서기: result에 queueId(대기열 id), waiterId(대기자 ID), myOrder(순번)가 나옵니다
+curl -sk -X POST -H "Target-URL: https://localhost/product/1" https://localhost/qqueueingAPI/waiting
+
+# 순번 조회: 줄에 있으면 "status":"WAITING"과 순번(myOrder), 대기 인원(totalQueueSize)이 나옵니다.
+# 입장했으면 "status":"ENTERED"와 통과 토큰(token)이 한 번만 나오고, 그다음부터는 "status":"NOT_FOUND"입니다
+curl -sk -X POST -H "Content-Type: application/json" -d '{"queueId":"<queueId>","waiterId":"<waiterId>"}' https://localhost/qqueueingAPI/waiting/order
+
+# 통과: 원래 페이지(데모 상품 페이지 HTML)가 나옵니다. 같은 토큰을 다시 쓰면 "invalid token"이 나옵니다
+curl -sk "https://localhost/qqueueingAPI/waiting/page-req?token=<token>"
+```
+
+줄에 혼자 있으면 1초 안에 입장하므로 순번 조회는 처음부터 `ENTERED`로 나옵니다.
 
 ### URL 등록 흐름
 
 1. 관리자 화면에서 URL을 등록하면 main(`POST /queue`)이 MongoDB에 등록 정보를 저장합니다. 대기열은 이 등록 정보의 id(대기열 id)로 부르고, 등록한 대기열은 바로 활성 상태가 됩니다.
-2. main은 에이전트와 함께 쓰는 볼륨의 FIFO(`/pipes/pipe`)에 `bash conf.sh register <URL>` 한 줄을 씁니다. 삭제(`DELETE /queue/{id}`)할 때는 `delete`를 씁니다.
+2. main은 에이전트와 함께 쓰는 볼륨의 FIFO(`/pipes/pipe`)에 `bash conf.sh register <URL>` 한 줄을 씁니다. 삭제(`DELETE /queue/{id}`)할 때는 `delete`를 쓰고, MongoDB의 등록 정보와 함께 Redis에 있는 그 대기열의 상태(줄, 입장 기록, 통과 토큰 등)도 지웁니다.
 3. 에이전트(`qqueueing-agent`)는 FIFO를 계속 읽다가, 이 형식과 URL 규칙에 맞는 줄만 `conf.sh`에 인자로 넘깁니다. 그 밖의 입력은 실행하지 않고 로그만 남깁니다.
 4. `conf.sh`는 docker.sock으로 대상 nginx 컨테이너(`TARGET_NGINX_CONTAINER`, 기본 `demo-nginx`)의 `/etc/nginx`를 복사해 옵니다. 443을 listen하는 server 블록 가운데 `server_name`이 URL의 호스트와 같은 블록에 아래와 같은 `location`을 넣습니다(삭제할 때는 뺍니다). 새 설정을 넣은 뒤 `nginx -t`가 통과하면 reload하고, 실패하면 원래 설정으로 되돌립니다.
    ```nginx
@@ -272,7 +291,7 @@ docker exec demo-nginx nginx -T
 - Prometheus는 1초마다 두 대상을 수집합니다. node-exporter(job `node-exporter`)와 main의 actuator(`/monitoring/prometheus`, job `main-server`)입니다. 설정 파일은 `src/build/prometheus/prometheus.yml`입니다.
 - 관리자 화면의 대시보드는 main API를 거쳐 지표를 봅니다. 호스트 자원과 요청 수는 main이 Prometheus에 질의해 돌려주고, JVM·HTTP 지표는 main의 actuator(`/monitoring/metrics/...`)에서 바로 가져옵니다.
 - Grafana는 Prometheus를 데이터소스로 씁니다. 데이터소스(`src/build/grafana/provisioning/datasources/prometheus.yml`)와 대시보드(`src/build/grafana/dashboards/*.json`)는 프로비저닝 파일로 저장소에서 관리합니다.
-- main에는 대기 인원 같은 대기열 전용 지표가 없습니다. Grafana의 "대기열 경로 (/waiting/**)" 패널은 main의 HTTP 요청 지표로 대기열 트래픽을 보여 줍니다. consumer 지표는 수집하지 않습니다.
+- main에는 대기 인원 같은 대기열 전용 지표가 없습니다. Grafana의 "대기열 경로 (/waiting/**)" 패널은 main의 HTTP 요청 지표로 대기열 트래픽을 보여 줍니다. Redis 지표는 수집하지 않습니다. Redis 연결 상태는 main의 `/monitoring/health`에서 봅니다.
 
 <br>
 
@@ -283,14 +302,12 @@ docker exec demo-nginx nginx -T
 | 변수 | 기본값 | 설명 |
 |---|---|---|
 | `MAIN_PORT` | `8081` | main API 호스트 포트 |
-| `CONSUMER_PORT` | `8082` | consumer 호스트 포트 |
 | `ADMIN_PORT` | `3001` | 관리자 화면 호스트 포트 |
 | `GRAFANA_PORT` | `3002` | Grafana 호스트 포트 |
 | `PROMETHEUS_PORT` | `3003` | Prometheus 호스트 포트 |
 | `NODE_EXPORTER_PORT` | `8100` | node-exporter 호스트 포트 |
 | `MONGO_PORT` | `27017` | MongoDB 호스트 포트 |
 | `REDIS_PORT` | `6379` | Redis 호스트 포트. IDE에서 main을 실행할 때 `localhost:<이 포트>`로 붙습니다 |
-| `KAFKA_HOST_PORT` | `9094` | 호스트용 Kafka listener. IDE에서 main·consumer를 실행할 때 `localhost:<이 포트>`로 붙습니다. 컨테이너끼리는 `qqueueing-kafka:9092`를 씁니다 |
 | `MONGO_ROOT_USERNAME`, `MONGO_ROOT_PASSWORD` | `root`, `example` | MongoDB 루트 계정. main의 접속 URI에 그대로 들어가므로 `@ : / ? # %`는 쓰지 않습니다. MongoDB 데이터가 새로 만들어질 때만 적용되므로, 바꾼 뒤에는 `docker compose down` 후 다시 올립니다 |
 | `PUBLIC_ORIGIN` | `https://localhost` | 브라우저가 데모 사이트에 접속하는 주소. 아래 설명 참고 |
 | `TARGET_NGINX_CONTAINER` | `demo-nginx` | URL 등록 에이전트가 설정을 고치고 reload할 nginx 컨테이너 이름 |
@@ -308,37 +325,31 @@ docker exec demo-nginx nginx -T
 
 ## 개발 환경
 
-### main·consumer를 IDE에서 실행하기
+### main을 IDE에서 실행하기
 
-MongoDB, Redis, Kafka만 compose로 띄우고, main과 consumer는 IDE(IntelliJ 등)나 `gradlew bootRun`으로 호스트에서 실행합니다. 두 서버의 `application.yml` 기본값이 이 방식(`localhost`와 `.env.example`의 기본 호스트 포트)을 기준으로 합니다.
+MongoDB와 Redis만 compose로 띄우고, main은 IDE(IntelliJ 등)나 `gradlew bootRun`으로 호스트에서 실행합니다. main의 `application.yml` 기본값이 이 방식(`localhost`와 `.env.example`의 기본 호스트 포트)을 기준으로 합니다.
 
-- JDK 21이 필요합니다(main은 Java 21, consumer는 Java 17을 대상으로 빌드합니다).
-- 전체 스택이 떠 있다면 포트가 겹치지 않게 컨테이너 main·consumer를 먼저 멈춥니다: `docker compose stop qqueueing-main qqueueing-consumer`
-
-```bash
-docker compose up -d qqueueing-mongo qqueueing-redis qqueueing-kafka
-```
-
-터미널 두 개에서 consumer, main 순서로 실행합니다. IntelliJ에서는 `src/consumer`와 `src/main`을 각각 Gradle 프로젝트로 열고 `ConsumerApplication`, `ApiServerApplication`을 실행합니다.
+- JDK 21이 필요합니다.
+- Redis는 7.4 이상이어야 합니다(main이 필드별 만료 시간 명령 `HEXPIRE`를 씁니다). compose의 `qqueueing-redis`를 쓰면 됩니다.
+- 전체 스택이 떠 있다면 컨테이너 main을 먼저 멈춥니다: `docker compose stop qqueueing-main`. 포트 8081이 겹치고, 두 main이 같은 Redis에서 함께 입장 처리를 하게 되기 때문입니다.
 
 ```bash
-cd src/consumer
-./gradlew bootRun        # PowerShell: .\gradlew.bat bootRun
+docker compose up -d qqueueing-mongo qqueueing-redis
 ```
+
+IntelliJ에서는 `src/main`을 Gradle 프로젝트로 열고 `ApiServerApplication`을 실행합니다. 터미널에서는 다음과 같이 실행합니다.
 
 ```bash
 cd src/main
 ./gradlew bootRun        # PowerShell: .\gradlew.bat bootRun
 ```
 
-`http://localhost:8082/actuator/health`와 `http://localhost:8081/monitoring/health`가 `UP`이면 뜬 것입니다. IDE 실행 기본값과, `.env`에서 포트나 계정을 바꿨을 때 덮어쓸 환경변수는 다음과 같습니다. 환경변수 이름은 Spring relaxed binding 규칙(점은 `_`로, 대시는 빼고, 대문자로)을 따릅니다.
+`http://localhost:8081/monitoring/health`가 `UP`이면 뜬 것입니다. IDE 실행 기본값과, `.env`에서 포트나 계정을 바꿨을 때 덮어쓸 환경변수는 다음과 같습니다. 환경변수 이름은 Spring relaxed binding 규칙(점은 `_`로, 대시는 빼고, 대문자로)을 따릅니다.
 
 | 대상 | 기본값 | 환경변수 |
 |---|---|---|
 | MongoDB | `mongodb://root:example@localhost:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1` | main: `SPRING_DATA_MONGODB_URI` |
 | Redis | `localhost:6379` | main: `SPRING_DATA_REDIS_HOST`, `SPRING_DATA_REDIS_PORT` |
-| Kafka | `localhost:9094` | main: `KAFKA_BROKER`, consumer: `SPRING_KAFKA_CONSUMER_BOOTSTRAPSERVERS` |
-| consumer | `localhost:8082` | main: `SERVERS_CONSUMER` |
 | 대기 페이지(관리자 프론트) | `localhost:3001/waiting` | main: `SERVERS_FRONT` |
 | Prometheus | `http://localhost:3003` | main: `PROMETHEUS_MONITORING` |
 
@@ -411,8 +422,7 @@ npm run dev
 ├── .env.example          # 설정 예시(.env로 복사해서 씁니다)
 ├── src/                  # QQueueing
 │   ├── compose.yml       # QQueueing과 모니터링 서비스
-│   ├── main/             # main API 서버(Spring Boot, Java 21)
-│   ├── consumer/         # Kafka consumer 서버(Spring Boot, Java 17)
+│   ├── main/             # main API 서버(Spring Boot, Java 21). 1초마다 입장 처리도 합니다
 │   ├── frontend/         # 관리자 화면과 대기 페이지(Next.js)
 │   ├── pipes/            # URL 등록 에이전트 스크립트(agent.sh, conf.sh)와 nginx 설정 파서
 │   └── build/            # Dockerfile, Prometheus 설정, Grafana 프로비저닝 파일과 대시보드
@@ -422,7 +432,10 @@ npm run dev
 │   ├── frontend/         # Next.js
 │   ├── backend/          # Spring Boot
 │   └── mysql/init/       # 스키마 초기화 SQL
-├── docs/agents/          # 에이전트(Claude Code)로 이슈를 계획·구현·검증하는 절차와 규칙
+├── CONTEXT.md            # 용어집(대기열, 대기자, 순번, 입장, 통과 토큰 등)
+├── docs/
+│   ├── adr/              # 설계 결정 기록(ADR)
+│   └── agents/           # 에이전트(Claude Code)로 이슈를 계획·구현·검증하는 절차와 규칙
 ├── .claude/agents/       # 계획·구현·검증 에이전트 정의
 └── .asset/               # README 이미지
 ```

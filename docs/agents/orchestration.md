@@ -40,7 +40,7 @@ compose 프로젝트 이름(`qqueueing`), `container_name`, 호스트 포트가 
 
 ## 서브에이전트를 멈출 때
 
-`TaskStop`으로 멈춘 뒤 그 에이전트가 남긴 것을 정리한다: 해당 worktree의 compose 스택(`docker compose ls`), 호스트 프로세스(`jps -l`의 `ApiServerApplication`·`ConsumerApplication`, Gradle wrapper). 재개 지점은 브랜치 커밋(`git log master..<브랜치>`)으로 판단한다.
+`TaskStop`으로 멈춘 뒤 그 에이전트가 남긴 것을 정리한다: 해당 worktree의 compose 스택(`docker compose ls`), 호스트 프로세스(`jps -l`의 `ApiServerApplication`, Gradle wrapper). 재개 지점은 브랜치 커밋(`git log master..<브랜치>`)으로 판단한다.
 
 ## GitHub와 셸에서 주의할 점
 

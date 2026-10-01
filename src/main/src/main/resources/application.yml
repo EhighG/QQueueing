@@ -48,7 +48,6 @@ spring:
 #      enabled: false
 
 servers: # 타 서버들의 정보 기록
-  consumer: localhost:8082
   front: localhost:3001/waiting
   # 브라우저가 접속하는 공개 origin(루트 .env의 PUBLIC_ORIGIN). 대기 페이지 리다이렉트 주소를 만든다.
   main: https://localhost
@@ -56,15 +55,6 @@ servers: # 타 서버들의 정보 기록
   parsing: http://localhost
 
   replace-url: http://localhost # replace url value for forwarding to target
-
-kafka:
-  # 호스트용 Kafka listener(루트 .env의 KAFKA_HOST_PORT)
-  broker: localhost:9094
-  topics:
-    enter:
-      # consumer의 spring.kafka.consumer.topic과 같아야 한다.
-      name: queueing.waiting-queue.enter2 # topic convention : messageType.datasetName.dataName / kebab-case, don't use '.' and '_' together
-      retention-ms: 259200000 # 3 days
 
 # actuator. Prometheus가 /monitoring/prometheus를 스크랩한다(src/build/prometheus/prometheus.yml).
 management:

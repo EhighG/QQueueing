@@ -14,15 +14,10 @@ services:
       # URL 등록·삭제 요청을 FIFO(/pipes/pipe)로 qqueueing-agent에 넘긴다(pipes 볼륨 공유).
       - pipes:/pipes
     depends_on:
-      qqueueing-kafka:
-        condition: service_healthy
       qqueueing-mongo:
         condition: service_started
       qqueueing-redis:
         condition: service_healthy
-      qqueueing-consumer:
-        condition: service_healthy
-        restart: true
       # main은 등록 요청을 FIFO에 동기로 쓴다. 에이전트가 FIFO를 만든 뒤에 띄운다.
       qqueueing-agent:
         condition: service_healthy
@@ -34,8 +29,6 @@ services:
       SPRING_DATA_MONGODB_URI: "mongodb://${MONGO_ROOT_USERNAME:-root}:${MONGO_ROOT_PASSWORD:-example}@qqueueing-mongo:27017/qqueueing?authSource=admin&authMechanism=SCRAM-SHA-1"
       SPRING_DATA_REDIS_HOST: qqueueing-redis
       SPRING_DATA_REDIS_PORT: "6379"
-      KAFKA_BROKER: qqueueing-kafka:9092
-      SERVERS_CONSUMER: qqueueing-consumer:8082
       SERVERS_FRONT: qqueueing-frontend:3000/waiting
       SERVERS_PARSING: http://qqueueing-frontend
       # 대기 페이지 리다이렉트 주소의 기준이다.
@@ -94,22 +87,6 @@ services:
     networks:
       - qqueueing-network
 
-  qqueueing-consumer:
-    build:
-      context: .
-      dockerfile: build/consumer/Dockerfile
-    image: qqueueing-consumer
-    networks:
-      - qqueueing-network
-    ports:
-      - "${CONSUMER_PORT:-8082}:8082"
-    depends_on:
-      qqueueing-kafka:
-        condition: service_healthy
-    # application.yml의 기본값은 IDE 실행용(localhost:9094)이다. 컨테이너에서는 환경변수로 덮어쓴다.
-    environment:
-      SPRING_KAFKA_CONSUMER_BOOTSTRAPSERVERS: qqueueing-kafka:9092
-
   qqueueing-frontend:
     build:
       context: .
@@ -121,40 +98,6 @@ services:
     image: qqueueing-frontend
     ports:
       - "${ADMIN_PORT:-3001}:3000"
-    networks:
-      - qqueueing-network
-
-  # KRaft 단일 노드(broker와 controller를 한 프로세스에서 실행).
-  # 컨테이너끼리는 PLAINTEXT(qqueueing-kafka:9092), 호스트에서 직접 실행하는 main·consumer는
-  # PLAINTEXT_HOST(localhost:KAFKA_HOST_PORT, 기본 9094)로 붙는다.
-  qqueueing-kafka:
-    image: apache/kafka:3.9.1
-    ports:
-      - "${KAFKA_HOST_PORT:-9094}:9094"
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:9094
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://qqueueing-kafka:9092,PLAINTEXT_HOST://localhost:${KAFKA_HOST_PORT:-9094}
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      # 데이터 볼륨을 다시 쓸 때 포맷된 ID와 같아야 하므로 고정한다.
-      CLUSTER_ID: 4L6g3nShT-eMCtK--X86sw
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-    volumes:
-      - kafka_data:/var/lib/kafka/data
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 || exit 1"]
-      interval: 5s
-      timeout: 10s
-      retries: 20
-      start_period: 10s
     networks:
       - qqueueing-network
 
@@ -202,7 +145,6 @@ services:
       - ./build/grafana/dashboards:/etc/grafana/dashboards:ro
 
 volumes:
-  kafka_data:
   # Redis AOF 파일. docker compose down으로는 지워지지 않고 down -v로 지워진다.
   redis_data:
   prometheus_data:
