@@ -1,6 +1,7 @@
 package com.qqueueing.main.waiting;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.qqueueing.main.registration.model.Registration;
 import com.qqueueing.main.support.QueueApiTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -144,6 +145,133 @@ class WaitingQueueApiTest extends QueueApiTestSupport {
         Enqueued after = enqueue(queue);
         assertThat(after.myOrder()).isEqualTo(1);
         assertThat(order(queue, after.waiterId())).isEqualTo(new OrderStatus("WAITING", 1, 1, null));
+    }
+
+    @Test
+    @DisplayName("비활성화: 줄에 남은 대기자가 모두 다음 순번 조회에서 통과 토큰을 받는다")
+    void deactivationAdmitsAllRemainingWaiters() throws Exception {
+        RegisteredQueue queue = registerQueue();
+        // 기본 입장 속도로 1초에 입장하는 인원(100)보다 많이 세운다
+        List<Enqueued> waiters = enqueue(queue, 150);
+
+        deactivate(queue);
+
+        // 한 번에 모두 입장해 줄이 비고, 입장 인원에 더해진다
+        assertThat(waitingInfo(queue)).isEqualTo(new WaitingInfo(150, 0));
+        List<String> tokens = new ArrayList<>();
+        for (Enqueued waiter : waiters) {
+            OrderStatus status = order(queue, waiter.waiterId());
+            assertThat(status.token()).isNotBlank();
+            assertThat(status).isEqualTo(new OrderStatus("ENTERED", 0, 0, status.token()));
+            tokens.add(status.token());
+        }
+        assertThat(tokens).doesNotHaveDuplicates();
+        assertThat(pass(tokens.get(0))).isEqualTo(TARGET_PAGE);
+        assertThat(pass(tokens.get(149))).isEqualTo(TARGET_PAGE);
+    }
+
+    @Test
+    @DisplayName("비활성화: 비활성화된 뒤에 줄을 선 대기자도 다음 순번 조회에서 바로 통과 토큰을 받는다")
+    void waiterQueuedAfterDeactivationEntersOnNextOrder() throws Exception {
+        RegisteredQueue queue = registerQueue();
+        deactivate(queue);
+
+        // 대기 페이지를 연 채 비활성화되면 대기 페이지의 줄 서기는 비활성 대기열로 들어온다
+        Enqueued late = enqueue(queue);
+        OrderStatus status = order(queue, late.waiterId());
+
+        assertThat(status.token()).isNotBlank();
+        assertThat(status).isEqualTo(new OrderStatus("ENTERED", 0, 0, status.token()));
+        assertThat(pass(status.token())).isEqualTo(TARGET_PAGE);
+        // 통과 토큰은 한 번만 발급되고, 입장 인원에 더해진다
+        assertThat(order(queue, late.waiterId())).isEqualTo(new OrderStatus("NOT_FOUND", 0, 0, null));
+        assertThat(waitingInfo(queue)).isEqualTo(new WaitingInfo(1, 0));
+    }
+
+    @Test
+    @DisplayName("재활성화: 비활성화한 뒤 남은 대기자가 토큰을 받아 가기 전에 다시 활성화하면 이전 대기자는 대기자 없음이 되고, 비활성 기간에 발급된 통과 토큰으로는 통과할 수 없으며, 입장 인원은 0이다")
+    void reactivationDiscardsEntriesAndTokensFromInactivePeriod() throws Exception {
+        RegisteredQueue queue = registerQueue();
+        List<Enqueued> waiters = enqueue(queue, 3);
+        deactivate(queue);
+
+        // 비활성 기간에 발급된 통과 토큰 두 가지: 남은 대기자가 순번 조회로 받은 토큰, 대상 URL 접속으로 바로 받은 토큰
+        OrderStatus received = order(queue, waiters.get(0).waiterId());
+        assertThat(received.status()).isEqualTo("ENTERED");
+        String enterToken = tokenOf(enter(queue));
+        assertThat(waitingInfo(queue)).isEqualTo(new WaitingInfo(3, 0));
+
+        activate(queue);
+
+        // 토큰을 받아 가지 않은 대기자(1, 2번째)를 포함해 이전 대기자는 모두 대기자 없음이다
+        for (Enqueued waiter : waiters) {
+            assertThat(order(queue, waiter.waiterId())).isEqualTo(new OrderStatus("NOT_FOUND", 0, 0, null));
+        }
+        assertThat(pass(received.token())).contains("invalid token").doesNotContain(TARGET_PAGE);
+        assertThat(pass(enterToken)).contains("invalid token").doesNotContain(TARGET_PAGE);
+        assertThat(waitingInfo(queue)).isEqualTo(new WaitingInfo(0, 0));
+        // 다시 활성화한 뒤에 온 사람은 줄을 선다
+        assertThat(enter(queue)).contains("/waiting/queue-page?Target-URL=" + queue.targetUrl());
+    }
+
+    @Test
+    @DisplayName("삭제 후 재등록: 같은 대상 URL로 다시 등록하면 빈 줄에서 시작하고, 이전 대기자 ID는 대기자 없음, 이전 통과 토큰으로는 통과할 수 없다")
+    void reRegisteringAfterDeletionStartsWithEmptyLine() throws Exception {
+        RegisteredQueue previous = registerQueue();
+        List<Enqueued> entered = enqueue(previous, 2);
+        admit();
+        OrderStatus received = order(previous, entered.get(0).waiterId()); // 통과 토큰을 받고 쓰지 않는다
+        assertThat(received.status()).isEqualTo("ENTERED");
+        Enqueued waiting = enqueue(previous); // 줄에 남는다
+        assertThat(waitingInfo(previous)).isEqualTo(new WaitingInfo(2, 1));
+
+        deleteQueue(previous);
+        RegisteredQueue renewed = registerQueue(previous.targetUrl());
+
+        assertThat(renewed.id()).isNotEqualTo(previous.id());
+        assertThat(waitingInfo(renewed)).isEqualTo(new WaitingInfo(0, 0));
+        for (String waiterId : List.of(entered.get(0).waiterId(), entered.get(1).waiterId(), waiting.waiterId())) {
+            assertThat(order(previous, waiterId)).isEqualTo(new OrderStatus("NOT_FOUND", 0, 0, null));
+            assertThat(order(renewed, waiterId)).isEqualTo(new OrderStatus("NOT_FOUND", 0, 0, null));
+        }
+        assertThat(pass(received.token())).contains("invalid token").doesNotContain(TARGET_PAGE);
+
+        Enqueued first = enqueue(renewed);
+        assertThat(first.queueId()).isEqualTo(renewed.id());
+        assertThat(first.myOrder()).isEqualTo(1);
+        assertThat(order(renewed, first.waiterId())).isEqualTo(new OrderStatus("WAITING", 1, 1, null));
+    }
+
+    @Test
+    @DisplayName("기동 정리: MongoDB 등록 정보에 없는 대기열의 Redis 상태만 지우고, 등록된 대기열의 상태는 그대로 둔다")
+    void startupCleanupRemovesOnlyUnregisteredQueueState() throws Exception {
+        RegisteredQueue orphan = registerQueue();
+        RegisteredQueue kept = registerQueue();
+        // 두 대기열 모두 입장 기록, 쓰지 않은 통과 토큰, 줄, 누적 입장 인원을 남긴다
+        List<Enqueued> orphanEntered = enqueue(orphan, 2);
+        List<Enqueued> keptEntered = enqueue(kept, 2);
+        admit();
+        OrderStatus orphanReceived = order(orphan, orphanEntered.get(0).waiterId());
+        OrderStatus keptReceived = order(kept, keptEntered.get(0).waiterId());
+        Enqueued orphanWaiting = enqueue(orphan);
+        Enqueued keptWaiting = enqueue(kept);
+
+        // docker compose down처럼 MongoDB의 등록 정보만 사라진 뒤 main이 기동한다
+        Registration document = dropRegistrationDocument(orphan);
+        runStartupCleanup();
+        // 정리 결과를 HTTP API로 보기 위해 같은 id로 등록 정보만 되살린다
+        restoreRegistrationDocument(document);
+
+        assertThat(order(orphan, orphanWaiting.waiterId())).isEqualTo(new OrderStatus("NOT_FOUND", 0, 0, null));
+        assertThat(order(orphan, orphanEntered.get(1).waiterId())).isEqualTo(new OrderStatus("NOT_FOUND", 0, 0, null));
+        assertThat(pass(orphanReceived.token())).contains("invalid token").doesNotContain(TARGET_PAGE);
+        assertThat(waitingInfo(orphan)).isEqualTo(new WaitingInfo(0, 0));
+
+        // 등록된 대기열의 줄, 입장 기록, 통과 토큰, 누적 입장 인원은 그대로다
+        assertThat(order(kept, keptWaiting.waiterId())).isEqualTo(new OrderStatus("WAITING", 1, 1, null));
+        assertThat(order(kept, keptEntered.get(1).waiterId()).status()).isEqualTo("ENTERED");
+        assertThat(pass(keptReceived.token())).isEqualTo(TARGET_PAGE);
+        assertThat(waitingInfo(kept)).isEqualTo(new WaitingInfo(2, 1));
     }
 
     @Test
