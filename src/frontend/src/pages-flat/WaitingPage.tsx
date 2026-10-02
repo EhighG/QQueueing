@@ -2,7 +2,7 @@
 import {
   useEnqueue,
   useGetWaitingInfo,
-  usePostWaitingOut,
+  sendLeaveBeacon,
   useGetServiceImage,
 } from "@/features";
 import {
@@ -19,7 +19,11 @@ import {
 } from "@/shared";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
+// 이탈 요청을 보낼 대기자
+type LeaveTarget = { queueId: string; waiterId: string };
+
 const WaitingPage = () => {
   const router = useRouter();
   const params = useSearchParams();
@@ -30,14 +34,13 @@ const WaitingPage = () => {
   const [leaving, setLeaving] = useState<boolean>(false);
   const [estimateTime, setEstimateTime] = useState<number>(0);
   const [waitingTime, setWaitingTime] = useState<number>(0);
+  // pagehide 리스너가 렌더와 상관없이 지금 값을 읽도록 ref에 둔다.
+  // 줄 서기 응답이 오기 전에는 null이고, 이탈 요청을 보낸 뒤에도 null로 되돌려 한 번만 보낸다.
+  const leaveTargetRef = useRef<LeaveTarget | null>(null);
   const { data: enqueueInfo } = useEnqueue(targetUrl);
   const { data: waitingInfo } = useGetWaitingInfo(
     queueId,
     leaving ? "" : waiterId
-  );
-  const { mutate: leaveQueue, isSuccess } = usePostWaitingOut(
-    queueId,
-    waiterId
   );
   type ProgressValue = 0 | 20 | 40 | 60 | 80 | 100;
 
@@ -90,6 +93,10 @@ const WaitingPage = () => {
     if (enqueueInfo) {
       setQueueId(enqueueInfo.queueId);
       setWaiterId(enqueueInfo.waiterId);
+      leaveTargetRef.current = {
+        queueId: enqueueInfo.queueId,
+        waiterId: enqueueInfo.waiterId,
+      };
     }
   }, [enqueueInfo]);
 
@@ -103,16 +110,41 @@ const WaitingPage = () => {
     }
   }, [waitingInfo, leaving, targetUrl]);
 
-  const handleLeave = () => {
-    setLeaving(true);
-    leaveQueue();
-  };
+  // 이탈 요청을 sendBeacon으로 보낸다. 줄 서기 응답 전(보낼 대기자 ID가 없음)이나 이미 보낸 뒤에는 보내지 않는다.
+  const leaveOnce = useCallback(() => {
+    const target = leaveTargetRef.current;
+    if (!target) return;
+    leaveTargetRef.current = null;
+    sendLeaveBeacon(target.queueId, target.waiterId);
+  }, []);
 
+  // 창을 닫거나 새로고침하거나 다른 페이지로 떠날 때(pagehide) 이탈 요청을 보낸다.
+  // 입장해서 대상 URL로 넘어갈 때도 보내지만, 서버는 줄에 있는 대기자만 빼므로 입장과 통과 토큰에는 영향이 없다.
+  // 뒤로 가기 캐시(bfcache)에서 되살아난 화면(pageshow의 persisted)은 이미 이탈한 대기자의 것이므로 새로고침해서 다시 줄을 선다.
   useEffect(() => {
-    if (isSuccess) {
-      router.back();
-    }
-  }, [router, isSuccess]);
+    const handlePageHide = () => leaveOnce();
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, [leaveOnce]);
+
+  // "나가기": 이탈 요청을 보내고 바로 이전 페이지로 돌아간다.
+  // sendBeacon은 응답을 기다리지 않으므로 요청이 실패해도 화면이 멈추지 않는다.
+  // 여러 번 눌러도 이전 페이지로 한 번만 돌아가도록, 이미 누른 뒤에는 아무것도 하지 않는다.
+  const handleLeave = () => {
+    if (leaving) return;
+    setLeaving(true);
+    leaveOnce();
+    router.back();
+  };
 
   //  estimate 추정 로직
   useEffect(() => {

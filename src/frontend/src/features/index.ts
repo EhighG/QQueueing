@@ -18,8 +18,8 @@ export {
 } from "./manage";
 export type { ResponseType } from "./manage";
 
-export { postEnqueue, getWaitingInfo, postWaitingOut } from "./waiting";
-export { useEnqueue, useGetWaitingInfo, usePostWaitingOut } from "./waiting";
+export { postEnqueue, getWaitingInfo, sendLeaveBeacon } from "./waiting";
+export { useEnqueue, useGetWaitingInfo } from "./waiting";
 export type { infoType, statusType, waitingStatus } from "./waiting";
 
 export {

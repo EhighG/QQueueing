@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getWaitingInfo, postWaitingOut, postEnqueue } from "./api";
+import { useQuery } from "@tanstack/react-query";
+import { getWaitingInfo, postEnqueue } from "./api";
 import { infoType, statusType } from "./type";
 import { AxiosError } from "axios";
 
@@ -44,12 +44,4 @@ const useGetWaitingInfo = (queueId: string, waiterId: string) => {
   };
 };
 
-const usePostWaitingOut = (queueId: string, waiterId: string) => {
-  const { mutate, isSuccess } = useMutation({
-    mutationFn: () => postWaitingOut(queueId, waiterId),
-  });
-
-  return { mutate, isSuccess };
-};
-
-export { useEnqueue, useGetWaitingInfo, usePostWaitingOut };
+export { useEnqueue, useGetWaitingInfo };
