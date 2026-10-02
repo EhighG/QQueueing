@@ -17,6 +17,8 @@ type InputProps = {
   title?: string;
   min?: number;
   max?: number;
+  step?: number;
+  placeholder?: string;
   value?: number | string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
@@ -26,6 +28,8 @@ const Input = ({
   type = "text",
   min,
   max,
+  step,
+  placeholder,
   value,
   title,
   onChange,
@@ -37,6 +41,9 @@ const Input = ({
         type={type}
         title={title}
         min={min}
+        max={max}
+        step={step}
+        placeholder={placeholder}
         className="w-full h-[50px] rounded-lg border border-black text-[1.5rem] p-1"
         value={value}
         onChange={onChange}

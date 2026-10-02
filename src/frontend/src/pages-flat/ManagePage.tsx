@@ -90,7 +90,7 @@ const ManagePage = ({ id }: ManagePageProps) => {
             {/*Left Middle*/}
             <div className="flex border border-md shadow-sm border-black rounded-md p-4">
               <ol className="font-bold text-[1.5rem]">
-                <li>1. 타겟 URL, 서비스 명의 변경이 가능합니다.</li>
+                <li>1. 타겟 URL, 서비스 명, 분당 입장 인원의 변경이 가능합니다.</li>
                 <li>2. 대기열 이미지 변경이 가능합니다.</li>
                 <li>3. 변경을 눌러야 최종 반영 됩니다.</li>
                 <li>4. 대기열을 활성화 하거나 비 활성화 할 수 있습니다</li>
