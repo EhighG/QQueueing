@@ -21,6 +21,10 @@ import {
 import Swal from "sweetalert2";
 import { ResponseType, waitingStatusType } from "@/features/manage/type";
 
+// 실패 응답 본문의 message. main은 등록·수정 값이 규칙에 맞지 않으면 HTTP 400과 {status, message}를 돌려준다.
+const failMessage = (error: Error) =>
+  (error as AxiosError<{ message?: string }>).response?.data?.message;
+
 // 대기열 등록
 const useRegistWaiting = () => {
   const { mutate, isSuccess } = useMutation({
@@ -32,9 +36,11 @@ const useRegistWaiting = () => {
         confirmButtonText: "확인",
       });
     },
-    onError: () => {
+    onError: (error) => {
       Swal.fire({
         title: "등록에 실패하였습니다.",
+        // main이 거부한 이유(예: 분당 입장 인원 규칙)를 보여 준다
+        text: failMessage(error),
         icon: "error",
         confirmButtonText: "확인",
       });
@@ -107,9 +113,10 @@ const usePatchWaiting = (id: string) => {
         window.history.go(0);
       });
     },
-    onError: () => {
+    onError: (error) => {
       Swal.fire({
         title: "수정에 실패하였습니다.",
+        text: failMessage(error),
         icon: "error",
         confirmButtonText: "확인",
       });

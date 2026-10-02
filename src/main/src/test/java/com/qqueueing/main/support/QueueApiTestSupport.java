@@ -7,6 +7,7 @@ import com.qqueueing.main.registration.repository.RegistrationRepository;
 import com.qqueueing.main.registration.service.ScriptExecService;
 import com.qqueueing.main.waiting.service.AdmissionService;
 import com.qqueueing.main.waiting.service.OrphanQueueCleaner;
+import com.qqueueing.main.waiting.service.QueueRegistry;
 import com.qqueueing.main.waiting.service.TargetApiConnector;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.nio.charset.StandardCharsets;
@@ -33,6 +35,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -42,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 가짜로 바꾸는 것은 바깥 세계와 닿는 두 곳뿐이다: 대상 사이트 포워딩(TargetApiConnector)과 에이전트 FIFO 쓰기(ScriptExecService).
  * 1초마다 도는 입장 처리는 끄고, 테스트가 admit()으로 직접 부른다. 현재 시각은 MutableClock으로 정한다.
  * main이 기동할 때 하는 정리도 테스트가 runStartupCleanup()으로 다시 부를 수 있다.
- * 대기열은 등록 정보 id(대기열 id)로 부른다.
+ * 대기열은 등록 정보 id(대기열 id)로 부른다. 입장 속도를 정하지 않고 등록한 대기열은 기본 입장 속도(분당 6000명, 1초에 100명)를 쓴다.
  */
 @SpringBootTest(properties = "admission.scheduler.enabled=false")
 @AutoConfigureMockMvc
@@ -73,6 +76,9 @@ public abstract class QueueApiTestSupport {
     @Autowired
     private RegistrationRepository registrationRepository;
 
+    @Autowired
+    private QueueRegistry queueRegistry;
+
     @MockBean
     protected TargetApiConnector targetApiConnector;
 
@@ -97,7 +103,12 @@ public abstract class QueueApiTestSupport {
     // ---- 관리자 API ----
 
     protected RegisteredQueue registerQueue() throws Exception {
-        return registerQueue("https://localhost/test/" + UUID.randomUUID());
+        return registerQueue(newTargetUrl());
+    }
+
+    /** 겹치지 않는 대상 URL. */
+    protected static String newTargetUrl() {
+        return "https://localhost/test/" + UUID.randomUUID();
     }
 
     /** 대상 URL을 정해 등록한다(삭제 후 같은 대상 URL로 다시 등록할 때). */
@@ -120,6 +131,54 @@ public abstract class QueueApiTestSupport {
     protected JsonNode registration(RegisteredQueue queue) throws Exception {
         return json(mockMvc.perform(get("/queue/{id}", queue.id())).andExpect(status().isOk()).andReturn())
                 .get("result");
+    }
+
+    /** 입장 속도(분당 입장 인원)를 정해 등록한다. */
+    protected RegisteredQueue registerQueueWithRate(int processingPerMinute) throws Exception {
+        String targetUrl = newTargetUrl();
+        return registered(postQueueWithRate(targetUrl, String.valueOf(processingPerMinute)), targetUrl);
+    }
+
+    /**
+     * 등록 요청(POST /queue)을 보낸다. processingPerMinute 자리에는 JSON 값을 글자 그대로 넣는다(예: "80", "null", "1.5", "\"80\"").
+     * 응답을 확인하지 않고 돌려준다.
+     */
+    protected ResultActions postQueueWithRate(String targetUrl, String processingPerMinuteJson) throws Exception {
+        String body = "{\"targetUrl\":\"" + targetUrl + "\",\"serviceName\":\"test\",\"processingPerMinute\":"
+                + processingPerMinuteJson + "}";
+        return mockMvc.perform(post("/queue").contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    /** 등록 응답이 201인지 확인하고 등록한 대기열을 돌려준다. */
+    protected RegisteredQueue registered(ResultActions response, String targetUrl) throws Exception {
+        JsonNode result = json(response.andExpect(status().isCreated()).andReturn()).get("result");
+        return new RegisteredQueue(result.get("id").asText(), targetUrl);
+    }
+
+    /** 수정 요청(PATCH /queue/{id})을 JSON 본문 그대로 보낸다. 응답을 확인하지 않고 돌려준다. */
+    protected ResultActions patchQueue(RegisteredQueue queue, String jsonBody) throws Exception {
+        return mockMvc.perform(patch("/queue/{id}", queue.id()).contentType(MediaType.APPLICATION_JSON).content(jsonBody));
+    }
+
+    /** processingPerMinute만 담은 수정 요청을 보낸다. 값은 JSON 글자 그대로 넣는다. */
+    protected ResultActions patchQueueWithRate(RegisteredQueue queue, String processingPerMinuteJson) throws Exception {
+        return patchQueue(queue, "{\"processingPerMinute\":" + processingPerMinuteJson + "}");
+    }
+
+    /** 입장 속도를 고친다. 수정이 성공(200)해야 한다. */
+    protected void updateRate(RegisteredQueue queue, int processingPerMinute) throws Exception {
+        patchQueueWithRate(queue, String.valueOf(processingPerMinute)).andExpect(status().isOk());
+    }
+
+    /** 등록 정보 상세(GET /queue/{id})의 processingPerMinute. 값이 없으면 null. */
+    protected Integer processingPerMinute(RegisteredQueue queue) throws Exception {
+        JsonNode value = registration(queue).get("processingPerMinute");
+        return value == null || value.isNull() ? null : value.asInt();
+    }
+
+    /** 거부 응답이 HTTP 400인지 확인하고 본문의 message를 돌려준다. */
+    protected String rejectedMessage(ResultActions response) throws Exception {
+        return json(response.andExpect(status().isBadRequest()).andReturn()).get("message").asText();
     }
 
     protected void deleteQueue(RegisteredQueue queue) throws Exception {
@@ -209,6 +268,13 @@ public abstract class QueueApiTestSupport {
         admissionService.admitAll();
     }
 
+    /** admit()을 seconds번 부른다. 1초씩 시계를 진행하며 입장 처리를 돌린다. */
+    protected void admit(int seconds) {
+        for (int i = 0; i < seconds; i++) {
+            admit();
+        }
+    }
+
     // ---- 기동 정리 ----
 
     /** main이 기동할 때 하는 정리(등록 정보가 없는 대기열의 Redis 상태 삭제)를 한 번 돌린다. */
@@ -229,6 +295,18 @@ public abstract class QueueApiTestSupport {
     /** dropRegistrationDocument로 지운 등록 정보를 같은 id로 되살린다. 정리 결과를 HTTP API로 보기 위해서만 쓴다. */
     protected void restoreRegistrationDocument(Registration registration) {
         registrationRepository.save(registration);
+    }
+
+    /**
+     * 입장 속도 검증이 생기기 전에 등록된 대기열을 흉내 낸다. 입장 속도를 processingPerMinute(null이나 0)로 MongoDB에 바로 저장하고,
+     * main이 기동할 때처럼 등록 정보 캐시를 다시 읽는다.
+     */
+    protected RegisteredQueue registerLegacyQueue(Integer processingPerMinute) {
+        String targetUrl = newTargetUrl();
+        Registration saved = registrationRepository.save(
+                new Registration(null, targetUrl, 0, processingPerMinute, "legacy", null, true));
+        queueRegistry.load();
+        return new RegisteredQueue(saved.getId(), targetUrl);
     }
 
     private JsonNode json(MvcResult result) throws Exception {
